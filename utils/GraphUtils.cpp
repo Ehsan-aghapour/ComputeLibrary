@@ -41,6 +41,9 @@ std::vector<bool*> __ready;//=false
 
 bool *start_frame=new bool(true);
 
+double trans_time=0;
+double rec_time=0;
+
 
 //static std::queue<std::shared_ptr<arm_compute::ITensor>> Tensors_Q;
 //arm_compute::Tensor transit_tensor1;
@@ -193,6 +196,11 @@ bool PPMWriter::access_tensor(ITensor &tensor)
 DummyAccessor::DummyAccessor(int type, unsigned int maximum)
     : _iterator(0), _maximum(maximum), _type(type)
 {
+	//std::cerr<<"typee::"<<type<<std::endl;
+	/*arm_compute::Tensor* dummy_tensor=new arm_compute::Tensor);
+	dummy_tensor->allocator()->init(*(Transmitters[Src_id]->handle()->tensor().info()));
+	dummy_tensor->allocator()->allocate();*/
+
 }
 
 
@@ -206,6 +214,7 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
 	//std::cerr<<"dummy type:"<<_type<<std::endl;
 	static int i=0;
 	if(per_frame){
+		//std::cerr<<"hihihi\n\n\n";
 		//input
 		if(_type==2){
 			std::unique_lock<std::mutex> lk(inout);
@@ -278,6 +287,8 @@ bool ReceiverAccessor::access_tensor(ITensor &tensor)
 	////PrintThread{}<<" size mux:"<<mx.size()<<std::endl;
 	//std::string c;
 	//std::cin>>c;
+	//trans_time=2;
+	//std::cerr<<"hi\n";
 	int id=Source_id;
 	std::unique_lock<std::mutex> lk(*(mx[id]));
 	//lk.lock();
@@ -325,7 +336,7 @@ bool ReceiverAccessor::access_tensor(ITensor &tensor)
 			auto tstart=std::chrono::high_resolution_clock::now();
 			tensor.copy_from(Transmitters[id]->handle()->tensor());
 			auto tfinish=std::chrono::high_resolution_clock::now();
-			double cost0 = std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+			rec_time += std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 #if My_print > 0
 			//PrintThread{}<<"\nTransfer time from source:"<<cost0<<std::endl<<std::endl;
 #endif
@@ -343,7 +354,7 @@ bool ReceiverAccessor::access_tensor(ITensor &tensor)
 		//tensor.copy_from(Tensors_Q.front().handle()->tensor());
 		Qs[id]->pop();
 		auto tfinish=std::chrono::high_resolution_clock::now();
-		double cost0 = std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+		rec_time += std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 #if My_print > 0
 		PrintThread{}<<"\nTransfer time from queue:"<<cost0<<std::endl<<std::endl;
 #endif
@@ -401,6 +412,7 @@ SenderAccessor::SenderAccessor(bool tran, int Dst_id){
 	transition=tran;
 	Destination_id=Dst_id;
 	frame=1;
+	trans_time =0;
 	////PrintThread{}<<"dst id:"<<Destination_id<<std::endl;
 	////PrintThread{}<<"sender node for graph with dest id:"<<Destination_id<<"  trans:"<<transition<<std::endl;
 }
@@ -411,6 +423,7 @@ SenderAccessor::SenderAccessor(bool tran, int Dst_id){
 template <typename T>
 void SenderAccessor::my_access_predictions_tensor(ITensor &tensor)
 {
+	//std::cerr<<"sa\n";
 	// Get the predicted class
     //std::vector<T>      classes_prob;
     //std::vector<size_t> index;
@@ -454,13 +467,14 @@ void SenderAccessor::my_access_predictions_tensor(ITensor &tensor)
 		if(*__waiting[id]==0 || *__ready[id]){
 			//->PrintThread{}<<std::flush<<"graph:" <<Destination_id-1<<" its destination is not waiting I want to push on q\n"<<std::flush;
 			//std::cin>>c;
-			//auto tstart=std::chrono::high_resolution_clock::now();
+			auto tstart=std::chrono::high_resolution_clock::now();
 			////Tensors_Q.push(dynamic_cast<arm_compute::Tensor*>(&(f_out->handle()->tensor())));
 			buffer_tensors[id]->copy_from(Transmitters[id]->handle()->tensor());
+			auto tfinish=std::chrono::high_resolution_clock::now();
 			Qs[id]->push(buffer_tensors[id]);
-			//auto tfinish=std::chrono::high_resolution_clock::now();
-			//double cost0 = std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
-			////PrintThread{}<<"\npushing to queue time:"<<cost0<<std::endl;
+			trans_time += std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+			//std::cerr<<"trans in q"<<trans_time<<std::endl;
+			////PrintThread{}<<"\npushing to queue time:"<<trans_time<<std::endl;
 			////PrintThread{}<<"\npushing to queue\n";
 			//Tensors_Q.push(*f_out);
 		}
@@ -479,8 +493,9 @@ void SenderAccessor::my_access_predictions_tensor(ITensor &tensor)
 				//PrintThread{}<<"len rec: "<<Receivers.size()<<" shape receiver: "<<Receivers[id]->desc().shape<<std::endl;
 				Receivers[id]->handle()->tensor().copy_from(tensor);
 				auto tfinish=std::chrono::high_resolution_clock::now();
-				double cost0 = std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
-				////PrintThread{}<<"\nTransfer0 time:"<<cost0<<std::endl<<std::endl;
+				trans_time += std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+
+				////PrintThread{}<<"\nDirect Transfer time:"<<trans_time<<std::endl<<std::endl;
 			}
 			*__ready[id] = true;
 			while(*__ready[id]==false){
@@ -1136,8 +1151,21 @@ bool SenderAccessor::access_tensor(ITensor &tensor)
 
     return false;
 }
+/*
+void SenderAccessor::set_trans_time(double t){
+	trans_time=t;
+}
+double SenderAccessor::get_trans_time(){
+	return trans_time;
+}
 
-
+void ReceiverAccessor::set_trans_time(double t){
+	trans_time=t;
+}
+double ReceiverAccessor::get_trans_time(){
+	return trans_time;
+}
+*/
 RandomAccessor::RandomAccessor(PixelValue lower, PixelValue upper, std::random_device::result_type seed)
     : _lower(lower), _upper(upper), _seed(seed)
 {

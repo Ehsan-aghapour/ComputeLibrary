@@ -96,7 +96,13 @@ public:
     bool call_accessor();
 
     //Ehsan
-    bool my_call_accessor();
+    bool my_call_accessor(int);
+    void set_mapping_time(double t);
+    void set_unmapping_time(double t);
+    void set_copy_time(double t);
+    double get_mapping_time();
+    double get_unmapping_time();
+    double get_copy_time();
     /** Binds the tensor with an edge
      *
      * @param[in] eid Edge ID that is bound to the tensor
@@ -119,6 +125,10 @@ private:
     std::unique_ptr<ITensorHandle>   _handle;      /**< Tensor Handle */
     std::unique_ptr<ITensorAccessor> _accessor;    /**< Tensor Accessor */
     std::set<EdgeID>                 _bound_edges; /**< Edges bound to this tensor */
+    //Ehsan
+    double							 mapping_time;
+    double							 unmapping_time;
+    double							 copy_time;
 };
 } // namespace graph
 } // namespace arm_compute

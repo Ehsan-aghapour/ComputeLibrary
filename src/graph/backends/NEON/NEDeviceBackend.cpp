@@ -94,6 +94,9 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
     //Ehsan
     //Scheduler::get().set_num_threads(ctx.config().num_threads);
     //std::cout<<"cluster:"<<ctx.config().cluster<<std::endl;
+    	//std::cerr<<"setup starting\n";
+    	//std::string tt;
+    	//std::cin>>tt;
     Scheduler::get().set_num_threads_with_affinity(ctx.config().num_threads,ctx.config(),[](int t_id,int max_cores, arm_compute::graph::GraphConfig cfg){
     #if My_print > 0
     		std::cout<<"max_cores: "<<max_cores<<std::endl;
@@ -102,6 +105,10 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
 		int big_cores=cfg.big_cores;
 		int little_cores=cfg.little_cores;
 		bool first_big=cfg.first_big;
+		//std::cerr<<"tid:"<<t_id<<" cluster:"<<cfg.cluster<<" total:"<<total_cores<<std::endl;
+		int core_id=cfg.cluster?((total_cores-1)-(t_id%total_cores)):t_id;
+		//std::cerr<<"core_id: "<<core_id<<std::endl;
+
 		if(cfg.cluster>0)
 			return ((total_cores-1)-(t_id%total_cores));
 		else

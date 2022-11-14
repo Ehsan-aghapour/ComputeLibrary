@@ -63,9 +63,10 @@ void execute_task(ExecutionTask &task)
 {
     if(task.task)
     {
-    	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
+    	//std::cout<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
     	//auto start=std::chrono::high_resolution_clock::now();
         task.task->run();
+        //std::cout<<"\n\n";
         //arm_compute::CLScheduler::get().queue().finish();
         //auto finish=std::chrono::high_resolution_clock::now();
         //tt[task.node->name()]+=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());
@@ -96,13 +97,14 @@ double execute_task2(ExecutionTask &task, int nn)
 	double t=0;
     if(task.task)
     {
-    	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
+    	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id()<<std::endl;
     	//static int n=-1;
     	auto start=std::chrono::high_resolution_clock::now();
         task.task->run();
         if(task.block)
         	arm_compute::CLScheduler::get().queue().finish();
         auto finish=std::chrono::high_resolution_clock::now();
+        //std::cerr<<"\n\n";
         t=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());
         //task_times[task.node->name()]+=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());
         //std::cerr<<"salam\n";

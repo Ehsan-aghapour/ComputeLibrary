@@ -32,6 +32,9 @@
 #endif
 //#include "src/graph/GraphManager.cpp"
 
+
+
+
 #include "arm_compute/graph/detail/ExecutionHelpers.h"
 
 #include "arm_compute/graph/Graph.h"
@@ -40,6 +43,7 @@
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
+
 
 namespace arm_compute
 {
@@ -167,6 +171,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     {
         auto node = g.node(node_id);
         //Ehsan
+        //std::cout<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<", "<<node->type()<<std::endl;
         /*
         std::cout<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<" num inputs: "<<node->num_inputs()<<std::endl<<std::flush;
         for(int k=0; k < node->num_inputs(); k++){
@@ -178,10 +183,10 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
             //std::cout<<"Padding: "<<_padding.left<<_padding.right<<_padding.top<<_padding.bottom<<std::endl;
         }*/
 
-        /*
-         ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
+
+         /*ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node->name()
+                               << " Type: " << node->type()
                                << " Target: " << CLTargetInfo::TargetType
                                << " Data Type: " << input0->info()->data_type()
                                << " Input0 shape: " << input0->info()->tensor_shape()
@@ -192,8 +197,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
                                << " Output2 shape: " << output2->info()->tensor_shape()
                                << " Output3 shape: " << output3->info()->tensor_shape()
                                << " DetectionPostProcessLayer info: " << detect_info
-                               << std::endl);
-         */
+                               << std::endl);*/
 
 
         if(node != nullptr)
@@ -283,7 +287,9 @@ bool call_all_input_node_accessors(ExecutionWorkload &workload)
     	std::cerr<<"input accessorrr"<<std::endl;
     	std::cerr<<input_tensor->desc().shape <<std::endl;
 #endif
-        bool valid_input = (input_tensor != nullptr) && input_tensor->my_call_accessor();
+    	//std::cerr<<"input time start:"<<std::chrono::high_resolution_clock::now().time_since_epoch().count()<<std::endl;
+        bool valid_input = (input_tensor != nullptr) && input_tensor->my_call_accessor(0);
+        //std::cerr<<"end time start:  "<<std::chrono::high_resolution_clock::now().time_since_epoch().count();
         is_valid         = is_valid && valid_input;
     });
     return is_valid;
@@ -356,7 +362,7 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
     bool is_valid = true;
     std::for_each(std::begin(workload.outputs), std::end(workload.outputs), [&](Tensor * output_tensor)
     {
-        bool valid_output = (output_tensor != nullptr) && output_tensor->my_call_accessor();
+        bool valid_output = (output_tensor != nullptr) && output_tensor->my_call_accessor(1);
         is_valid          = is_valid && valid_output;
     });
 

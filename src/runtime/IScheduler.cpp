@@ -64,9 +64,14 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 #ifndef BARE_METAL
+    //replicate: task profiling
+    //std::cerr<<kernel->name()<<std::endl;
     const Window &max_window = window;
+    static int c=0;
+    //std::cout<<c++<<" hint:"<<hints.split_dimension()<<" split:"<<IScheduler::split_dimensions_all<<std::endl;
     if(hints.split_dimension() == IScheduler::split_dimensions_all)
     {
+    	//std::cerr<<"\n\n\n\n\n\n\n\n";
         /*
          * if the split dim is size_t max then this signals we should parallelise over
          * all dimensions
@@ -106,8 +111,11 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
     }
     else
     {
+    	//Ehsan
+    	//std::cout<<"else: ";
         const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
         const unsigned int num_threads    = std::min(num_iterations, this->num_threads());
+        //std::cout<<"num_iters:"<<num_iterations<<"num threads:"<<num_threads<<std::endl;
 
         if(num_iterations == 0)
         {
@@ -134,9 +142,13 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
             {
                 case StrategyHint::STATIC:
                     num_windows = num_threads;
+                    //replicate: task profiling
+                    //std::cout<<"static\t";
                     break;
                 case StrategyHint::DYNAMIC:
                 {
+                	//replicate: task profiling
+                	//std::cerr<<"dynamic\t";
                     const unsigned int granule_threshold = (hints.threshold() <= 0) ? num_threads : static_cast<unsigned int>(hints.threshold());
                     // Make sure we don't use some windows which are too small as this might create some contention on the ThreadFeeder
                     num_windows = num_iterations > granule_threshold ? granule_threshold : num_iterations;
@@ -146,6 +158,9 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
                     ARM_COMPUTE_ERROR("Unknown strategy");
             }
             std::vector<IScheduler::Workload> workloads(num_windows);
+            //replicate: task profiling
+            //std::cerr<<"name:"<<kernel->name()<<std::endl;
+            //std::cerr<<"numb of windows:"<<num_windows<<"\n\n\n";
             for(unsigned int t = 0; t < num_windows; ++t)
             {
                 //Capture 't' by copy, all the other variables by reference:

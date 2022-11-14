@@ -104,7 +104,7 @@ bool Tensor::call_accessor()
 }
 
 //Ehsan
-bool Tensor::my_call_accessor()
+bool Tensor::my_call_accessor(int type)
 {
 	////ANNOTATE_MARKER_STR("input_output accessor start");
     // Early exit guard
@@ -117,9 +117,10 @@ bool Tensor::my_call_accessor()
     ////static int c=4;
     ///ANNOTATE_CHANNEL_COLOR(c,ANNOTATE_GREEN,"map");
     // Map tensor
-    //auto start=std::chrono::high_resolution_clock::now();
+    auto start=std::chrono::high_resolution_clock::now();
     _handle->map(true);
-    //auto finish=std::chrono::high_resolution_clock::now();
+    auto finish=std::chrono::high_resolution_clock::now();
+    mapping_time+=std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count();
     //std::cerr<<"mapping: "<<1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count())<<std::endl;
     //std::cerr<<"*******************************\n\n";
     ////ANNOTATE_CHANNEL_END(c++);
@@ -134,18 +135,53 @@ bool Tensor::my_call_accessor()
     //std::string cc;
     //std::cout<<"salammm\n";
     ////start=std::chrono::high_resolution_clock::now();
+
     bool retval = _accessor->access_tensor(_handle->tensor());
+    /*if(type==0){
+    	copy_time+=dynamic_cast<ReceiverAccessor*>(_accessor)->get_trans_time();
+    	std::cerr<<dynamic_cast<arm_compute::graph_utils::ReceiverAccessor*>(_accessor)->get_trans_time()<<std::endl;
+    }
+    if(type==1){
+    	copy_time+=dynamic_cast<arm_compute::graph_utils::SenderAccessor*>(_accessor)->get_trans_time();
+    	std::cerr<<dynamic_cast<arm_compute::graph_utils::SenderAccessor*>(_accessor)->get_trans_time()<<std::endl;
+    }*/
+    //std::cerr<<"copy time"<<trans_time<<std::endl;
     ////finish=std::chrono::high_resolution_clock::now();
     ////std::cerr<<"access: "<<(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count())<<std::endl;
     ////ANNOTATE_CHANNEL_END(c++);
     ////ANNOTATE_CHANNEL_COLOR(c,ANNOTATE_RED,"unmap");
     // Unmap tensor
-    ////start=std::chrono::high_resolution_clock::now();
+    start=std::chrono::high_resolution_clock::now();
     _handle->unmap();
-    ////finish=std::chrono::high_resolution_clock::now();
+    finish=std::chrono::high_resolution_clock::now();
+    unmapping_time+=std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count();
     ////std::cerr<<"unmap: "<<(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count())<<std::endl;
     ////ANNOTATE_CHANNEL_END(c++);
     return retval;
+}
+
+void Tensor::set_mapping_time(double t){
+    mapping_time=t;
+}
+
+void Tensor::set_unmapping_time(double t){
+	unmapping_time=t;
+}
+
+void Tensor::set_copy_time(double t){
+	copy_time=t;
+}
+
+double Tensor::get_mapping_time(){
+	return mapping_time;
+}
+
+double Tensor::get_unmapping_time(){
+	return unmapping_time;
+}
+
+double Tensor::get_copy_time(){
+	return copy_time;
 }
 
 

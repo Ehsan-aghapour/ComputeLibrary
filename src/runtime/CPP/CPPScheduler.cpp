@@ -31,6 +31,8 @@
 #include "support/Mutex.h"
 //Ehsan
 //#include "arm_compute/gl_vs.h"
+#include<chrono>
+
 
 #include <atomic>
 #include <condition_variable>
@@ -138,10 +140,22 @@ public:
     void start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info);
 
     /** Wait for the current kernel execution to complete. */
-    void wait();
+    std::chrono::high_resolution_clock::time_point wait();
 
     /** Function ran by the worker thread. */
     void worker_thread();
+
+    int thread_idd(){
+    	return _info.thread_id;
+    }
+
+    std::chrono::high_resolution_clock::time_point get_ftime(){
+    	return finish_time;
+    }
+
+    std::chrono::high_resolution_clock::time_point get_stime(){
+        return start_time;
+    }
 
 private:
     std::thread                        _thread{};
@@ -154,6 +168,8 @@ private:
     bool                               _job_complete{ true };
     std::exception_ptr                 _current_exception{ nullptr };
     int                                _core_pin{ -1 };
+    std::chrono::high_resolution_clock::time_point finish_time;
+    std::chrono::high_resolution_clock::time_point start_time;
 };
 
 Thread::Thread(int core_pin)
@@ -178,6 +194,7 @@ void Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &f
     _workloads = workloads;
     _feeder    = &feeder;
     _info      = info;
+    start_time=std::chrono::high_resolution_clock::now();
     {
         std::lock_guard<std::mutex> lock(_m);
         _wait_for_work = true;
@@ -186,11 +203,14 @@ void Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &f
     _cv.notify_one();
 }
 
-void Thread::wait()
+std::chrono::high_resolution_clock::time_point Thread::wait()
 {
     {
         std::unique_lock<std::mutex> lock(_m);
         _cv.wait(lock, [&] { return _job_complete; });
+        std::chrono::high_resolution_clock::time_point t1=std::chrono::high_resolution_clock::now();
+        //join_time=t1;
+        return t1;
     }
 
     if(_current_exception)
@@ -202,7 +222,7 @@ void Thread::wait()
 void Thread::worker_thread()
 {
     set_thread_affinity(_core_pin);
-
+    //std::cerr<<"core pin worder thread:"<<_core_pin<<std::endl;
     while(true)
     {
         std::unique_lock<std::mutex> lock(_m);
@@ -210,10 +230,11 @@ void Thread::worker_thread()
         _wait_for_work = false;
 
         _current_exception = nullptr;
-
+        //std::cerr<<"work thread processing "<<_core_pin<<std::endl;
         // Time to exit
         if(_workloads == nullptr)
         {
+        	//std::cerr<<"\n\n\n\n\n\njjjjjjjjj\n\n\n\n\n\n";
             return;
         }
 
@@ -231,6 +252,10 @@ void Thread::worker_thread()
         }
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         _job_complete = true;
+        finish_time=std::chrono::high_resolution_clock::now();
+        //std::chrono::high_resolution_clock::time_point
+        //auto tm=std::chrono::high_resolution_clock::now();
+        //std::cerr<<"job complete thread:"<<_info.thread_id<<std::endl;
         lock.unlock();
         _cv.notify_one();
     }
@@ -242,6 +267,7 @@ struct CPPScheduler::Impl final
     explicit Impl(unsigned int thread_hint)
         : _num_threads(thread_hint), _threads(_num_threads - 1)
     {
+    	std::cerr<<"inja num th:"<<_num_threads<<std::endl;
     }
     void set_num_threads(unsigned int num_threads, unsigned int thread_hint)
     {
@@ -250,17 +276,34 @@ struct CPPScheduler::Impl final
     }
     void set_num_threads_with_affinity(unsigned int num_threads, unsigned int thread_hint, arm_compute::graph::GraphConfig cfg, BindFunc func)
     {
+    	//std::string tt;
+    	//std::cerr<<"00\n";
+    	//std::cin>>tt;
+    	//std::cerr<<"000\n";
+    	//std::cin>>tt;
         _num_threads = num_threads == 0 ? thread_hint : num_threads;
 
         // Set affinity on main thread
+
+        //std::cerr<<"avaleshe\n";
+        //std::cin>>tt;
         set_thread_affinity(func(0, thread_hint, cfg));
+        //std::cerr<<"2\n";
+          //      std::cin>>tt;
 
         // Set affinity on worked threads
         _threads.clear();
+        std::cerr<<"the size is:"<<_threads.size()<<std::endl;
+        //std::cerr<<"3\n";
+          //      std::cin>>tt;
         for(auto i = 1U; i < _num_threads; ++i)
         {
             _threads.emplace_back(func(i, thread_hint, cfg));
+            //std::cerr<<i+3<<"\n";
+              //      std::cin>>tt;
         }
+        //std::cerr<<"7\n";
+          //      std::cin>>tt;
     }
     unsigned int num_threads() const
     {
@@ -318,9 +361,13 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
     // Other thread's workloads will be scheduled after the current thread's workloads have finished
     // This is not great because different threads workloads won't run in parallel but at least they
     // won't interfere each other and deadlock.
+
     arm_compute::lock_guard<std::mutex> lock(_impl->_run_workloads_mutex);
     const unsigned int                  num_threads = std::min(_impl->num_threads(), static_cast<unsigned int>(workloads.size()));
+    //Ehsan
+    std::chrono::high_resolution_clock::time_point tms[num_threads];
     //std::cout<<"\nnum threads:"<<num_threads<<std::endl;
+
     if(num_threads < 1)
     {
         return;
@@ -336,17 +383,40 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
         info.thread_id = t;
         thread_it->start(&workloads, feeder, info);
     }
-
+    auto main_start_time=std::chrono::high_resolution_clock::now();
     info.thread_id = t;
     process_workloads(workloads, feeder, info);
+    //tms[num_threads-1]=std::chrono::high_resolution_clock::now();
+    auto main_finish_time=std::chrono::high_resolution_clock::now();
+    //std::cerr<<"number of threads: "<<num_threads<<std::endl;
+    //std::cerr<<"sizee:"<<_impl->_threads.size()<<std::endl;
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         for(auto &thread : _impl->_threads)
         {
-            thread.wait();
+            //tms[thread.thread_idd()]=thread.wait();
+            auto join_time=thread.wait();
+            //std::cerr<<"thread finished: "<<thread.thread_idd()<<"   time:"<<tms[thread.thread_idd()].time_since_epoch().count()<<std::endl;
+           //replicate:task profiling:
+            /* std::cerr<<"thread id: "<<thread.thread_idd()
+            		<<"   start time: "<<thread.get_stime().time_since_epoch().count()
+            		<<"   finish time: "<<thread.get_ftime().time_since_epoch().count()
+					<<"   join time: "<<join_time.time_since_epoch().count()
+					<<"   idle time: "<<1000000.0*std::chrono::duration_cast<std::chrono::duration<double>>(join_time-thread.get_ftime()).count()
+					<<"   process time: "<<1000000.0*std::chrono::duration_cast<std::chrono::duration<double>>(thread.get_ftime()-thread.get_stime()).count()
+					<<std::endl;*/
         }
+        auto end=std::chrono::high_resolution_clock::now();
+        //replicate:task profiling
+        /*std::cerr<<"thread id: "<<num_threads-1
+        		<<"   start time: "<<main_start_time.time_since_epoch().count()
+        		<<"   finish time: "<<main_finish_time.time_since_epoch().count()
+				<<"   join time: "<<end.time_since_epoch().count()
+				<<"   idle time: "<<1000000.0*std::chrono::duration_cast<std::chrono::duration<double>>(end-main_finish_time).count()
+				<<"   process time: "<<1000000.0*std::chrono::duration_cast<std::chrono::duration<double>>(main_finish_time-main_start_time).count()
+				<<"\n\n";*/
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::system_error &e)

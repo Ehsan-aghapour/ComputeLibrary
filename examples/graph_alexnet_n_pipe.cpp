@@ -251,6 +251,7 @@ public:
         cmd_parser.validate();
 
         // Consume common parameters
+        //std::cout<<"hi\n"<<common_params<<std::endl;
         common_params = consume_common_graph_parameters(common_opts);
         //common_params2 = consume_common_graph_parameters(common_opts);
         
@@ -270,8 +271,8 @@ public:
         }
 
         // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-
+        ////ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
+        common_params.data_type=DataType::QASYMM8;
 
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
@@ -511,7 +512,7 @@ public:
 
 		im_acc=dynamic_cast<ImageAccessor*>(graphs[0]->graph().node(0)->output(0)->accessor());
 
-		std::cout<<"Total layers:"<<Layer<<std::endl<<std::endl;
+		std::cerr<<"Total layers:"<<Layer<<std::endl<<std::endl;
 
 		// Save the opencl kernels to a file
 		if(common_opts.enable_cl_cache)
@@ -568,7 +569,9 @@ public:
 		CPU_SET(core_id,&set);
 		ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
 		//PrintThread{}<<"start running graph "<<graph_id<<std::flush<<std::endl;
-		std::cerr<<"start running graph "<<graph_id<<std::flush<<std::endl;
+		std::cerr<<"----------------------------------------------------"<<std::endl;
+		std::cerr<<"start running graph "<<graph_id<<std::endl;
+		std::cerr<<common_params.order<<'\t'<<common_params.threads<<std::endl;
 		double in=0;
 		double task=0;
 		double out=0;

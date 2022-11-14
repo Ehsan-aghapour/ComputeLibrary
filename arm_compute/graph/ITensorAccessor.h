@@ -28,6 +28,9 @@
 
 #include <memory>
 
+//static double trans_time;
+//static double receive_time;
+
 namespace arm_compute
 {
 namespace graph
@@ -45,6 +48,11 @@ public:
      * @return True if access is successful else false
      */
     virtual bool access_tensor(ITensor &tensor) = 0;
+
+    //Ehsan
+    //void set_trans_time(double t){trans_time=t;};
+    //double get_trans_time(){return trans_time;};
+
 };
 
 using ITensorAccessorUPtr = std::unique_ptr<ITensorAccessor>;

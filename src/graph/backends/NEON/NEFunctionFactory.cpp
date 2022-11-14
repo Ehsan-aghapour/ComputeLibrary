@@ -131,6 +131,7 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
     switch(type)
     {
         case NodeType::ActivationLayer:
+        	//std::cerr<<"activation layer\n\n";
             return detail::create_activation_layer<NEActivationLayer, NETargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
         case NodeType::ArgMinMaxLayer:
             return detail::create_arg_min_max_layer<NEArgMinMaxLayer, NETargetInfo>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));

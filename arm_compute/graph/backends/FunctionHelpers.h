@@ -512,7 +512,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
 			<<" Number of groups:"<<num_groups
 			<<" Input shape"<<input->info()->tensor_shape()
 			<<" Weights shape:"<<weights->info()->tensor_shape()
-			<< "Output shape:"<<output->info()->tensor_shape()
+			<<" Output shape:"<<output->info()->tensor_shape()
 			<<std::endl;
    #endif
 

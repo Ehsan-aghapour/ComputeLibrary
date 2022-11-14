@@ -74,6 +74,7 @@ public:
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments
+
         cmd_parser.parse(argc, argv);
         cmd_parser.validate();
 
@@ -96,8 +97,8 @@ public:
         }
 
         // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-
+        //ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
+        common_params.data_type=DataType::QASYMM8;
         // Print parameter values
         std::cout << common_params << std::endl;
 
@@ -227,7 +228,7 @@ public:
     {
         // Run graph
         //Ehsan
-        std::cout<<"start running graph ...\n";
+        std::cerr<<"start running graph ...\n";
         ImageAccessor *im_acc=dynamic_cast<ImageAccessor*>(graph.graph().node(0)->output(0)->accessor());
         double in=0;
         double task=0;

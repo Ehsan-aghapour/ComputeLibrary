@@ -67,7 +67,10 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     //std::cerr<<"befor pass 1 graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
 
+
     pm.run_type(graph, IGraphMutator::MutationType::IR);
+
+
     // Force target to all graph construct
     // TODO (COMPMID-2014) : Support heterogeneous execution
     Target forced_target = target;
@@ -96,16 +99,32 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
      * quantinfo and ...
      * strides in bytes for all dimensions also is set in tensorInfo
      */
+
+
+
     detail::configure_all_tensors(graph);
     // Apply backend mutating passes
 
     //std::cerr<<"befor pass 2 graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
+
+
+    /*for(auto &node : graph.nodes()){
+        	std::cerr<<"node name:"<<node->name()<<std::endl;
+    }*/
     pm.run_type(graph, IGraphMutator::MutationType::Backend);
+
     // Perform topological sort
     std::vector<NodeID> topological_sorted_nodes = dfs(graph);
+
+    /*for(auto &node_id : topological_sorted_nodes)
+    {
+    	auto node = graph.node(node_id);
+    	std::cerr<<"node name:"<<node->name()<<std::endl;
+    }*/
     // Validate all nodes
     detail::validate_all_nodes(graph);
+
 
     // Configure all nodes
     auto workload = detail::configure_all_nodes(graph, ctx, topological_sorted_nodes);
@@ -278,6 +297,7 @@ void GraphManager::execute_graph(Graph &graph, int nn)
 	//double tot=0;
 	//ANNOTATE_CHANNEL_COLOR(1,ANNOTATE_GREEN,"input");
 	auto tstart=std::chrono::high_resolution_clock::now();
+	//std::cerr<<tstart.time_since_epoch().count()<<std::endl;
 	//std::cerr<<"graph_id:"<<graph.id()<<std::endl;
         if(!detail::call_all_input_node_accessors(it->second))
         {
@@ -285,11 +305,12 @@ void GraphManager::execute_graph(Graph &graph, int nn)
         }
         //std::cout<<"call all input called\n";
 	auto tfinish=std::chrono::high_resolution_clock::now();
+	//std::cerr<<tfinish.time_since_epoch().count()<<std::endl;
 	//ANNOTATE_CHANNEL_END(1);
 	//ANNOTATE_CHANNEL_COLOR(2,ANNOTATE_YELLOW,"task");
 	/*in += std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();*/
 	input_time += std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
-
+	//std::cerr<<input_time<<std::endl;
 	//std::cout<<"Input accessor duration: "<<Cost0<<std::endl;
         // Run graph
 	//std::cout<<"\ntask:"<<task<<std::endl;

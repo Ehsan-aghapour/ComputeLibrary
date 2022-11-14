@@ -235,12 +235,15 @@ public:
 
     bool do_setup(int argc, char **argv) override
     {
+
         // Parse arguments
         cmd_parser.parse(argc, argv);
         cmd_parser.validate();
 
         // Consume common parameters
         common_params = consume_common_graph_parameters(common_opts);
+        common_params.data_type = DataType::QASYMM8;
+        //common_params.data_type=DataType::F32;
 
         //Ehsan
         imgs=!(common_params.image.empty());
@@ -264,6 +267,7 @@ public:
         int model_id = model_id_opt->value();
 
         // Create input descriptor
+
         unsigned int spatial_size = (model_id == 0 || common_params.data_type == DataType::QASYMM8) ? 224 : 160;
 
         // Create input descriptor
@@ -437,7 +441,10 @@ public:
 		CPU_ZERO(&set);
 		CPU_SET(core_id,&set);
 		ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
-		PrintThread{}<<"start running graph "<<graph_id<<std::flush<<std::endl;
+		//PrintThread{}<<"start running graph "<<graph_id<<std::flush<<std::endl;
+		std::cerr<<"----------------------------------------------------"<<std::endl;
+				std::cerr<<"start running graph "<<graph_id<<std::endl;
+				std::cerr<<common_params.order<<'\t'<<common_params.threads<<std::endl;
 		double in=0;
 		double task=0;
 		double out=0;

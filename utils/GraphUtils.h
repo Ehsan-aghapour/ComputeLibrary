@@ -65,6 +65,8 @@ static std::vector<std::queue<arm_compute::Tensor*>*> Qs;
 static std::mutex inout;
 static std::condition_variable inout_cv;
 extern bool per_frame;
+extern double trans_time;
+extern double rec_time;
 
 //std::vector<bool> __waiting;//=true
 //std::vector<bool> __ready;//=false
@@ -206,6 +208,8 @@ public:
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
+    //void set_trans_time(double) override;
+    //double get_trans_time() override;
 
 private:
     //unsigned int _iterator;
@@ -213,6 +217,7 @@ private:
     bool		transition=false;
     int			Source_id;
     int frame;
+    //double		trans_time;
 };
 
 
@@ -535,6 +540,8 @@ public:
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
+    //void set_trans_time(double) override;
+    //double get_trans_time() override;
 
 private:
 
@@ -544,6 +551,7 @@ private:
     bool		transition=false;
     int			Destination_id;
     int frame;
+    //double		trans_time;
 
 };
 
@@ -589,6 +597,9 @@ public:
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
+
+    //void set_trans_time(double) override;
+    //double get_trans_time() override;
 
 private:
     bool              _already_loaded;
