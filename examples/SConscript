@@ -27,6 +27,8 @@ Import('install_bin')
 
 examples_env = env.Clone()
 
+#for x in examples_env['CPPPATH']:
+#	print("hiii:"+x)
 examples_env.Append(CPPPATH = ["#"])
 
 # Build examples
@@ -156,3 +158,19 @@ if env['external_tests_dir']:
             prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
         Default(alias)
+        
+SConscript('./npu/SConscript')
+#prefix = "arm-linux-androideabi-"
+#,ENV = {'PATH' : os.environ['PATH']}
+#jjj_env=Environment(CC=prefix+'clang')
+#jjj_env.Append(LINKFLAGS=[
+#    '-Wl,-rpath,/system/usr/lib/'
+#])
+#,RPATH='/system/usr/lib/'
+####progg = examples_env.Program('outt', [examples_env.Object(source='jjjjtttt.c', target='outt'), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags)
+#nn=examples_env.Program(target='outt', source='jjjjtttt.c',LIBPATH=['lib/'],LIBS=['ovxlib','jpeg_t','vnn_inceptionv3'],CPPPATH=['include/applib/ovxinc/include/','include/service/ovx_inc/'])
+#AlwaysBuild(nn)
+####alias = examples_env.Alias('ou', progg)
+####Default(alias)
+
+####print("helooooooooooo\n")
