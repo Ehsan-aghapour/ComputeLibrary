@@ -36,12 +36,14 @@ SubStream::SubStream(IStream &s)
     : _s(s)
 {
     _hints     = s.hints();
+    std::cerr<<"new substream with tail node: "<<s.tail_node()<<std::endl;
     _tail_node = s.tail_node();
 }
 
 void SubStream::add_layer(ILayer &layer)
 {
     auto nid   = layer.create_layer(*this);
+    std::cerr<<"(SubStream) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
     _tail_node = nid;
 }
 
@@ -54,6 +56,30 @@ Graph &SubStream::graph()
 {
     return _s.graph();
 }
+
+//Ehsan
+
+SubStream & SubStream::operator<<(ILayer &layer)
+{
+
+	if (layer.get_input_nodes().size()==0){
+		layer.add_input_node(_tail_node);
+	}
+	_s.next_layer(layer.get_input_nodes());
+	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
+    add_layer(layer);
+    std::cerr<<"*******************************\n";
+    return *this;
+}
+SubStream & SubStream::operator<<(ILayer &&layer)
+{
+	_s.next_layer(layer,_tail_node);
+	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
+	add_layer(layer);
+	std::cerr<<"*******************************\n";
+    return *this;
+}
+
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute

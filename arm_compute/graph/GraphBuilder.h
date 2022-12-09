@@ -52,12 +52,39 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_const_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
+
+
+    //************************************************ Ehsan *******************************************************
+    /** Adds an Receiver layer node to the graph
+	 *
+	 * @param[in] g        Graph to add the node to
+	 * @param[in] params   Common node parameters
+	 * @param[in] desc     Tensor descriptor of the Tensor
+	 * @param[in] accessor (Optional) Accessor of the receiver node data
+	 *
+	 * @return Node ID of the created node, EmptyNodeID in case of error
+	 */
+    NodeID add_receiver_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor);
+
     /** Adds an input layer node to the graph
+	 *
+	 * @param[in] g        Graph to add the node to
+	 * @param[in] params   Common node parameters
+	 * @param[in] desc     Tensor descriptor of the Tensor
+	 * @param[in] accessor (Optional) Accessor of the input node data
+	 *
+	 * @return Node ID of the created node, EmptyNodeID in case of error
+	 */
+    NodeID add_sender_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor);
+    //**************************************************************************************************************
+
+
+    /** Adds an sender layer node to the graph
      *
      * @param[in] g        Graph to add the node to
      * @param[in] params   Common node parameters
-     * @param[in] desc     Tensor descriptor of the Tensor
-     * @param[in] accessor (Optional) Accessor of the input node data
+     * @param[in] input    Input to the output node as a NodeID-Index pair
+     * @param[in] accessor (Optional) Accessor of the sender node data
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */

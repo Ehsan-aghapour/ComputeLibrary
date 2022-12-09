@@ -21,7 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/frontend/Stream.h"
+//Ehsan
+#include "arm_compute/graph/frontend/IStreamPipeline.h"
 
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/frontend/ILayer.h"
@@ -32,71 +33,61 @@ namespace graph
 {
 namespace frontend
 {
-Stream::Stream(size_t id, std::string name)
-    : _ctx(), _manager(), _g(id, std::move(name))
-{
-}
-
-void Stream::finalize(Target target, const GraphConfig &config, std::set<int> *b, int blocking)
-{
-    PassManager pm = create_default_pass_manager(target, config);
-    _ctx.set_config(config);
-    _manager.finalize_graph(_g, _ctx, pm, target, b, blocking);
-}
-
-void Stream::measure(int n)
-{
-	_manager.print_times(_g, n);
-}
-
-void Stream::reset()
-{
-	_manager.reset(_g);
-}
-
-
-void Stream::run(int n)
-{
-    _manager.execute_graph(_g,n);
-}
-
-/*void Stream::run(double &in,double &task, double &out)
-{
-    _manager.execute_graph(_g,in,task,out);
-}*/
-void Stream::run(bool anotate, int nn)
-{
-	//start=std::chrono::high_resolution_clock::now();
-    _manager.execute_graph(_g, anotate, nn);
-    //finish=std::chrono::high_resolution_clock::now();
-}
 
 
 
 
-void Stream::add_layer(ILayer &layer)
+
+
+void IStreamPipeline::add_layer(ILayer &layer)
 {
     auto nid   = layer.create_layer(*this);
-    std::cerr<<"(stream) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
-    _tail_node = nid;
+    std::cerr<<"(IStreamPipeline) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
+    _tail_node=nid;
+}
+/*
+const Graph &IStreamPipeline::graph() const
+{
+	//std::cerr<<"calling graph const\n";
+	return this->graph();
+	//return _g;
 }
 
-const Graph &Stream::graph() const
+Graph &IStreamPipeline::graph()
 {
-    return _g;
+    return this->graph();
+	//return _g;
 }
 
-Graph &Stream::graph()
+IStreamPipeline & IStreamPipeline::operator<<(ILayer &layer)
 {
-    return _g;
-}
 
-Stream & Stream::operator<<(ILayer &layer)
-{
-	std::cerr<<"(stream) Layer Name:"<<layer.name()<<std::endl;
+	std::cerr<<"(IStreamPipeline) "<<current_layer++<<" Layer Name:"<<layer.name()<<std::endl;
     add_layer(layer);
+    std::cerr<<"*******************************\n";
     return *this;
 }
+IStreamPipeline & IStreamPipeline::operator<<(ILayer &&layer)
+{
+
+	std::cerr<<"(IStreamPipeline) "<<current_layer++<<" Layer Name:"<<layer.name()<<std::endl;
+    add_layer(layer);
+    std::cerr<<"*******************************\n";
+    return *this;
+}
+
+
+
+NodeID IStreamPipeline::tail_node()
+{
+	//std::cerr<<"(IStreamPipeline) tail_node()- Tail_node: "<<Tail_node[target_graph]<<std::endl;
+	//return Tail_node[target_graph];
+	std::cerr<<"(IStreamPipeline) tail_node()- Tail_node: "<<_tail_node<<std::endl;
+	return _tail_node;
+
+}
+*/
+
 
 } // namespace frontend
 } // namespace graph

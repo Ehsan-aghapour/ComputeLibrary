@@ -21,16 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_STREAM_H
-#define ARM_COMPUTE_GRAPH_STREAM_H
+#ifndef ARM_COMPUTE_GRAPH_STREAM_PIPELINE_H
+#define ARM_COMPUTE_GRAPH_STREAM_PIPELINE_H
 
-#include "arm_compute/graph/frontend/IStream.h"
+#include "arm_compute/graph/frontend/IStreamPipeline.h"
 #include "arm_compute/graph/frontend/IStreamOperators.h"
 #include "arm_compute/graph/frontend/Types.h"
 
-#include "arm_compute/graph/Graph.h"
+//#include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/GraphManager.h"
+#include "arm_compute/graph/GraphManagerPipeline.h"
+
+
+//#include "utils/CommonGraphOptions.h"
+#include "arm_compute/graph/GraphPipeline.h"
+#include "arm_compute/graph/frontend/Stream.h"
+
+#include "arm_compute/graph/GraphBuilder.h"
+#include "utils/CommonGraphOptions.h"
 
 namespace arm_compute
 {
@@ -42,7 +50,7 @@ namespace frontend
 class ILayer;
 
 /** Stream frontend class to construct simple graphs in a stream fashion */
-class Stream : public IStream
+class StreamPipeline final : public IStreamPipeline
 {
 public:
     /** Constructor
@@ -50,16 +58,18 @@ public:
      * @param[in] id   Stream id
      * @param[in] name Stream name
      */
-    Stream(size_t id, std::string name);
+	StreamPipeline(size_t id, std::string name);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    Stream(const Stream &) = delete;
+    StreamPipeline(const StreamPipeline &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    Stream &operator=(const Stream &) = delete;
+    StreamPipeline &operator=(const StreamPipeline &) = delete;
     /** Finalizes the stream for an execution target
      *
      * @param[in] target Execution target
      * @param[in] config (Optional) Graph configuration to use
      */
+
+    void create_graphs();
     void finalize(Target target, const GraphConfig &config, std::set<int> *b=NULL, int blocking=0);
     /** Executes the stream **/
     //Ehsan
@@ -70,6 +80,7 @@ public:
     void reset();
     // Inherited overridden methods
     void add_layer(ILayer &layer) override;
+
     Graph       &graph() override;
     const Graph &graph() const override;
     /*std::chrono::time_point<std::chrono::high_resolution_clock> get_start_time(){
@@ -88,49 +99,75 @@ public:
     	return std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count();
     }*/
 
-    void set_input_time(double t){
-    	_manager.set_input_time(t);
+    void set_input_time(int target, double t){
+    	_manager.set_input_time(target, t);
     }
-    void set_task_time(double t){
-        _manager.set_task_time(t);
+    void set_task_time(int target, double t){
+        _manager.set_task_time(target, t);
     }
-    void set_output_time(double t){
-        _manager.set_output_time(t);
+    void set_output_time(int target, double t){
+        _manager.set_output_time(target, t);
     }
-    void set_cost_time(double t){
-    	cost=t;
+    void set_cost_time(int target, double t){
+    	cost[target]=t;
     }
 
-    double get_input_time(){
-    	return _manager.get_input_time();
+    double get_input_time(int target){
+    	return _manager.get_input_time(target);
     }
-    double get_task_time(){
-    	return _manager.get_task_time();
+    double get_task_time(int target){
+    	return _manager.get_task_time(target);
     }
-    double get_output_time(){
-    	return _manager.get_output_time();
+    double get_output_time(int target){
+    	return _manager.get_output_time(target);
     }
-    double get_cost_time(){
-        return cost;
+    double get_cost_time(int target){
+        return cost[target];
     }
-    Stream &operator<<(ILayer &layer);
+    StreamPipeline &operator<<(ILayer &layer);
+    StreamPipeline &operator<<(ILayer &&layer);
+
+    int get_next_id(){
+    	return num_graphs;
+    }
+    NodeID tail_node();
+    //NodeID tail_node(int target);
+
+    void add_graph(int start, int end, char _PE, char _Host_PE);
+    NodeID next_layer(std::vector<NodeID>) override;
+    void set_common_params(arm_compute::utils::CommonGraphParams);
+    void prnt();
+    void forward_tail(NodeID nid);
 
 private:
     //Important: GraphContext must be declared *before* the GraphManager because the GraphManager
     //allocates resources from the context and therefore needs to be destroyed before the context during clean up.
+
+    GraphManagerPipeline _manager; /**< Graph manager */
+    //std::vector<GraphContext> _ctxs;     /**< Graph context to use */
     GraphContext _ctx;     /**< Graph context to use */
-    GraphManager _manager; /**< Graph manager */
-    Graph        _g;       /**< Internal graph representation of the stream */
+    std::vector<std::unique_ptr<Graph>>        _gs;       /**< Internal graph representation of the stream */
+    //Graph        _g;       /**< Internal graph representation of the stream */
 
     //Ehsan
     //std::chrono::time_point<std::chrono::high_resolution_clock> start;
     //std::chrono::time_point<std::chrono::high_resolution_clock> finish;
-    double input_time=0;
-    double task_time=0;
-    double output_time=0;
-    double cost=0;
+    std::vector<double> input_time;
+    std::vector<double> task_time;
+    std::vector<double> output_time;
+    std::vector<double> cost;
+    int					num_graphs;
+    int					target_graph;
+    std::string			name;
+    std::vector<char>	PE;
+    std::vector<int>	start_layer;
+    std::vector<int>	end_layer;
+    std::vector<char>	Host_PE;
+    //std::vector<NodeID>	Tail_node;
+    int					current_layer;
+    arm_compute::utils::CommonGraphParams  common_params;
 };
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_STREAM_H */
+#endif /* ARM_COMPUTE_GRAPH_STREAM_PIPELINE_H */

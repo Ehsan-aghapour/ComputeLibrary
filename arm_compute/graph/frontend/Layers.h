@@ -308,6 +308,11 @@ public:
             _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
+
+        //Ehsan
+        for (auto _ss:_sub_streams){
+        	input_nodes.push_back(_ss->tail_node());
+        }
     }
     /** Construct a concatenation layer
      *
@@ -328,6 +333,11 @@ public:
             _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         },
         std::move(rest_sub_streams)...);
+
+        //Ehsan
+		for (auto _ss:_sub_streams){
+			input_nodes.push_back(_ss->tail_node());
+		}
     }
     /** Construct a concat layer
      *
@@ -338,6 +348,10 @@ public:
         : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
         _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
+        //Ehsan
+		for (auto _ss:_sub_streams){
+			input_nodes.push_back(_ss->tail_node());
+		}
     }
     NodeID create_layer(IStream &s) override
     {
@@ -411,6 +425,8 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
+    	//std::cerr << "Create layer type of stream " << typeid(s).name()<<std::endl;
+    	std::cerr<<"create layer in layers.h \n"<<s.tail_node()<<std::endl;
         NodeIdxPair input         = { s.tail_node(), 0 };
         NodeParams  common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_convolution_node(s.graph(), common_params, input,
@@ -673,6 +689,10 @@ public:
     EltwiseLayer(SubStream &&sub_stream0, SubStream &&sub_stream1, EltwiseOperation op)
         : _ss0(std::move(sub_stream0)), _ss1(std::move(sub_stream1)), _op(op)
     {
+        //Ehsan
+		input_nodes.push_back(_ss0.tail_node());
+		input_nodes.push_back(_ss1.tail_node());
+
     }
 
     NodeID create_layer(IStream &s) override

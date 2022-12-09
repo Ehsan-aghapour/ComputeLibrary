@@ -38,7 +38,8 @@ namespace arm_compute
 namespace graph
 {
 /** Tensor object **/
-class Tensor final
+//Ehsan remove final
+class Tensor
 {
 public:
     /** Default constructor

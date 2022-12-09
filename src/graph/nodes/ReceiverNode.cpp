@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,62 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ILAYER_H
-#define ARM_COMPUTE_GRAPH_ILAYER_H
+#include "arm_compute/graph/nodes/ReceiverNode.h"
+
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/INodeVisitor.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-namespace frontend
+ReceiverNode::ReceiverNode(TensorDescriptor desc)
+    : _desc(std::move(desc))
 {
-// Forward declarations
-class IStream;
+    _outputs.resize(1, NullTensorID);
+}
 
-/** ILayer interface */
-class ILayer
+bool ReceiverNode::forward_descriptors()
 {
-public:
-    /** Default destructor */
-    virtual ~ILayer() = default;
-    /** Create layer and add to the given stream.
-     *
-     * @param[in] s Stream to add layer to.
-     *
-     * @return ID of the created node.
-     */
-    virtual NodeID create_layer(IStream &s) = 0;
-    /** Sets the name of the layer
-     *
-     * @param[in] name Name of the layer
-     *
-     * @return The layer object
-     */
-    ILayer &set_name(std::string name)
+    if(output_id(0) != NullTensorID)
     {
-        _name = name;
-        return *this;
+        Tensor *t = output(0);
+        ARM_COMPUTE_ERROR_ON(t == nullptr);
+        t->desc() = configure_output(0);
+        //Add the tensor pointer into the TensorPipelineReceiver
+        receiver_tensor.set_tensor(t);
+        return true;
     }
-    /** Layer name accessor
-     *
-     * @return Returns the name of the layer
-     */
-    const std::string &name() const
-    {
-        return _name;
-    }
+    return false;
+}
 
-    //Ehsan
-    virtual std::vector<NodeID> get_input_nodes(){return input_nodes;};
-    virtual void add_input_node(NodeID node){ input_nodes.push_back(node);};
+TensorDescriptor ReceiverNode::configure_output(size_t idx) const
+{
+    ARM_COMPUTE_UNUSED(idx);
+    return _desc;
+}
 
-private:
-    std::string _name = {};
+NodeType ReceiverNode::type() const
+{
+    return NodeType::Input;
+}
 
-    //Ehsan
-    std::vector<NodeID> input_nodes;
-};
-} // namespace frontend
+void ReceiverNode::accept(INodeVisitor &v)
+{
+    v.visit(*this);
+}
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_ILAYER_H */

@@ -68,4 +68,8 @@
 #include "arm_compute/graph/nodes/StackLayerNode.h"
 #include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
 
+//Ehsan
+#include "arm_compute/graph/nodes/ReceiverNode.h"
+#include "arm_compute/graph/nodes/SenderNode.h"
+
 #endif /* ARM_COMPUTE_GRAPH_NODES_H */

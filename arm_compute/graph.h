@@ -26,7 +26,7 @@
 
 // IR
 #include "arm_compute/graph/Edge.h"
-#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/GraphPipeline.h"
 #include "arm_compute/graph/GraphBuilder.h"
 #include "arm_compute/graph/IDeviceBackend.h"
 #include "arm_compute/graph/IGraphMutator.h"
@@ -53,5 +53,8 @@
 #include "arm_compute/graph/frontend/Stream.h"
 #include "arm_compute/graph/frontend/SubStream.h"
 #include "arm_compute/graph/frontend/Types.h"
+
+//Ehsan
+#include "arm_compute/graph/frontend/StreamPipeline.h"
 
 #endif /* ARM_COMPUTE_GRAPH_H */

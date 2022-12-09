@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ISTREAM_H
-#define ARM_COMPUTE_GRAPH_ISTREAM_H
+#ifndef ARM_COMPUTE_GRAPH_ISTREAM_PIPELINE_H
+#define ARM_COMPUTE_GRAPH_ISTREAM_PIPELINE_H
 
-#include "arm_compute/graph/frontend/Types.h"
+#include "arm_compute/graph/frontend/IStream.h"
 
 namespace arm_compute
 {
@@ -39,10 +39,10 @@ namespace frontend
 class ILayer;
 
 /** Stream interface **/
-class IStream
+class IStreamPipeline: public IStream
 {
 public:
-    virtual ~IStream() = default;
+    virtual ~IStreamPipeline() = default;
     /** Adds a layer to the stream
      *
      * @param[in] layer Layer to add
@@ -62,7 +62,7 @@ public:
      *
      * @return Tail Node ID
      */
-    NodeID tail_node()
+    virtual NodeID tail_node()
     {
     	std::cerr<<"ISTREAM callin tail_node() "<<_tail_node<<std::endl;
         return _tail_node;
@@ -71,7 +71,7 @@ public:
      *
      * @return Stream hints
      */
-    StreamHints &hints()
+    virtual StreamHints &hints()
     {
         return _hints;
     }
@@ -79,15 +79,18 @@ public:
      *
      * @param[in] nid NodeID of the updated tail node
      */
-    void forward_tail(NodeID nid)
+    virtual void forward_tail(NodeID nid)
     {
         _tail_node = (nid != NullTensorID) ? nid : _tail_node;
     }
-    virtual NodeID next_layer(std::vector<NodeID>){};
+    //IStreamPipeline & operator<<(ILayer &layer);
+    //IStreamPipeline & operator<<(ILayer &&layer);
+    //virtual void next_layer();
 
 protected:
-    StreamHints _hints     = {};              /**< Execution and algorithmic hints */
-    NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
+    int 	current_layer	=	{0};
+    //StreamHints _hints     = {};              /**< Execution and algorithmic hints */
+    //NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
 };
 } // namespace frontend
 } // namespace graph

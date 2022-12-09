@@ -45,6 +45,8 @@ class ILayer;
  */
 inline IStream &operator<<(IStream &s, ILayer &&layer)
 {
+	std::cerr<<"s tail node:"<<s.tail_node()<<std::endl;
+	//std::cerr<<s.graph().node(s.tail_node)->name()<<std::endl;
     s.add_layer(layer);
     return s;
 }
@@ -55,11 +57,15 @@ inline IStream &operator<<(IStream &s, ILayer &&layer)
  *
  * @return Updated stream
  */
+
 inline IStream &operator<<(IStream &s, ILayer &layer)
 {
+	std::cerr<<"___s tail node:"<<s.tail_node()<<std::endl;
+	//std::cerr<<"s tail node:"<<s.tail_node()<<" adding layer:"<<layer.name()<<std::endl;
     s.add_layer(layer);
     return s;
 }
+
 /** Overloaded stream operator to provide a target hint to the graph
  *
  * @param[in, out] s           Stream to provide the hint to

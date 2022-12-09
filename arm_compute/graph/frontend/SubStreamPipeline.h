@@ -21,10 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ISTREAM_H
-#define ARM_COMPUTE_GRAPH_ISTREAM_H
+#ifndef ARM_COMPUTE_GRAPH_SUB_STREAM_PIPELINE_H
+#define ARM_COMPUTE_GRAPH_SUB_STREAM_PIPELINE_H
 
+#include "arm_compute/graph/frontend/IStreamPipeline.h"
+#include "arm_compute/graph/frontend/SubStream.h"
+#include "arm_compute/graph/frontend/IStreamOperators.h"
 #include "arm_compute/graph/frontend/Types.h"
+
+#include <memory>
+#include <vector>
 
 namespace arm_compute
 {
@@ -38,58 +44,27 @@ namespace frontend
 // Forward declarations
 class ILayer;
 
-/** Stream interface **/
-class IStream
+/** Sub stream class*/
+class SubStreamPipeline final : public IStreamPipeline
 {
 public:
-    virtual ~IStream() = default;
-    /** Adds a layer to the stream
+    /** Default Constructor
      *
-     * @param[in] layer Layer to add
+     * @param[in] s Parent stream
      */
-    virtual void add_layer(ILayer &layer) = 0;
-    /** Returns the underlying graph
-     *
-     * @return Underlying graph
-     */
-    virtual Graph &graph() = 0;
-    /** Returns the underlying graph
-     *
-     * @return Underlying graph
-     */
-    virtual const Graph &graph() const = 0;
-    /** Returns the tail node of the Stream
-     *
-     * @return Tail Node ID
-     */
-    NodeID tail_node()
-    {
-    	std::cerr<<"ISTREAM callin tail_node() "<<_tail_node<<std::endl;
-        return _tail_node;
-    }
-    /** Returns the stream hints that are currently used
-     *
-     * @return Stream hints
-     */
-    StreamHints &hints()
-    {
-        return _hints;
-    }
-    /** Forwards tail of stream to a given nid
-     *
-     * @param[in] nid NodeID of the updated tail node
-     */
-    void forward_tail(NodeID nid)
-    {
-        _tail_node = (nid != NullTensorID) ? nid : _tail_node;
-    }
-    virtual NodeID next_layer(std::vector<NodeID>){};
+	SubStreamPipeline(IStreamPipeline &s);
 
-protected:
-    StreamHints _hints     = {};              /**< Execution and algorithmic hints */
-    NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
+    // Inherited overridden methods
+    void add_layer(ILayer &layer) override;
+    Graph       &graph() override;
+    const Graph &graph() const override;
+    SubStreamPipeline &operator<<(ILayer &layer);
+    SubStreamPipeline &operator<<(ILayer &&layer);
+
+private:
+    IStreamPipeline &_s; /**< Parent stream (assume that the lifetime of the parent is longer) */
 };
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_ISTREAM_H */
+#endif /* ARM_COMPUTE_GRAPH_SUB_STREAM_H */

@@ -30,7 +30,8 @@ examples_env = env.Clone()
 examples_env.Append(CPPPATH = ["#"])
 
 # Build examples
-utils = examples_env.Object("../utils/Utils.cpp")
+utils = examples_env.Object("../../utils/Utils.cpp")
+#utils = examples_env.Object("../utils/Utils_Pipeline.cpp")
 
 if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import('arm_compute_graph_a')
@@ -166,6 +167,7 @@ if env['external_tests_dir']:
 #Ehsan
 if env['estate'] == '64':
     SConscript('./NPU/SConscript',['examples_env','utils','graph_utils'])
+    SConscript('./Pipeline/SConscript',['examples_env','utils','graph_utils'])
 # equivalent:
 #SConscript('./NPU/SConscript')
 #export('examples_env')

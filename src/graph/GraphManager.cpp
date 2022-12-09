@@ -123,31 +123,34 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     detail::prepare_all_tasks(workload);
 
     //Ehsan
+    std::cerr<<"3"<<std::endl;
     int ii=0;
     //std::set<int> blocking_set1 {1, 2, 3, 4};
     //std::set<int> *blocking_set=&blocking_set1;
-    for(auto &task : workload.tasks)
-    {
-    	if(!task.task)
-    		continue;
-    	bool b=false;
-    	if(blocking_set->find(ii) != blocking_set->end()){
-    	      b=true;
-    	      task.ending=true;
-    	}
-    	if(blocking==1){
-    		if(blocking_set!=NULL and b && target==arm_compute::graph::Target ::CL)
-    		    task.block=1;
-    	}
-    	if(blocking==2){
-    		if(blocking_set!=NULL && target==arm_compute::graph::Target ::CL){
-    			task.block=1;
-    		}
-    	}
+    if(blocking_set!=NULL){
+		for(auto &task : workload.tasks)
+		{
+			if(!task.task)
+				continue;
+			bool b=false;
+			if(blocking_set->find(ii) != blocking_set->end()){
+				  b=true;
+				  task.ending=true;
+			}
+			if(blocking==1){
+				if(blocking_set!=NULL and b && target==arm_compute::graph::Target ::CL)
+					task.block=1;
+			}
+			if(blocking==2){
+				if(blocking_set!=NULL && target==arm_compute::graph::Target ::CL){
+					task.block=1;
+				}
+			}
 
-    	ii++;
+			ii++;
+		}
     }
-
+    std::cerr<<"4"<<std::endl;
 #if My_print > 0
     //Ehsan
         DotGraphPrinter p;

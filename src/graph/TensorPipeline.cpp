@@ -21,62 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ILAYER_H
-#define ARM_COMPUTE_GRAPH_ILAYER_H
+//Ehsan
+#include"annotate/streamline_annotate.h"
+#include<chrono>
+
+
+#include "arm_compute/graph/TensorPipeline.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-namespace frontend
-{
-// Forward declarations
-class IStream;
 
-/** ILayer interface */
-class ILayer
-{
-public:
-    /** Default destructor */
-    virtual ~ILayer() = default;
-    /** Create layer and add to the given stream.
-     *
-     * @param[in] s Stream to add layer to.
-     *
-     * @return ID of the created node.
-     */
-    virtual NodeID create_layer(IStream &s) = 0;
-    /** Sets the name of the layer
-     *
-     * @param[in] name Name of the layer
-     *
-     * @return The layer object
-     */
-    ILayer &set_name(std::string name)
-    {
-        _name = name;
-        return *this;
-    }
-    /** Layer name accessor
-     *
-     * @return Returns the name of the layer
-     */
-    const std::string &name() const
-    {
-        return _name;
-    }
-
-    //Ehsan
-    virtual std::vector<NodeID> get_input_nodes(){return input_nodes;};
-    virtual void add_input_node(NodeID node){ input_nodes.push_back(node);};
-
-private:
-    std::string _name = {};
-
-    //Ehsan
-    std::vector<NodeID> input_nodes;
-};
-} // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_ILAYER_H */

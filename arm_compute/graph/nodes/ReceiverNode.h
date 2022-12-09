@@ -21,62 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ILAYER_H
-#define ARM_COMPUTE_GRAPH_ILAYER_H
+#ifndef ARM_COMPUTE_GRAPH_Receiver_NODE_H
+#define ARM_COMPUTE_GRAPH_Receiver_NODE_H
+
+#include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/TensorPipeline.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-namespace frontend
-{
-// Forward declarations
-class IStream;
-
-/** ILayer interface */
-class ILayer
+/** Intermediate Input Layer node */
+class ReceiverNode final : public INode
 {
 public:
-    /** Default destructor */
-    virtual ~ILayer() = default;
-    /** Create layer and add to the given stream.
+    /** Constructor
      *
-     * @param[in] s Stream to add layer to.
-     *
-     * @return ID of the created node.
+     * @param[in] desc Tensor descriptor
      */
-    virtual NodeID create_layer(IStream &s) = 0;
-    /** Sets the name of the layer
-     *
-     * @param[in] name Name of the layer
-     *
-     * @return The layer object
-     */
-    ILayer &set_name(std::string name)
-    {
-        _name = name;
-        return *this;
-    }
-    /** Layer name accessor
-     *
-     * @return Returns the name of the layer
-     */
-    const std::string &name() const
-    {
-        return _name;
-    }
+	ReceiverNode(TensorDescriptor desc);
 
-    //Ehsan
-    virtual std::vector<NodeID> get_input_nodes(){return input_nodes;};
-    virtual void add_input_node(NodeID node){ input_nodes.push_back(node);};
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
 
 private:
-    std::string _name = {};
-
-    //Ehsan
-    std::vector<NodeID> input_nodes;
+    TensorPipelineReceiver receiver_tensor;
+    TensorDescriptor _desc;
 };
-} // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_ILAYER_H */
+#endif /* ARM_COMPUTE_GRAPH_INPUT_NODE_H */

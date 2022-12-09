@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,51 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_SUB_STREAM_H
-#define ARM_COMPUTE_GRAPH_SUB_STREAM_H
 
-#include "arm_compute/graph/frontend/IStream.h"
-#include "arm_compute/graph/frontend/IStreamPipeline.h"
-#include "arm_compute/graph/frontend/IStreamOperators.h"
-#include "arm_compute/graph/frontend/Types.h"
+#include "utils/GraphUtilsPipeline.h"
 
-#include <memory>
-#include <vector>
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/graph/Logger.h"
+#include "arm_compute/runtime/SubTensor.h"
 
-namespace arm_compute
-{
-namespace graph
-{
-// Forward declarations
-class Graph;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include "utils/ImageLoader.h"
+#pragma GCC diagnostic pop
+#include "utils/Utils.h"
 
-namespace frontend
-{
-// Forward declarations
-class ILayer;
+#include <inttypes.h>
+#include <iomanip>
+#include <limits>
 
-/** Sub stream class*/
-class SubStream final : public IStreamPipeline
-{
-public:
-    /** Default Constructor
-	 *
-	 * @param[in] s Parent stream
-	 */
-	SubStream(IStream &s);
+using namespace arm_compute::graph_utils;
 
-	// Inherited overridden methods
-	void add_layer(ILayer &layer) override;
-	Graph       &graph() override;
-	const Graph &graph() const override;
-	//Ehsan
-	SubStream &operator<<(ILayer &layer);
-	SubStream &operator<<(ILayer &&layer);
-
-private:
-    IStream &_s; /**< Parent stream (assume that the lifetime of the parent is longer) */
-};
-} // namespace frontend
-} // namespace graph
-} // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_SUB_STREAM_H */

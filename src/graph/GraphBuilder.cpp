@@ -133,6 +133,36 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
     return nid;
 }
 
+
+//************************************************ Ehsan ***********************************************
+
+NodeID GraphBuilder::add_receiver_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor)
+{
+    auto nid = g.add_node<ReceiverNode>(desc);
+    set_node_params(g, nid, params);
+    set_accessor_on_node(g, nid, true, 0, std::move(accessor));
+    return nid;
+}
+
+NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor)
+{
+    check_nodeidx_pair(input, g);
+
+    NodeID nid = g.add_node<SenderNode>();
+    g.add_connection(input.node_id, input.index, nid, 0);
+    //Set tensor in TensorPipelineSender object inside the sender_node class
+    //g.node(nid)->forward_descriptors();
+    set_node_params(g, nid, params);
+    set_accessor_on_node(g, nid, false, 0, std::move(accessor));
+
+    return nid;
+}
+
+//*****************************************************************************************************
+
+
+
+
 NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
                                          const QuantizationInfo &out_quant_info)
 {
@@ -223,16 +253,18 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
                                           const QuantizationInfo &weights_quant_info,
                                           const QuantizationInfo &out_quant_info)
 {
+	//std::cerr<<"adding conv layer in graph builder\n";
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON(depth == 0);
     ARM_COMPUTE_ERROR_ON((kernel_spatial_extend.width == 0) || (kernel_spatial_extend.height == 0));
-
+    //std::cerr<<"adding conv layer in graph with input node id "<<input.node_id<<" in builder1\n";
     bool has_bias = (bias_accessor != nullptr);
 
     // Get input tensor descriptor
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+    //std::cerr<<"adding conv layer in graph builder1.1\n";
     const DataLayout       input_data_layout = input_tensor_desc.layout;
-
+    //std::cerr<<"adding conv layer in graph builder2\n";
     // Create weights node
     TensorDescriptor w_desc = input_tensor_desc;
     w_desc.shape.set(get_dimension_idx(input_data_layout, DataLayoutDimension::WIDTH), kernel_spatial_extend.width);
@@ -244,7 +276,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     {
         w_desc.quant_info = weights_quant_info;
     }
-
+    //std::cerr<<"adding conv layer in graph builder3\n";
     NodeID w_nid = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
 
     // Create bias nodes
@@ -259,7 +291,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
         }
         b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
-
+    //std::cerr<<"adding conv layer in graph builder4\n";
     // Create convolution node and connect
     NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, num_groups, method, fast_math_hint, out_quant_info);
     g.add_connection(input.node_id, input.index, conv_nid, 0);
@@ -269,7 +301,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
         g.add_connection(b_nid, 0, conv_nid, 2);
     }
     set_node_params(g, conv_nid, params);
-
+    //std::cerr<<"adding conv layer in graph builder5\n";
     return conv_nid;
 }
 

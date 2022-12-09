@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ILAYER_H
-#define ARM_COMPUTE_GRAPH_ILAYER_H
+#include "arm_compute/graph/frontend/SubStreamPipeline.h"
+
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/frontend/ILayer.h"
 
 namespace arm_compute
 {
@@ -30,53 +32,48 @@ namespace graph
 {
 namespace frontend
 {
-// Forward declarations
-class IStream;
-
-/** ILayer interface */
-class ILayer
+SubStreamPipeline::SubStreamPipeline(IStreamPipeline &s)
+    : _s(s)
 {
-public:
-    /** Default destructor */
-    virtual ~ILayer() = default;
-    /** Create layer and add to the given stream.
-     *
-     * @param[in] s Stream to add layer to.
-     *
-     * @return ID of the created node.
-     */
-    virtual NodeID create_layer(IStream &s) = 0;
-    /** Sets the name of the layer
-     *
-     * @param[in] name Name of the layer
-     *
-     * @return The layer object
-     */
-    ILayer &set_name(std::string name)
-    {
-        _name = name;
-        return *this;
-    }
-    /** Layer name accessor
-     *
-     * @return Returns the name of the layer
-     */
-    const std::string &name() const
-    {
-        return _name;
-    }
+    _hints     = s.hints();
+    std::cerr<<"new substream with tail node: "<<s.tail_node()<<std::endl;
+    _tail_node = s.tail_node();
+}
 
-    //Ehsan
-    virtual std::vector<NodeID> get_input_nodes(){return input_nodes;};
-    virtual void add_input_node(NodeID node){ input_nodes.push_back(node);};
+void SubStreamPipeline::add_layer(ILayer &layer)
+{
+    auto nid   = layer.create_layer(*this);
+    std::cerr<<"(SubStream) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
+    _tail_node = nid;
+}
 
-private:
-    std::string _name = {};
+const Graph &SubStreamPipeline::graph() const
+{
+    return _s.graph();
+}
 
-    //Ehsan
-    std::vector<NodeID> input_nodes;
-};
+Graph &SubStreamPipeline::graph()
+{
+    return _s.graph();
+}
+
+SubStreamPipeline & SubStreamPipeline::operator<<(ILayer &layer)
+{
+	current_layer++;
+	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
+    add_layer(layer);
+    std::cerr<<"*******************************\n";
+    return *this;
+}
+SubStreamPipeline & SubStreamPipeline::operator<<(ILayer &&layer)
+{
+	current_layer++;
+	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
+	add_layer(layer);
+	std::cerr<<"*******************************\n";
+    return *this;
+}
+
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_ILAYER_H */
