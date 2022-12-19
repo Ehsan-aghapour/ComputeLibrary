@@ -83,12 +83,23 @@ public:
     {
         _tail_node = (nid != NullTensorID) ? nid : _tail_node;
     }
+
     //IStreamPipeline & operator<<(ILayer &layer);
     //IStreamPipeline & operator<<(ILayer &&layer);
     //virtual void next_layer();
+    NodeID* get_tail_p(){
+    	return &_tail_node;
+    }
+    int* get_graph_id(){
+    	return &graph_id;
+    }
+    std::pair<NodeID*,int*> get_position(){
+    	return std::make_pair(this->get_tail_p(),this->get_graph_id());
+    }
 
 protected:
     int 	current_layer	=	{0};
+    int		graph_id;
     //StreamHints _hints     = {};              /**< Execution and algorithmic hints */
     //NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
 };

@@ -310,10 +310,20 @@ public:
         std::move(rest_sub_streams)...);
 
         //Ehsan
-        for (auto _ss:_sub_streams){
-        	input_nodes.push_back(_ss->tail_node());
+        for (unsigned int i=0;i<_sub_streams.size();i++){
+        	input_nodes.push_back( std::make_pair(_sub_streams[i]->get_tail_p(), _sub_streams[i]->get_graph_id()));
         }
     }
+    //Ehsan
+    /*
+    void restore_tail_nodes() override{
+    	ILayer::restore_tail_nodes(_sub_streams);
+    }
+    void set_tail_nodes(int i, NodeID nid){
+    	if ( (unsigned int)i < _sub_streams.size() ){
+    		_sub_streams[i]->forward_tail(nid);
+    	}
+    }*/
     /** Construct a concatenation layer
      *
      * @param[in] concat_descriptor Concat layer descriptor
@@ -335,8 +345,8 @@ public:
         std::move(rest_sub_streams)...);
 
         //Ehsan
-		for (auto _ss:_sub_streams){
-			input_nodes.push_back(_ss->tail_node());
+        for (unsigned int i=0;i<_sub_streams.size();i++){
+			input_nodes.push_back( std::make_pair(_sub_streams[i]->get_tail_p(), _sub_streams[i]->get_graph_id()));
 		}
     }
     /** Construct a concat layer
@@ -349,8 +359,8 @@ public:
     {
         _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         //Ehsan
-		for (auto _ss:_sub_streams){
-			input_nodes.push_back(_ss->tail_node());
+        for (unsigned int i=0;i<_sub_streams.size();i++){
+			input_nodes.push_back( std::make_pair(_sub_streams[i]->get_tail_p(), _sub_streams[i]->get_graph_id()));
 		}
     }
     NodeID create_layer(IStream &s) override
@@ -690,10 +700,24 @@ public:
         : _ss0(std::move(sub_stream0)), _ss1(std::move(sub_stream1)), _op(op)
     {
         //Ehsan
-		input_nodes.push_back(_ss0.tail_node());
-		input_nodes.push_back(_ss1.tail_node());
+		input_nodes.push_back( std::make_pair(_ss0.get_tail_p(), _ss0.get_graph_id()));
+		input_nodes.push_back( std::make_pair(_ss1.get_tail_p(), _ss1.get_graph_id()));
 
     }
+    //Ehsan
+    /*
+	void restore_tail_nodes() override{
+		_ss0.forward_tail(*(input_nodes[0].first));
+		_ss1.forward_tail(*(input_nodes[1].first));
+	}
+	void set_tail_nodes(int i, NodeID nid){
+		if ( i == 0 ){
+			_ss0.forward_tail(nid);
+		}
+		if ( i==1 ){
+			_ss1.forward_tail(nid);
+		}
+	}*/
 
     NodeID create_layer(IStream &s) override
     {

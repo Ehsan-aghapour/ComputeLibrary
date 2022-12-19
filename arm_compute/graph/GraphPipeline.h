@@ -48,7 +48,7 @@ public:
 	{
 	}*/
 	GraphPipeline(GraphID id, std::string name, char _PE, char _Host_PE, int _start, int _end)
-		    : Graph(id, name), PE(_PE), Host_PE(_Host_PE), start_layer(_start), end_layer(_end)
+		    : Graph(id, name), start_layer(_start), end_layer(_end), PE(_PE), Host_PE(_Host_PE)
 	{
 	}
 

@@ -38,6 +38,7 @@ SubStream::SubStream(IStream &s)
     _hints     = s.hints();
     std::cerr<<"new substream with tail node: "<<s.tail_node()<<std::endl;
     _tail_node = s.tail_node();
+    graph_id=*(s.get_graph_id());
 }
 
 void SubStream::add_layer(ILayer &layer)
@@ -62,9 +63,9 @@ Graph &SubStream::graph()
 SubStream & SubStream::operator<<(ILayer &layer)
 {
 
-	if (layer.get_input_nodes().size()==0){
-		layer.add_input_node(_tail_node);
-	}
+	//if (layer.get_input_nodes().size()==0){
+		layer.add_input_node(this->get_tail_p(),this->get_graph_id());
+	//}
 	_s.next_layer(layer.get_input_nodes());
 	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
     add_layer(layer);
@@ -73,7 +74,8 @@ SubStream & SubStream::operator<<(ILayer &layer)
 }
 SubStream & SubStream::operator<<(ILayer &&layer)
 {
-	_s.next_layer(layer,_tail_node);
+	layer.add_input_node(this->get_tail_p(),this->get_graph_id());
+	_s.next_layer(layer.get_input_nodes());
 	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
 	add_layer(layer);
 	std::cerr<<"*******************************\n";

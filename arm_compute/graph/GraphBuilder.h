@@ -64,7 +64,7 @@ public:
 	 *
 	 * @return Node ID of the created node, EmptyNodeID in case of error
 	 */
-    NodeID add_receiver_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor);
+    static NodeID add_receiver_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
 
     /** Adds an input layer node to the graph
 	 *
@@ -75,7 +75,7 @@ public:
 	 *
 	 * @return Node ID of the created node, EmptyNodeID in case of error
 	 */
-    NodeID add_sender_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor);
+    static NodeID add_sender_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
     //**************************************************************************************************************
 
 

@@ -34,6 +34,7 @@ ReceiverNode::ReceiverNode(TensorDescriptor desc)
     : _desc(std::move(desc))
 {
     _outputs.resize(1, NullTensorID);
+    receiver_tensor=new TensorPipelineReceiver();
 }
 
 bool ReceiverNode::forward_descriptors()
@@ -44,7 +45,7 @@ bool ReceiverNode::forward_descriptors()
         ARM_COMPUTE_ERROR_ON(t == nullptr);
         t->desc() = configure_output(0);
         //Add the tensor pointer into the TensorPipelineReceiver
-        receiver_tensor.set_tensor(t);
+        receiver_tensor->set_tensor(t);
         return true;
     }
     return false;

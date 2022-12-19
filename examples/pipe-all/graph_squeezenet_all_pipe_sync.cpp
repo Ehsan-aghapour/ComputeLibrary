@@ -31,7 +31,7 @@
 #include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
-#include "utils/GraphUtils.h"
+#include "utils/pipe-all/GraphUtils.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute::utils;

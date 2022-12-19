@@ -35,6 +35,7 @@ namespace graph
 SenderNode::SenderNode()
 {
     _input_edges.resize(1, EmptyEdgeID);
+    sender_tensor=new TensorPipelineSender();
 }
 
 bool SenderNode::forward_descriptors()
@@ -55,7 +56,7 @@ bool SenderNode::forward_descriptors()
 	With EmptyEdgeId then g.add<NodeType>() function for each output_edge creates a tensor
 	********/
 	//if(input_edges.size()>0)
-	sender_tensor.set_tensor(input(0));
+	sender_tensor->set_tensor(input(0));
     return true;
 }
 
@@ -76,7 +77,7 @@ void SenderNode::accept(INodeVisitor &v)
 }
 void SenderNode::set_tensor(Tensor *t){
 	//Add tensor to TensorPipelineSender
-	sender_tensor.set_tensor(t);
+	sender_tensor->set_tensor(t);
 }
 } // namespace graph
 } // namespace arm_compute

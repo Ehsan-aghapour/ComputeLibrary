@@ -1,0 +1,29 @@
+********************************************************
+GraphUtils.h            -->     Origin
+GraphUtils.cpp          -->     Origin
+********************************************************
+
+
+********************************************************
+pipe-all                -->     These are the first pipeline (named as pipe-all) Before cleaning the code for publish.
+                                They are in these repos (pipe-all branch modified June 2021):
+                                  https://github.com/Ehsan-aghapour/ComputeLibrary.git
+                                  https://github.com/Ehsan-aghapour/ARMCL-V21.02.git
+                                The clean version is GraphUtils_published.h (modified Jully 2021) (see below) which is added in paper
+                                
+pipe-all/GraphUtils_published.h and pipe-all/GraphUtils_published.cpp:
+  Created for pipe-all and published as arxive (first pipeline used in embedded systems lab and first arxiv paper)
+Repo: https://github.com/Ehsan-aghapour/ARMCL-pipe-all branch pipe-all (modified jully 2021)
+arxiv: https://www.techrxiv.org/articles/preprint/Integrated_ARM_big_Little-Mali_Pipeline_for_High-Throughput_CNN_Inference/14994885
+********************************************************
+
+
+********************************************************
+n-pipe:                     -->     Graph utils that works with n-pip-1 and n-pipe that is for BGL pipeline (for NPU another files created and 
+                                was added to sconstruct)
+********************************************************
+
+
+********************************************************
+n-pipe-NPU:                 -->     It works for n-pipe with npu (alexnet_n_pipe_npu)
+********************************************************

@@ -24,6 +24,9 @@
 #ifndef ARM_COMPUTE_GRAPH_ILAYER_H
 #define ARM_COMPUTE_GRAPH_ILAYER_H
 
+//Ehsan
+#include "arm_compute/graph/frontend/SubStream.h"
+
 namespace arm_compute
 {
 namespace graph
@@ -67,14 +70,27 @@ public:
     }
 
     //Ehsan
-    virtual std::vector<NodeID> get_input_nodes(){return input_nodes;};
-    virtual void add_input_node(NodeID node){ input_nodes.push_back(node);};
+    std::vector<std::pair<NodeID*,int*>> get_input_nodes(){return input_nodes;};
+    void add_input_node(NodeID* node, int* graph_id){ input_nodes.push_back(std::make_pair(node,graph_id));};
+    /*virtual std::vector<std::unique_ptr<SubStream>> get_sub_streams();
 
-private:
+    void restore_tail_nodes(std::vector<std::unique_ptr<SubStream>> sub_streams){
+    	if(input_nodes.size() < sub_streams.size()){
+			std::cerr<<"ILayer: size of input_nodes is smaller than size of substreams\n";
+			return;
+		}
+		for (unsigned int _i=0;_i<sub_streams.size();_i++){
+			sub_streams[_i]->forward_tail(*(input_nodes[_i].first));
+		}
+    }
+    virtual void restore_tail_nodes();
+    virtual void set_tail_nodes(int,NodeID);*/
+
+protected:
     std::string _name = {};
 
     //Ehsan
-    std::vector<NodeID> input_nodes;
+    std::vector<std::pair<NodeID*,int*>> input_nodes;
 };
 } // namespace frontend
 } // namespace graph

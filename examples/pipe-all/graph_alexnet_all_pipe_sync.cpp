@@ -40,7 +40,7 @@
 //#include<unistd.h>
 //#include<sched.h>
 #include "arm_compute/graph/Types.h"
-#include "arm_compute/gl_vs.h"
+//#include "arm_compute/gl_vs_pipe_all.h"
 
 
 #include "arm_compute/graph.h"
@@ -49,7 +49,7 @@
 #endif /* ARM_COMPUTE_CL */
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
-#include "utils/GraphUtils.h"
+#include "utils/pipe-all/GraphUtils.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;

@@ -83,7 +83,10 @@ public:
     {
         _tail_node = (nid != NullTensorID) ? nid : _tail_node;
     }
-    virtual NodeID next_layer(std::vector<NodeID>){};
+    virtual NodeID next_layer(std::vector<std::pair<NodeID*,int*>>){};
+    virtual NodeID* get_tail_p(){};
+	virtual int* get_graph_id(){};
+	virtual std::pair<NodeID*,int*> get_position(){};
 
 protected:
     StreamHints _hints     = {};              /**< Execution and algorithmic hints */

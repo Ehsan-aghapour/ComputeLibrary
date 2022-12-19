@@ -46,9 +46,10 @@ public:
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
+    TensorPipelineReceiver* get_receiver_tensor(){return receiver_tensor;};
 
 private:
-    TensorPipelineReceiver receiver_tensor;
+    TensorPipelineReceiver *receiver_tensor;
     TensorDescriptor _desc;
 };
 } // namespace graph

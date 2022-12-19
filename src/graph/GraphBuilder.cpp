@@ -140,7 +140,7 @@ NodeID GraphBuilder::add_receiver_node(Graph &g, NodeParams params, const Tensor
 {
     auto nid = g.add_node<ReceiverNode>(desc);
     set_node_params(g, nid, params);
-    set_accessor_on_node(g, nid, true, 0, std::move(accessor));
+    //set_accessor_on_node(g, nid, true, 0, std::move(accessor));
     return nid;
 }
 
@@ -153,7 +153,7 @@ NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair in
     //Set tensor in TensorPipelineSender object inside the sender_node class
     //g.node(nid)->forward_descriptors();
     set_node_params(g, nid, params);
-    set_accessor_on_node(g, nid, false, 0, std::move(accessor));
+    //set_accessor_on_node(g, nid, false, 0, std::move(accessor));
 
     return nid;
 }

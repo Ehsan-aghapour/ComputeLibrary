@@ -87,17 +87,17 @@ public:
      * @param[in] id   Tensor ID
      * @param[in] desc Tensor information
      */
-	void set_dest_tensor(TensorPipelineSender* d){
-		{
-			receiver=d;
-		}
+	void add_receiver(TensorPipelineReceiver* d){
+		receivers.emplace_back(d);
 	}
-	TensorPipelineSender* get_dest(){
-		return receiver;
+	std::vector<TensorPipelineReceiver*> get_dest(){
+		return receivers;
 	}
 	void check(){
 		std::cerr<<"Before check dest_tensor "<<std::endl;
-		receiver->check();
+		for(auto rec:receivers){
+			rec->check();
+		}
 		std::cerr<<"After check dest_tensor "<<std::endl;
 
 	}
@@ -111,7 +111,8 @@ public:
 
 private:
 	Tensor* tensor = nullptr;
-	TensorPipelineReceiver* receiver;
+	//vector of receivers instead of one receiver
+	std::vector<TensorPipelineReceiver*> receivers;
 };
 
 } // namespace graph

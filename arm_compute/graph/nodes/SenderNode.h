@@ -44,8 +44,9 @@ public:
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
     void set_tensor(Tensor *t);
+    TensorPipelineSender* get_sender_tensor(){return sender_tensor;};
 private:
-    TensorPipelineSender sender_tensor;
+    TensorPipelineSender *sender_tensor;
 };
 } // namespace graph
 } // namespace arm_compute
