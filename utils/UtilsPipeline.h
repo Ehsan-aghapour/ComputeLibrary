@@ -48,7 +48,8 @@ class Example_Pipeline: public Example
 {
 public:
 	Example_Pipeline(int _id, std::string _name)
-	:	graph(_id,_name)
+	//:	cmd_parser(), common_opts(cmd_parser), common_params(), graph(_id,std::move(_name))
+	: 	cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "AlexNet")
 	{
 
 	}
@@ -68,6 +69,87 @@ public:
 		host_PE = _host_PE;
 		//npu_init_context(NPU_index);
 		return;
+	}
+
+	int init(int argc, char **argv){
+
+		cmd_parser.parse(argc, argv);
+		cmd_parser.validate();
+
+		// Consume common parameters
+		common_params = consume_common_graph_parameters(common_opts);
+
+		// Return when help menu is requested
+		if(common_params.help)
+		{
+			cmd_parser.print_help(argv[0]);
+			return -1;
+		}
+
+		//Provide directory of images in addition to one image file as image argument
+		bool imgs = !(common_params.image.empty());
+		stringvec images_list;
+		size_t image_index = 0;
+		if(imgs){
+			//read_directory(common_params.image, images_list);
+			std::cerr<<"UtilsPipeline.h- image directory is: "<<common_params.image<<std::endl;
+			read_directory(common_params.image, graph.manager()->get_input_list());
+			std::cerr<<graph.manager()->get_input_list().size()<<" Input images are read from "<<common_params.image<<std::endl;
+			//common_params.image = images_list[image_index];
+			//common_params.image = graph.manager()->get_input_list()[0];
+			common_params.image=common_params.image+"/";
+			std::cerr<<"UtilsPipeline.h- image directory is: "<<common_params.image<<std::endl;
+		}
+		// Print parameter values
+		std::cout << common_params << std::endl;
+
+		return 0;
+		//example_pipeline->common_opts=common_opts;
+
+	}
+	int config_pipeline(){
+		std::string order = common_params.order;
+		int Layers = order.size();
+		if (Layers == 0){
+			order='B';
+		}
+		int id = 0;
+		char PE = order[0];
+		int start = 0;
+		int end = 0;
+		for(int i=1 ; i < Layers ; i++){
+			if(order[i] != PE){
+				end = i-1;
+				//id=example_pipeline->graph.get_next_id();
+				char Host_PE=PE;
+				if (PE=='G'){
+					Host_PE=common_params.gpu_host;
+				}
+				if (PE=='N'){
+					Host_PE=common_params.npu_host;
+				}
+				add_graph(start, end, PE, Host_PE);
+				start = i;
+				PE = order[i];
+			}
+			if(i == Layers-1){
+				end = i;
+				char Host_PE=PE;
+				if (PE=='G'){
+					Host_PE=common_params.gpu_host;
+				}
+				if (PE=='N'){
+					Host_PE=common_params.npu_host;
+				}
+				add_graph(start, end, PE, Host_PE);
+			}
+		}
+
+		set_common_params(common_params);
+
+
+		return 0;
+
 	}
 
 	void set_start(int start){
@@ -111,10 +193,15 @@ public:
     void set_common_params(CommonGraphParams _common_params){
     	graph.set_common_params(_common_params);
     }
+
+	/*CommonGraphParams  				common_params;
+	CommonGraphOptions 				common_opts;
+	CommandLineParser  				cmd_parser;*/
 protected:
 
-
-	CommonGraphParams  				common_params;
+    CommandLineParser  				cmd_parser;
+    CommonGraphOptions 				common_opts;
+    CommonGraphParams  				common_params;
 	graph::frontend::StreamPipeline	graph;
 	int								start_indx;
 	int 							end_indx;
@@ -140,78 +227,24 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
 template <typename T>
 int run_example_pipeline(int argc, char **argv)
 {
-	CommandLineParser  cmd_parser;
-	CommonGraphOptions common_opts(cmd_parser);
-	CommonGraphParams  common_params;
-	// Parse arguments
-	cmd_parser.parse(argc, argv);
-	cmd_parser.validate();
-
-	// Consume common parameters
-	common_params = consume_common_graph_parameters(common_opts);
-
-	// Return when help menu is requested
-	if(common_params.help)
-	{
-		cmd_parser.print_help(argv[0]);
-		return false;
-	}
-
-	//Provide directory of images in addition to one image file as image argument
-	bool imgs = !(common_params.image.empty());
-	stringvec images_list;
-	size_t image_index = 0;
-	if(imgs){
-		read_directory(common_params.image, images_list);
-		std::cerr<<images_list.size()<<" Input images are read from "<<common_params.image<<std::endl;
-		common_params.image = images_list[image_index];
-	}
-
 
 	std::unique_ptr<Example_Pipeline> example_pipeline=std::make_unique<T>();
+	/*CommandLineParser  cmd_parser;
+	CommonGraphOptions common_opts(cmd_parser);
+	CommonGraphParams  common_params;*/
+	// Parse arguments
+	int r;
 
-
-	std::string order = common_params.order;
-	int Layers = order.size();
-	if (Layers == 0){
-		order='B';
+	r=example_pipeline->init(argc,argv);
+	if(r<0){
+		std::cerr<<"error in initializing the options\n";
+		return r;
 	}
-	int id = 0;
-	char PE = order[0];
-	int start = 0;
-	int end = 0;
-	for(int i=1 ; i < Layers ; i++){
-		if(order[i] != PE){
-			end = i-1;
-			//id=example_pipeline->graph.get_next_id();
-			char Host_PE=PE;
-			if (PE=='G'){
-				Host_PE=common_params.gpu_host;
-			}
-			if (PE=='N'){
-				Host_PE=common_params.npu_host;
-			}
-			example_pipeline->add_graph(start, end, PE, Host_PE);
-			start = i;
-			PE = order[i];
-		}
-		if(i == Layers-1){
-			end = i;
-			char Host_PE=PE;
-			if (PE=='G'){
-				Host_PE=common_params.gpu_host;
-			}
-			if (PE=='N'){
-				Host_PE=common_params.npu_host;
-			}
-			example_pipeline->add_graph(start, end, PE, Host_PE);
-		}
+	example_pipeline->config_pipeline();
+	if(r<0){
+		std::cerr<<"error in configuring the pipeline\n";
+		return r;
 	}
-	example_pipeline->set_common_params(common_params);
-
-
-
-
 
 	//Setup GPIO for sending (start and end) signals to power manager
 #if Power_Measurement
@@ -229,8 +262,7 @@ int run_example_pipeline(int argc, char **argv)
 	}
 #endif
 
-	// Print parameter values
-	std::cout << common_params << std::endl;
+
 
 
 

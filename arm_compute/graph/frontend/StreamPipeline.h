@@ -76,7 +76,7 @@ public:
     std::pair<int,int> find(std::pair<NodeID,int> key, int target_graph){
         std::pair<NodeID,int> r={0,-2};
         if(mm.find(key)==mm.end()){
-            std::cout<<"There is no mapping for node graph \n";
+            std::cerr<<"There is no mapping for node graph \n";
             r={0,-1};
             //create a T node and append to the node key.first in graph key.second (add it to mapping also)
             //create a R node in new graph (and add it to mapping)
@@ -86,7 +86,7 @@ public:
             bool exist=false;
             for(auto v:maps){
                 if(v.second==target_graph){
-                    std::cout<<"There is a mapped node in this graph\n";
+                    std::cerr<<"There is a mapped node in this graph\n";
                     exist=true;
                     r=v;
                     //change the tail node from key.first to v.first
@@ -96,7 +96,7 @@ public:
             if(!exist){
                 for(auto v:maps){
                     if(v.second==key.second){
-                        std::cout<<"The T node in that graph is node: "<<v.first<<"\n";
+                        std::cerr<<"The T node in that graph is node: "<<v.first<<"\n";
                         r=v;
                         //create a R node in new graph (and add it to mapping)
                         //add R node into the T node(v.first) of origin graph
@@ -105,7 +105,7 @@ public:
                 }
             }
         }
-        std::cout<<"mappd node for node "<<key.first<<" in graph "<<key.second<<" is node "<<r.first<<" in graph "<<r.second<<std::endl;
+        std::cerr<<"mappd node for node "<<key.first<<" in graph "<<key.second<<" is node "<<r.first<<" in graph "<<r.second<<std::endl;
         return r;
     }
     std::pair<int,int> find(std::pair<NodeID*,int*> key, int target_graph){
@@ -115,9 +115,9 @@ public:
 
     void print(){
         for(auto entry:mm){
-            std::cout<<"\n\n\n"<<entry.first.first<<" in graph "<<entry.first.second<<std::endl;
+            std::cerr<<"\n\n\n"<<entry.first.first<<" in graph "<<entry.first.second<<std::endl;
             for(auto v: entry.second){
-                std::cout<<"equals to: "<<v.first<<" in graph "<<v.second<<std::endl;
+                std::cerr<<"equals to: "<<v.first<<" in graph "<<v.second<<std::endl;
             }
         }
     }
@@ -150,10 +150,20 @@ public:
 
     void create_graphs();
     void finalize(Target target, const GraphConfig &config, std::set<int> *b=NULL, int blocking=0);
+    void finalize_parallel(int i,std::set<int> *b, int blocking);
     /** Executes the stream **/
     //Ehsan
     void run(int nn=0);
-    void run(bool annotate, int nn=0);
+    //void run(bool annotate, int nn=0);
+    void run_parallel(int i, int n=0);
+    void run_w_parallel(int i, int n=0);
+
+    void warmup(int nn=0);
+    void run_w(int nn=0);
+
+    //test
+    //void finalize(Target target, const GraphConfig &config);
+
 
     void measure(int n);
     void reset();
@@ -205,6 +215,10 @@ public:
     }
     StreamPipeline &operator<<(ILayer &layer);
     StreamPipeline &operator<<(ILayer &&layer);
+    StreamPipeline &operator<<(Target target_hint);
+    StreamPipeline &operator<<(ConvolutionMethod convolution_method_hint);
+    StreamPipeline &operator<<(DepthwiseConvolutionMethod depthwise_convolution_method_hint);
+    StreamPipeline &operator<<(FastMathHint fast_math_hint);
 
     int get_next_id(){
     	return num_graphs;
@@ -217,6 +231,19 @@ public:
     void set_common_params(arm_compute::utils::CommonGraphParams);
     void prnt();
     void forward_tail(NodeID nid) override;
+    int target_graph(int layer);
+    /*StreamHints &hints() override{
+    	std::cerr<<"calling hints in streampipeline\n";
+    	return all_hints[graph_id];
+    }*/
+    cpu_set_t* set_cores(cpu_set_t *set,int _core, bool _one_master_core=false);
+    cpu_set_t* set_cores(cpu_set_t *set,char cluster);
+
+    void reset_timings();
+
+    GraphManagerPipeline* manager(){
+    	return &_manager;
+    }
 
 private:
     //Important: GraphContext must be declared *before* the GraphManager because the GraphManager
@@ -225,8 +252,9 @@ private:
     GraphManagerPipeline _manager; /**< Graph manager */
     //std::vector<GraphContext> _ctxs;     /**< Graph context to use */
     GraphContext _ctx;     /**< Graph context to use */
+    std::vector<GraphContext> _ctxs;
     std::vector<std::unique_ptr<Graph>>        _gs;       /**< Internal graph representation of the stream */
-    //Graph        _g;       /**< Internal graph representation of the stream */
+    Graph        _g;       /**< Internal graph representation of the stream */
 
     //Ehsan
     //std::chrono::time_point<std::chrono::high_resolution_clock> start;
@@ -242,10 +270,13 @@ private:
     std::vector<int>	start_layer;
     std::vector<int>	end_layer;
     std::vector<char>	Host_PE;
+    std::vector<StreamHints> all_hints;
     //std::vector<NodeID>	Tail_node;
     int					current_layer;
     arm_compute::utils::CommonGraphParams  common_params;
+    std::vector<GraphConfig> 				configs;
     NodeMap				node_map;
+    int					n_warmup=2;
 };
 } // namespace frontend
 } // namespace graph

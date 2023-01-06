@@ -138,6 +138,9 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
 
 NodeID GraphBuilder::add_receiver_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor)
 {
+	std::string s;
+	s="Adding "+params.name+" to graph "+std::to_string(g.id())+" with target "+std::to_string((int)(params.target))+'\n';
+	std::cerr<<s;
     auto nid = g.add_node<ReceiverNode>(desc);
     set_node_params(g, nid, params);
     //set_accessor_on_node(g, nid, true, 0, std::move(accessor));
@@ -146,6 +149,9 @@ NodeID GraphBuilder::add_receiver_node(Graph &g, NodeParams params, const Tensor
 
 NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor)
 {
+	std::string s;
+	s="Adding "+params.name+" to graph "+std::to_string(g.id())+" with target "+std::to_string((int)(params.target))+'\n';
+	std::cerr<<s;
     check_nodeidx_pair(input, g);
 
     NodeID nid = g.add_node<SenderNode>();

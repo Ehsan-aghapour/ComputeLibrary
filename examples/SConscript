@@ -165,8 +165,9 @@ if env['external_tests_dir']:
         
 #Ehsan
 if env['estate'] == '64':
+    #SConscript('./n-pipe/SConscript',['examples_env','utils','graph_utils'])
     SConscript('./n-pipe-NPU/SConscript',['examples_env','utils','graph_utils'])
-    SConscript('./n-pipe/SConscript',['examples_env','utils','graph_utils'])
+    SConscript('./Pipeline/SConscript',['examples_env','utils','graph_utils'])
     # pipe-all could not be compiled because "void run(double &in, double &task, double &out);" in arm_compute/graph/frontend/Stream.h is not exist anymore
     #SConscript('./pipe-all/SConscript',['examples_env','utils','graph_utils'])
 # equivalent:

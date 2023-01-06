@@ -32,6 +32,9 @@ namespace graph
 {
 namespace frontend
 {
+
+
+
 Stream::Stream(size_t id, std::string name)
     : _ctx(), _manager(), _g(id, std::move(name))
 {
@@ -73,13 +76,13 @@ void Stream::run(bool anotate, int nn)
 
 
 
-
 void Stream::add_layer(ILayer &layer)
 {
     auto nid   = layer.create_layer(*this);
     std::cerr<<"(stream) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
     _tail_node = nid;
 }
+
 
 const Graph &Stream::graph() const
 {
@@ -90,6 +93,8 @@ Graph &Stream::graph()
 {
     return _g;
 }
+
+
 
 Stream & Stream::operator<<(ILayer &layer)
 {

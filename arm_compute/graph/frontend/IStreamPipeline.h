@@ -64,7 +64,7 @@ public:
      */
     virtual NodeID tail_node()
     {
-    	std::cerr<<"ISTREAM callin tail_node() "<<_tail_node<<std::endl;
+    	std::cerr<<"ISTREAMPipeline callin tail_node() "<<_tail_node<<std::endl;
         return _tail_node;
     }
     /** Returns the stream hints that are currently used
@@ -73,6 +73,9 @@ public:
      */
     virtual StreamHints &hints()
     {
+    	std::string s;
+		s="calling hints in IstreamPipeline is "+ std::to_string((int)(_hints.target_hint)) +"\n";
+		std::cerr<<s;
         return _hints;
     }
     /** Forwards tail of stream to a given nid
@@ -83,6 +86,7 @@ public:
     {
         _tail_node = (nid != NullTensorID) ? nid : _tail_node;
     }
+    //virtual StreamHints &hints();
 
     //IStreamPipeline & operator<<(ILayer &layer);
     //IStreamPipeline & operator<<(ILayer &&layer);
@@ -90,16 +94,21 @@ public:
     NodeID* get_tail_p(){
     	return &_tail_node;
     }
-    int* get_graph_id(){
+    int* get_graph_id_p(){
     	return &graph_id;
     }
+    int get_graph_id(){
+    	return graph_id;
+    }
     std::pair<NodeID*,int*> get_position(){
-    	return std::make_pair(this->get_tail_p(),this->get_graph_id());
+    	return std::make_pair(this->get_tail_p(),this->get_graph_id_p());
     }
 
 protected:
     int 	current_layer	=	{0};
     int		graph_id;
+    inline static int			_target_graph;
+
     //StreamHints _hints     = {};              /**< Execution and algorithmic hints */
     //NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
 };

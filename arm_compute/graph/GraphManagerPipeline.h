@@ -26,6 +26,19 @@
 
 
 #include "arm_compute/graph/GraphManager.h"
+//#include "arm_compute/graph/WorkloadPipeline.h"
+
+#include<chrono>
+#include "arm_compute/graph/printers/DotGraphPrinter.h"
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/Logger.h"
+#include "arm_compute/graph/PassManager.h"
+#include "arm_compute/graph/TypePrinter.h"
+#include "arm_compute/graph/Utils.h"
+#include "arm_compute/graph/detail/CrossLayerMemoryManagerHelpers.h"
+#include "arm_compute/graph/detail/ExecutionHelpersPipeline.h"
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 
 
 
@@ -74,8 +87,9 @@ public:
      * @param[in] graph Graph to execute
      */
     //Ehsan
-    //void execute_graph(Graph &graph);
-    //void execute_graph(Graph &graph, int nn=0);
+    void execute_graph(Graph &graph);
+    void execute_graph(Graph &graph, int nn=0);
+    void warmup_and_execute_graph(Graph &graph, int nn);
     //void execute_graph(Graph &graph, bool annotate, int nn=0);
     //void execute_graph(Graph &graph, double &in, double &task, double &out, int nn=0);
     //void execute_graph(Graph &graph, double &in, double &task, double &out, bool annotate, int nn=0);
@@ -109,13 +123,43 @@ public:
     double get_output_time(int target){
     	return output_time[target];
     }
+    void print_times(Graph &graph, int n);
+    void reset(Graph &graph);
+    void set_num_graphs(int n){
+    	num_graphs=n;
+    	input_time.resize(n);
+    	task_time.resize(n);
+    	output_time.resize(n);
+    	transmition_time.resize(n);
+    }
+    void reset_timing(int graph_id);
 
+    void finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target, std::set<int> *blocking_set=nullptr, int blocking=0);
+
+    bool* get_ready(){
+    	return &ready;
+    }
+    std::vector<std::string>& get_input_list(){
+    	return input_images;
+    }
 
 private:
-    //std::map<GraphID, ExecutionWorkload> _workloads = {}; /**< Graph workloads */
-    std::vector<double> input_time;
-    std::vector<double> task_time;
-    std::vector<double> output_time;
+
+    std::map<GraphID, ExecutionWorkload> 	_workloads = {}; /**< Graph workloads */
+
+    std::vector<double> 					input_time;
+    std::vector<double> 					task_time;
+    std::vector<double> 					output_time;
+    std::vector<double>						transmition_time;
+    int 									num_graphs=1;
+    int										warmup_n=1;
+	bool									parallel=true;
+	bool									measure_when_full=true&&parallel;
+	std::mutex 								_mtx = {};
+	std::condition_variable 				condVar;
+	bool									ready=false;
+	int										c=0;
+	std::vector<std::string>				input_images;
 };
 } // namespace graph
 } // namespace arm_compute

@@ -39,6 +39,9 @@
 #include <iomanip>
 #include <limits>
 
+//Ehsan
+#include <dirent.h>
+
 using namespace arm_compute::graph_utils;
 
 namespace
@@ -164,6 +167,7 @@ DummyAccessor::DummyAccessor(unsigned int maximum)
 
 bool DummyAccessor::access_tensor(ITensor &tensor)
 {
+	std::cerr<<"access dummy accessor\n";
     ARM_COMPUTE_UNUSED(tensor);
     bool ret = _maximum == 0 || _iterator < _maximum;
     if(_iterator == _maximum)
@@ -253,12 +257,35 @@ bool SaveNumPyAccessor::access_tensor(ITensor &tensor)
 ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
     : _already_loaded(false), _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
+	std::cerr<<"GraphUtils.cpp- fname: "<<_filename<<std::endl;
+	if(arm_compute::utility::endswith(_filename, ".ppm") || arm_compute::utility::endswith(_filename, ".jpg")){
+		image_list.push_back(_filename);
+		return;
+	}
+	DIR* dirp = opendir(_filename.c_str());
+	struct dirent * dp;
+	while ((dp = readdir(dirp)) != NULL) {
+		if(arm_compute::utility::endswith(dp->d_name, ".ppm") || arm_compute::utility::endswith(dp->d_name, ".jpg"))
+		   image_list.push_back(_filename+(dp->d_name));
+	}
+	closedir(dirp);
+	for(auto img:image_list){
+		std::cerr<<img<<std::endl;
+	}
+	if(image_list.size()==0){
+		std::cerr<<"GraphUtils.cpp- Error: image list is empty\n";
+	}
 }
 
 bool ImageAccessor::access_tensor(ITensor &tensor)
 {
     if(!_already_loaded)
     {
+    	iterator=(iterator+1)%(image_list.size());
+    	std::cerr<<"iterator:"<<iterator<<std::endl;
+    	_filename=image_list[iterator];
+    	std::cerr<<"reading image: "<<_filename<<std::endl;
+
         auto image_loader = utils::ImageLoaderFactory::create(_filename);
         ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
 
@@ -294,7 +321,7 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
         }
     }
 
-    _already_loaded = !_already_loaded;
+    //_already_loaded = !_already_loaded;
     return _already_loaded;
 }
 

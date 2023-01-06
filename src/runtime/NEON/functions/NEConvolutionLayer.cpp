@@ -55,6 +55,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
                                                             enable_fast_math, num_groups));
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
+    std::cerr<<"**********conv method: "<<NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math)<<std::endl;
     switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:

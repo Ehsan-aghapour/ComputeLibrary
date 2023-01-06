@@ -41,22 +41,7 @@ void ExecutionTask::operator()()
     TaskExecutor::get().execute_function(*this);
 }
 
-void ExecutionTask::operator()(int nn)
-{
-    t+=TaskExecutor::get().execute_function2(*this,nn);
-}
 
-double ExecutionTask::time(int n){
-	if(n!=0)
-		return t/n;
-	else
-		return t;
-}
-
-void ExecutionTask::reset(){
-	t=0;
-	n=0;
-}
 
 
 void execute_task(ExecutionTask &task)
@@ -90,7 +75,7 @@ void execute_task(ExecutionTask &task)
 
 //std::map<std::string,double> task_times;
 //void execute_task(ExecutionTask &task, const std::map<std::string,double>& tt)
-
+/*
 double execute_task2(ExecutionTask &task, int nn)
 {
 	double t=0;
@@ -128,7 +113,7 @@ double execute_task2(ExecutionTask &task, int nn)
     }
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
     return t;
-}
+}*/
 
 void ExecutionTask::prepare()
 {
@@ -139,7 +124,7 @@ void ExecutionTask::prepare()
 }
 
 TaskExecutor::TaskExecutor()
-    : execute_function(execute_task),execute_function2(execute_task2)
+    : execute_function(execute_task)
 {
 }
 

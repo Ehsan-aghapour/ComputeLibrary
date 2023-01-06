@@ -42,8 +42,10 @@ void read_directory(const std::string& name, stringvec& v)
     DIR* dirp = opendir(name.c_str());
     struct dirent * dp;
     while ((dp = readdir(dirp)) != NULL) {
-        if(arm_compute::utility::endswith(dp->d_name, ".ppm") || arm_compute::utility::endswith(dp->d_name, ".jpg"))
+        if(arm_compute::utility::endswith(dp->d_name, ".ppm") || arm_compute::utility::endswith(dp->d_name, ".jpg")){
            v.push_back(name+(dp->d_name));
+           //std::cerr<<"UtilsPipeline.cpp- file name: "<<name+(dp->d_name)<<std::endl;
+        }
     }
     closedir(dirp);
 }
@@ -69,6 +71,7 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
         int f_i=1;
 #endif
         bool status = example->do_setup(argc, argv);
+        std::cerr<<"setup finished\n\n";
         if(!status)
         {
             return 1;

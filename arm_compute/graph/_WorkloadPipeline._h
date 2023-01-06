@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_WORKLOAD_H
-#define ARM_COMPUTE_GRAPH_WORKLOAD_H
+#ifndef ARM_COMPUTE_GRAPH_WORKLOAD_PIPELINE_H
+#define ARM_COMPUTE_GRAPH_WORKLOAD_PIPELINE_H
 
 #include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/TensorPipeline.h"
+#include "arm_compute/graph/Workload.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
-#include "arm_compute/graph/TensorPipeline.h"
 
 #include <functional>
 #include <memory>
@@ -44,28 +44,29 @@ class ITensorHandle;
 class INode;
 class Graph;
 
-struct ExecutionTask;
+struct ExecutionTaskPipeline;
 
 //void execute_task(ExecutionTask &task, const std::map<std::string,double>& tt=std::map<std::string, double>());
-void execute_task(ExecutionTask &task);
-double execute_task2(ExecutionTask &task,int nn);
+//void execute_task(ExecutionTask &task);
+double execute_task_pipeline(ExecutionTaskPipeline &task,int nn=0);
+
 
 /** Task executor */
-class TaskExecutor final
+class TaskExecutorPipeline:TaskExecutor
 {
 private:
     /** Default constructor **/
-    TaskExecutor();
+    TaskExecutorPipeline();
 
 public:
     /** Task executor accessor
      *
      * @return Task executor instance
      */
-    static TaskExecutor &get();
+    static TaskExecutorPipeline &get();
     /** Function that is responsible for executing tasks */
-    std::function<decltype(execute_task)> execute_function;
-    std::function<decltype(execute_task2)> execute_function2;
+    //std::function<decltype(execute_task)> execute_function;
+    std::function<decltype(execute_task_pipeline)> execute_function_pipeline;
     //std::function<void(ExecutionTask &task, const std::map<std::string,double>& tt= std::map<std::string, double>())> execute_function;
 };
 
@@ -73,51 +74,43 @@ public:
  *
  * Contains all the information required to execute a given task
  */
-struct ExecutionTask
+struct ExecutionTaskPipeline:ExecutionTask
 {
-    ExecutionTask(std::unique_ptr<arm_compute::IFunction> &&f, INode *n)
-        : task(std::move(f)), node(n)
+	ExecutionTaskPipeline(std::unique_ptr<arm_compute::IFunction> &&f, INode *n)
+        : ExecutionTask(std::move(f), n)
     {
+		//task=std::move(f);
+		//node=n;
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    ExecutionTask(const ExecutionTask &) = delete;
+    ExecutionTaskPipeline(const ExecutionTaskPipeline &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    ExecutionTask &operator=(const ExecutionTask &) = delete;
+    ExecutionTaskPipeline &operator=(const ExecutionTaskPipeline &) = delete;
     /** Default Move Constructor. */
-    ExecutionTask(ExecutionTask &&) noexcept = default;
+    ExecutionTaskPipeline(ExecutionTaskPipeline &&) noexcept = default;
     /** Default move assignment operator */
-    ExecutionTask &operator=(ExecutionTask &&) noexcept = default;
+    ExecutionTaskPipeline &operator=(ExecutionTaskPipeline &&) noexcept = default;
     /** Default destructor */
-    ~ExecutionTask() = default;
-    // TODO (geopin01) : Support vector of functions?
-    std::unique_ptr<arm_compute::IFunction> task = {}; /**< Task to execute */
-    INode                                  *node = {}; /**< Node bound to this workload */
-
-    /** Function operator */
-    void operator()();
-    void operator()(int nn);
-
-    /** Prepare execution task */
-    void prepare();
-
+    ~ExecutionTaskPipeline() = default;
+	void operator()(int nn=0);
     double time(int n);
     void reset();
-    double t;
+    double t=0;
     int n=0;
     bool block=0;
     bool ending=0;
 };
 
 /** Execution workload */
-struct ExecutionWorkload
+struct ExecutionWorkloadPipeline:ExecutionWorkload
 {
-    std::vector<Tensor *>      inputs  = {};          /**< Input handles */
-    std::vector<Tensor *>      outputs = {};          /**< Output handles */
-    std::vector<ExecutionTask> tasks   = {};          /**< Execution workload */
-    Graph                     *graph   = { nullptr }; /**< Graph bound to the workload */
-    GraphContext              *ctx     = { nullptr }; /**< Graph execution context */
+    //std::vector<Tensor *>      inputs  = {};          /**< Input handles */
+    //std::vector<Tensor *>      outputs = {};          /**< Output handles */
     std::vector<TensorPipelineReceiver *>      receivers  = {};          /**< receiver handles */
-    std::vector<TensorPipelineSender *>      senders = {};
+    std::vector<TensorPipelineSender *>      senders = {};          /**< sender handles */
+    std::vector<ExecutionTaskPipeline> tasks   = {};          /**< Execution workload */
+    //Graph                     *graph   = { nullptr }; /**< Graph bound to the workload */
+    //GraphContext              *ctx     = { nullptr }; /**< Graph execution context */
 };
 } // namespace graph
 } // namespace arm_compute

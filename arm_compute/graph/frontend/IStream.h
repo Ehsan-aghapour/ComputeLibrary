@@ -73,6 +73,9 @@ public:
      */
     StreamHints &hints()
     {
+    	std::string s;
+    	s="calling hints in Istream is "+ std::to_string((int)(_hints.target_hint)) +"\n";
+    	std::cerr<<s;
         return _hints;
     }
     /** Forwards tail of stream to a given nid
@@ -85,7 +88,8 @@ public:
     }
     virtual NodeID next_layer(std::vector<std::pair<NodeID*,int*>>){};
     virtual NodeID* get_tail_p(){};
-	virtual int* get_graph_id(){};
+	virtual int get_graph_id(){};
+	virtual int* get_graph_id_p(){};
 	virtual std::pair<NodeID*,int*> get_position(){};
 
 protected:

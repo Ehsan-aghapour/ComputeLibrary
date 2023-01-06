@@ -28,7 +28,6 @@
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
-#include "arm_compute/graph/TensorPipeline.h"
 
 #include <functional>
 #include <memory>
@@ -48,12 +47,12 @@ struct ExecutionTask;
 
 //void execute_task(ExecutionTask &task, const std::map<std::string,double>& tt=std::map<std::string, double>());
 void execute_task(ExecutionTask &task);
-double execute_task2(ExecutionTask &task,int nn);
+//double execute_task2(ExecutionTask &task,int nn);
 
 /** Task executor */
-class TaskExecutor final
+class TaskExecutor
 {
-private:
+protected:
     /** Default constructor **/
     TaskExecutor();
 
@@ -65,7 +64,7 @@ public:
     static TaskExecutor &get();
     /** Function that is responsible for executing tasks */
     std::function<decltype(execute_task)> execute_function;
-    std::function<decltype(execute_task2)> execute_function2;
+    //std::function<decltype(execute_task2)> execute_function2;
     //std::function<void(ExecutionTask &task, const std::map<std::string,double>& tt= std::map<std::string, double>())> execute_function;
 };
 
@@ -75,6 +74,9 @@ public:
  */
 struct ExecutionTask
 {
+	ExecutionTask(){
+
+	}
     ExecutionTask(std::unique_ptr<arm_compute::IFunction> &&f, INode *n)
         : task(std::move(f)), node(n)
     {
@@ -95,17 +97,17 @@ struct ExecutionTask
 
     /** Function operator */
     void operator()();
-    void operator()(int nn);
+    //void operator()(int nn);
 
     /** Prepare execution task */
     void prepare();
 
-    double time(int n);
+    /*double time(int n);
     void reset();
     double t;
     int n=0;
     bool block=0;
-    bool ending=0;
+    bool ending=0;*/
 };
 
 /** Execution workload */
@@ -116,8 +118,6 @@ struct ExecutionWorkload
     std::vector<ExecutionTask> tasks   = {};          /**< Execution workload */
     Graph                     *graph   = { nullptr }; /**< Graph bound to the workload */
     GraphContext              *ctx     = { nullptr }; /**< Graph execution context */
-    std::vector<TensorPipelineReceiver *>      receivers  = {};          /**< receiver handles */
-    std::vector<TensorPipelineSender *>      senders = {};
 };
 } // namespace graph
 } // namespace arm_compute

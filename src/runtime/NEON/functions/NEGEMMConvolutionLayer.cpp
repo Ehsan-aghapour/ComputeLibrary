@@ -565,8 +565,9 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
 void NEGEMMConvolutionLayer::run()
 {
+	std::cerr<<"start of running gemm conv\n";
     prepare();
-
+    std::cerr<<"after prepare gemm conv\n";
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     bool out_has_padding = _skip_col2im && (_original_output->info()->padding().bottom != 0 || _original_output->info()->padding().top != 0);
@@ -584,6 +585,7 @@ void NEGEMMConvolutionLayer::run()
     _gemm_output_3d.allocator()->import_memory(out_to_use->buffer());
 
     // Runs NEGEMM or NEGEMMLowpMatrixMultiplyCore functions
+    std::cerr<<"before run\n";
     if(_is_quantized)
     {
         // Run gemmlowp
@@ -594,7 +596,7 @@ void NEGEMMConvolutionLayer::run()
         // Run gemm
         _mm_gemm.run();
     }
-
+    std::cerr<<"after mm_gem.run\n";
     // Reshape output matrix
     if(!_skip_col2im)
     {

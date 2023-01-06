@@ -853,7 +853,7 @@ bool NEGEMMAssemblyDispatch::is_configured() const
 void NEGEMMAssemblyDispatch::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
-
+    std::cerr<<"dispatch\n";
     ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
     _arm_gemm->run();
 }

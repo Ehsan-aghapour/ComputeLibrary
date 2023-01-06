@@ -26,6 +26,7 @@
 
 #include "arm_compute/graph/Tensor.h"
 #include <condition_variable>
+#include <thread>
 
 
 
@@ -43,23 +44,86 @@ public:
      * @param[in] id   Tensor ID
      * @param[in] desc Tensor information
      */
-	void check(){
+	TensorPipelineReceiver(){
+		receiver_ready=false;
+		data_sent=false;
+	}
+	double send_data(){
+		{
+			std::string s;
+			auto tstart=std::chrono::high_resolution_clock::now();
+			std::unique_lock<std::mutex> lck(mutex_);
+			if(!get_receiver_ready()){
+				s=name+" waiting for receiver to get ready\n";
+				std::cerr<<s;
+			}
+
+			condVar.wait(lck, [this]{ return get_receiver_ready(); });
+			auto tend1=std::chrono::high_resolution_clock::now();
+			s=name+" transferring data\n";
+			std::cerr<<s;
+			receiver_ready=false;
+			//Transfer data
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			data_sent=true;
+			condVar.notify_all();
+			s=name+" done\n";
+			std::cerr<<s;
+			lck.unlock();
+			auto tend2=std::chrono::high_resolution_clock::now();
+			t_sender_wait+=std::chrono::duration_cast<std::chrono::duration<double>>(tend1 - tstart).count();
+			double t=std::chrono::duration_cast<std::chrono::duration<double>>(tend2 - tend1).count();
+			t_transmition+=t;
+			return t;
+		}
+	}
+	void wait_for_receiver(){
 		{
 			std::unique_lock<std::mutex> lck(mutex_);
-			condVar.wait(lck, [this]{ return *(get_ready()); });
+			condVar.wait(lck, [this]{ return get_receiver_ready(); });
 			lck.unlock();
 		}
+		return;
 	}
-	void set_ready(){
+	void signal_receiver(){
 		{
-			std::lock_guard<std::mutex> lck(mutex_);
-			*ready = true;
+				std::unique_lock<std::mutex> lck(mutex_);
+				data_sent=true;
+				receiver_ready=false;
+				condVar.notify_all();
+				lck.unlock();
 		}
-		condVar.notify_all();
+	}
+	bool receive_data(){
+		{
+			//std::lock_guard<std::mutex> lck(mutex_);
+			std::string s;
+			s=name+" setting ready for getting data\n";
+			std::cerr<<s;
+			auto tstart=std::chrono::high_resolution_clock::now();
+			std::unique_lock<std::mutex> lck(mutex_);
+			receiver_ready = true;
+			condVar.notify_all();
+			if(!get_data_sent()){
+				s=name+" waiting for sender to send the data\n";
+				std::cerr<<s;
+			}
+			condVar.wait(lck, [this]{ return get_data_sent(); });
+			data_sent=false;
+			s=name+" done\n";
+			std::cerr<<s;
+			lck.unlock();
+			auto tend=std::chrono::high_resolution_clock::now();
+			t_receiver_wait+=std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count();
+		}
+		return true;
 	}
 
-	bool* get_ready(){
-		return ready;
+	bool get_receiver_ready(){
+		return receiver_ready;
+	}
+	bool get_data_sent(){
+		return data_sent;
 	}
 	void set_tensor(Tensor* t){
 		tensor=t;
@@ -68,12 +132,35 @@ public:
 		return tensor;
 	}
 
+	void set_name(std::string _name){
+		name=std::string(_name);
+	}
+
+	void reset_timing(){
+		t_sender_wait=0;
+		t_receiver_wait=0;
+		t_transmition=0;
+	}
+	double get_transmition_time(){
+		return t_transmition;
+	}
+	double get_sender_wait_time(){
+		return t_sender_wait;
+	}
+	double get_receiver_wait_time(){
+		return t_receiver_wait;
+	}
 
 private:
 	Tensor* tensor = nullptr;
 	std::mutex mutex_;
 	std::condition_variable condVar;
-	bool* ready=new bool(false);
+	bool receiver_ready=new bool(false);
+	bool data_sent=new bool (false);
+	std::string		name;
+	double	t_sender_wait;
+	double	t_receiver_wait;
+	double	t_transmition;
 };
 
 
@@ -93,12 +180,17 @@ public:
 	std::vector<TensorPipelineReceiver*> get_dest(){
 		return receivers;
 	}
-	void check(){
-		std::cerr<<"Before check dest_tensor "<<std::endl;
+	bool send_data(){
+		std::string s;
+
+		s=name+ " before check dest_tensor\n";
+		std::cerr<<s;
 		for(auto rec:receivers){
-			rec->check();
+			rec->send_data();
 		}
-		std::cerr<<"After check dest_tensor "<<std::endl;
+		s=name+" after check dest_tensor\n";
+		std::cerr<<s;
+		return true;
 
 	}
 	void set_tensor(Tensor* t){
@@ -107,12 +199,15 @@ public:
 	Tensor* get_tensor(){
 		return tensor;
 	}
-
+	void set_name(std::string _name){
+		name=std::string(_name);
+	}
 
 private:
 	Tensor* tensor = nullptr;
 	//vector of receivers instead of one receiver
 	std::vector<TensorPipelineReceiver*> receivers;
+	std::string name;
 };
 
 } // namespace graph

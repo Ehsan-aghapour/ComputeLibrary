@@ -504,7 +504,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     //std::string mtd=cnmethods[int(conv_algorithm)];
     //std::cout<<"function helpers create convolution layer, node "<<node.name()<<" Convolution method: "<<mtd<<std::endl;
 
-    #if My_print > 0
+    #if My_print > -1
     //Ehsan
     std::cout<<"\nFunctionHelpers.cpp::create_convolution_layer(node,ctx)\n "
     		<<" Node name:"<<node.name()
@@ -543,6 +543,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                         std::string("GenericConvolutionLayer"), mm,
                                         input, weights, biases, output, conv_info,
                                         WeightsInfo(), Size2D(1U, 1U), fused_act, fast_math, num_groups);
+        //std::cerr<<"**********func type: "<<typeid(func).name()<<std::endl;
     }
 
     // Log info

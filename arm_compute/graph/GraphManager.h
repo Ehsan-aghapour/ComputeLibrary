@@ -69,16 +69,14 @@ public:
      * @param[in] target Execution target (Single target execution is currently supported)
      */
     void finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target, std::set<int> *b=NULL, int blocking=0);
-    /** Executes a graph
-     *
-     * @param[in] graph Graph to execute
-     */
-    //Ehsan
-    //void execute_graph(Graph &graph);
-    void execute_graph(Graph &graph, int nn=0);
-    void execute_graph(Graph &graph, bool annotate, int nn=0);
-    //void execute_graph(Graph &graph, double &in, double &task, double &out, int nn=0);
-    //void execute_graph(Graph &graph, double &in, double &task, double &out, bool annotate, int nn=0);
+	/** Executes a graph
+	 *
+	 * @param[in] graph Graph to execute
+	 */
+	//Ehsan
+	//void execute_graph(Graph &graph);
+	void execute_graph(Graph &graph, int nn=0);
+	void execute_graph(Graph &graph, bool annotate, int nn=0);
     /** Invalidates the graph execution workload
      *
      * @param[in] graph Graph to invalidate
@@ -111,11 +109,16 @@ public:
     }
 
 
+
+
+
 private:
     std::map<GraphID, ExecutionWorkload> _workloads = {}; /**< Graph workloads */
     double input_time=0;
     double task_time=0;
     double output_time=0;
+
+
 };
 } // namespace graph
 } // namespace arm_compute

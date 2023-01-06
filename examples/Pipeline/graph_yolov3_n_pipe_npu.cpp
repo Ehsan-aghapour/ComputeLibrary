@@ -21,19 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#define Pipeline 1
+
+
 #include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
+#if Pipeline==1
 #include "utils/UtilsPipeline.h"
-
+#endif
 
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-#define Pipeline 1
 /*
 class L{
 	public:
@@ -103,10 +107,8 @@ public:
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
         std::cerr<<"start of adding target into stream\n";
-        std::cerr << typeid(graph).name()<<std::endl;
         graph << common_params.target
               << common_params.fast_math_hint;
-        std::cerr << typeid(graph).name()<<std::endl;
         std::cerr<<"start of adding input layer\n";
               graph<< InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor), false));
         std::pair<SubStream, SubStream> intermediate_layers = darknet53(data_path, weights_layout);

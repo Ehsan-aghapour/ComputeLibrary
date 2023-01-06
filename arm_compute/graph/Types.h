@@ -192,7 +192,10 @@ enum class NodeType
     Output,
     Const,
 
-    Dummy
+    Dummy,
+	//Ehsan
+	Receiver,
+	Sender
 };
 
 /** Backend Memory Manager affinity **/

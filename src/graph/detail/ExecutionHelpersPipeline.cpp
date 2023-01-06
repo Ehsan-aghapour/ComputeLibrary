@@ -22,6 +22,10 @@
  * SOFTWARE.
  */
 //Ehsan
+#include <sstream>
+#include "arm_compute/graph/nodes/SenderNode.h"
+#include "arm_compute/graph/nodes/ReceiverNode.h"
+
 #define streamline 0
 #include<chrono>
 #ifndef My_print
@@ -32,12 +36,12 @@
 #endif
 //#include "src/graph/GraphManager.cpp"
 
-#include "arm_compute/graph/detail/ExecutionHelpers.h"
+#include "arm_compute/graph/detail/ExecutionHelpersPipeline.h"
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/GraphManager.h"
-#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/GraphManagerPipeline.h"
+#include "arm_compute/graph/TensorPipeline.h"
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
 
@@ -47,115 +51,8 @@ namespace graph
 {
 namespace detail
 {
-void validate_all_nodes(Graph &g)
-{
-    auto &nodes = g.nodes();
 
-    // Create tasks
-    for(auto &node : nodes)
-    {
-        if(node != nullptr)
-        {
-            Target                    assigned_target = node->assigned_target();
-            backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
-            Status                    status          = backend.validate_node(*node);
-            ARM_COMPUTE_ERROR_ON_MSG(!bool(status), status.error_description().c_str());
-        }
-    }
-}
-
-void configure_all_tensors(Graph &g)
-{
-    auto &tensors = g.tensors();
-
-    for(auto &tensor : tensors)
-    {
-        if(tensor && tensor->handle() == nullptr)
-        {
-            Target                         target  = tensor->desc().target;
-            backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
-            std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
-            ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
-            tensor->set_handle(std::move(handle));
-        }
-    }
-}
-
-void allocate_all_input_tensors(INode &node)
-{
-    for(unsigned int i = 0; i < node.num_inputs(); ++i)
-    {
-    	std::cerr<<"Allocate all inputs of node: "<<node.name()<<std::endl;
-        Tensor *tensor = node.input(i);
-        if(tensor != nullptr && !tensor->bound_edges().empty())
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
-#if My_print > 0
-            //Ehsan
-            std::cout<<"\nExecutionHelpers, Allocating input tensor for outpu node, node shape:"<<tensor->handle()->tensor().info()->tensor_shape()
-            		<<" tensor shape:"<<tensor->desc().shape
-					<<std::endl;
-#endif
-            tensor->handle()->allocate();
-        }
-    }
-}
-
-void allocate_all_output_tensors(INode &node)
-{
-    for(unsigned int i = 0; i < node.num_outputs(); ++i)
-    {
-    	std::cerr<<"Allocate all outputs of node: "<<node.name()<<std::endl;
-        Tensor *tensor = node.output(i);
-        if(tensor != nullptr && !tensor->bound_edges().empty())
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
-#if My_print > 0
-            //Ehsan
-            std::cout<<"\nExecutionHelpers, Allocating output tensor for input and const node, CLTensor shape:"<<tensor->handle()->tensor().info()->tensor_shape()
-            		<<" tensor shape:"<<tensor->desc().shape
-					<<std::endl;
-#endif
-            tensor->handle()->allocate();
-        }
-    }
-}
-
-void allocate_const_tensors(Graph &g)
-{
-    for(auto &node : g.nodes())
-    {
-        if(node != nullptr)
-        {
-            switch(node->type())
-            {
-                case NodeType::Const:
-                case NodeType::Input:
-                    allocate_all_output_tensors(*node);
-                    break;
-                case NodeType::Output:
-                    allocate_all_input_tensors(*node);
-                default:
-                    break;
-            }
-        }
-    }
-}
-
-void allocate_all_tensors(Graph &g)
-{
-    auto &tensors = g.tensors();
-
-    for(auto &tensor : tensors)
-    {
-        if(tensor && !tensor->bound_edges().empty() && tensor->handle() != nullptr && tensor->handle()->tensor().info()->is_resizable() && tensor->handle()->tensor().is_used())
-        {
-            tensor->handle()->allocate();
-        }
-    }
-}
-
-ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::vector<NodeID> &node_order)
+ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, const std::vector<NodeID> &node_order)
 {
     ExecutionWorkload workload;
     workload.graph = &g;
@@ -169,8 +66,8 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     {
         auto node = g.node(node_id);
         //Ehsan
-        /*
-        std::cout<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<" num inputs: "<<node->num_inputs()<<std::endl<<std::flush;
+
+        /*std::cout<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<" num inputs: "<<node->num_inputs()<<std::endl<<std::flush;
         for(int k=0; k < node->num_inputs(); k++){
         	INode *cc=node->input_edge(k)->producer();
         	std::cout<<"\ninput "<<k<<" node_name: "<<cc->name()<<" ID: "<<cc->id()<<std::endl<<std::flush;
@@ -197,14 +94,17 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
                                << std::endl);
          */
 
-
+        std::cerr<<"node name: "<<node->name()<<std::endl;
         if(node != nullptr)
         {
+        	std::cerr<<"node is not null\n";
             Target                     assigned_target = node->assigned_target();
             backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
             std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
+            std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
             if(func != nullptr || is_utility_node(node))
             {
+            	std::cerr<<"adding to tasks\n";
                 workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
             }
         }
@@ -220,6 +120,24 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
 
             workload.inputs.push_back(node->output(0));
         }
+        if(node != nullptr && node->type() == NodeType::Receiver)
+		{
+			//Ehsan
+			//std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+        	ReceiverNode* rec=dynamic_cast<ReceiverNode*>(node.get());
+        	rec->get_receiver_tensor()->set_name(rec->common_node_params().name);
+			workload.receivers.push_back(rec->get_receiver_tensor());
+		}
+        if(node != nullptr && node->type() == NodeType::Sender)
+		{
+        	SenderNode* sender=dynamic_cast<SenderNode*>(node.get());
+        	sender->get_sender_tensor()->set_name(sender->common_node_params().name);
+			workload.senders.push_back(sender->get_sender_tensor());
+			//Ehsan
+			//std::cout<<"\noutput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+
+			//continue;
+		}
 
         if(node != nullptr && node->type() == NodeType::Output)
         {
@@ -230,81 +148,90 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
             continue;
         }
     }
-
+    std::stringstream stream;
+    stream<<"Graph "<<g.id()<<" input size: "<<workload.inputs.size()<<" receiver size: "<<workload.receivers.size()<<
+    		" tasks size: "<<workload.tasks.size()<<" senders size: "<<workload.senders.size()<<" output size: "<<
+			workload.outputs.size()<<std::endl;
+    std::cerr<<stream.str();
+    stream.str(std::string());
     return workload;
 }
 
-void release_unused_tensors(Graph &g)
+
+
+double call_all_senders(ExecutionWorkload &workload)
 {
-    for(auto &tensor : g.tensors())
+    double t=0;
+    std::for_each(std::begin(workload.senders), std::end(workload.senders), [&](TensorPipelineSender * sender_tensor)
     {
-        if(tensor != nullptr && tensor->handle() != nullptr)
-        {
-            tensor->handle()->release_if_unused();
-        }
-    }
+        double t_i=sender_tensor->send_data();
+        //t=(t_i>t)?t_i:t;//if parallelize senders and receivers
+        t+=t_i;
+    });
+
+    return t;
 }
 
-void call_tensor_accessor(Tensor *tensor)
-{
-    ARM_COMPUTE_ERROR_ON(!tensor);
-    tensor->call_accessor();
-}
 
-void call_all_const_node_accessors(Graph &g)
-{
-    auto &nodes = g.nodes();
 
-    for(auto &node : nodes)
-    {
-        if(node != nullptr && node->type() == NodeType::Const && node->num_outputs())
-        {
-            if(!node->output(0)->bound_edges().empty())
-            {
-#if My_print > 0
-            	//Ehsan
-            	std::cout<<"ExecutionHelpers, call all const node tensor accessors, node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
-#endif
-            	call_tensor_accessor(node->output(0));
-            }
-        }
-    }
-}
-
-bool call_all_input_node_accessors(ExecutionWorkload &workload)
+bool call_all_receivers(ExecutionWorkload &workload)
 {
     bool is_valid = true;
     //Ehsan: size of inputs is 1
     //std::string c;
-    std::stringstream stream;
-	stream<<"size of input: "<<workload.inputs.size()<<std::endl;
-	std::cerr<<stream.str();
-	stream.str(std::string());
+
+    std::cerr<<"number of receivers: "<<workload.receivers.size()<<std::endl;
     //std::string t;
     //std::cin>>t;
-    std::for_each(std::begin(workload.inputs), std::end(workload.inputs), [&](Tensor * input_tensor)
+    std::for_each(std::begin(workload.receivers), std::end(workload.receivers), [&](TensorPipelineReceiver * receiver_tensor)
     {
 #if My_print > 0
-    	std::cerr<<"input accessorrr"<<std::endl;
-    	std::cerr<<input_tensor->desc().shape <<std::endl;
+    	std::cerr<<"Receiver"<<std::endl;
+    	std::cerr<<receiver_tensor->desc().shape <<std::endl;
 #endif
-        bool valid_input = (input_tensor != nullptr) && input_tensor->my_call_accessor();
+        bool valid_input = (receiver_tensor != nullptr) && receiver_tensor->receive_data();
         is_valid         = is_valid && valid_input;
     });
     return is_valid;
 }
 
-void prepare_all_tasks(ExecutionWorkload &workload)
+void reset_transmit_timings(ExecutionWorkload &workload)
 {
-    ARM_COMPUTE_ERROR_ON(workload.graph == nullptr);
-    for(auto &task : workload.tasks)
+
+    std::for_each(std::begin(workload.receivers), std::end(workload.receivers), [&](TensorPipelineReceiver * receiver_tensor)
     {
-        task.prepare();
-        release_unused_tensors(*workload.graph);
+        receiver_tensor->reset_timing();
+    });
+    return;
+}
+
+
+
+void allocate_const_tensors_pipeline(Graph &g)
+{
+    for(auto &node : g.nodes())
+    {
+        if(node != nullptr)
+        {
+            switch(node->type())
+            {
+                case NodeType::Const:
+                case NodeType::Receiver:
+                case NodeType::Input:
+                    allocate_all_output_tensors(*node);
+                    break;
+                case NodeType::Sender:
+                case NodeType::Output:
+                    allocate_all_input_tensors(*node);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 
-void call_all_tasks(ExecutionWorkload &workload,int nn)
+void call_all_tasks_pipeline(ExecutionWorkload &workload,int nn)
 {
     ARM_COMPUTE_ERROR_ON(workload.ctx == nullptr);
 
@@ -326,10 +253,18 @@ void call_all_tasks(ExecutionWorkload &workload,int nn)
     static int c=0;
 #endif
     int ii=0;
-    std::cerr<<"size of tasks: "<<workload.tasks.size()<<std::endl;
+    std::stringstream stream;
+	stream<<"--size of tasks: "<<workload.tasks.size()<<std::endl;
+	std::cerr<<stream.str();
+	stream.str(std::string());
     for(auto &task : workload.tasks)
     {
     	ii++;
+    	//wait until last task finish
+    	if(ii==workload.tasks.size()){
+    		//task.block=1;
+    		task(1);
+    	}
     	std::cerr<<ii<<"  "<<task.node->name()<<std::endl;
     	if(nn==0)
     		task();
@@ -337,7 +272,7 @@ void call_all_tasks(ExecutionWorkload &workload,int nn)
 #if streamline > 0
     		ANNOTATE_CHANNEL_COLOR(cc,((c%2)==0)?ANNOTATE_GREEN:ANNOTATE_YELLOW, (std::to_string(c)+" "+task.node->name()).c_str() );
 #endif
-    		task();
+    		task(nn);
 #if streamline > 0
     		if(task.ending)
     			c=c+1;
@@ -361,17 +296,8 @@ void call_all_tasks(ExecutionWorkload &workload,int nn)
     }
 }
 
-bool call_all_output_node_accessors(ExecutionWorkload &workload)
-{
-    bool is_valid = true;
-    std::for_each(std::begin(workload.outputs), std::end(workload.outputs), [&](Tensor * output_tensor)
-    {
-        bool valid_output = (output_tensor != nullptr) && output_tensor->my_call_accessor();
-        is_valid          = is_valid && valid_output;
-    });
 
-    return is_valid;
-}
+
 } // namespace detail
 } // namespace graph
 } // namespace arm_compute

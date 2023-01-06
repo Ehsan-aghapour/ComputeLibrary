@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,50 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ReceiverNode.h"
+#ifndef ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_PIPELINE_H
+#define ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_PIPELINE_H
 
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/INodeVisitor.h"
+#include "arm_compute/graph/Types.h"
+#include "arm_compute/graph/detail/ExecutionHelpers.h"
+
 
 namespace arm_compute
 {
 namespace graph
 {
-ReceiverNode::ReceiverNode(TensorDescriptor desc)
-    : _desc(std::move(desc))
-{
-    _outputs.resize(1, NullTensorID);
-    receiver_tensor=new TensorPipelineReceiver();
-}
+// Forward declarations
+class Graph;
+class GraphContext;
+struct ExecutionWorkloadPipeline;
+class Tensor;
+class INode;
 
-bool ReceiverNode::forward_descriptors()
+namespace detail
 {
-    if(output_id(0) != NullTensorID)
-    {
-        Tensor *t = output(0);
-        ARM_COMPUTE_ERROR_ON(t == nullptr);
-        t->desc() = configure_output(0);
-        //Add the tensor pointer into the TensorPipelineReceiver
-        receiver_tensor->set_tensor(t);
-        return true;
-    }
-    return false;
-}
 
-TensorDescriptor ReceiverNode::configure_output(size_t idx) const
-{
-    ARM_COMPUTE_UNUSED(idx);
-    return _desc;
-}
+ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, const std::vector<NodeID> &node_order);
 
-NodeType ReceiverNode::type() const
-{
-    return NodeType::Receiver;
-}
+double call_all_senders(ExecutionWorkload &workload);
 
-void ReceiverNode::accept(INodeVisitor &v)
-{
-    v.visit(*this);
-}
+bool call_all_receivers(ExecutionWorkload &workload);
+
+void allocate_const_tensors_pipeline(Graph &g);
+
+void call_all_tasks_pipeline(ExecutionWorkload &workload,int n=0);
+
+void reset_transmit_timings(ExecutionWorkload &workload);
+
+
+} // namespace detail
 } // namespace graph
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H */

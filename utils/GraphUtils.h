@@ -242,12 +242,23 @@ public:
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
+    /*void set_file_name(std::string file_name){
+    	_filename=std::string(file_name);
+    }
+    std::vector<std::string>& get_image_list(){
+    	return image_list;
+    }*/
+
 
 private:
     bool                           _already_loaded;
-    const std::string              _filename;
+    //const std::string              _filename;
+    std::string              _filename;
     const bool                     _bgr;
     std::unique_ptr<IPreprocessor> _preprocessor;
+    int							iterator=0;
+    std::vector<std::string>		image_list;
+
 };
 
 /** Input Accessor used for network validation */
@@ -517,7 +528,8 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_comp
         }
         else if(arm_compute::utility::endswith(image_file_lower, ".jpeg")
                 || arm_compute::utility::endswith(image_file_lower, ".jpg")
-                || arm_compute::utility::endswith(image_file_lower, ".ppm"))
+                || arm_compute::utility::endswith(image_file_lower, ".ppm")
+				|| arm_compute::utility::endswith(image_file_lower, "/"))
         {
             return std::make_unique<ImageAccessor>(image_file, bgr, std::move(preprocessor));
         }

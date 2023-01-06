@@ -31,6 +31,7 @@
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/GraphManager.h"
+#include "arm_compute/graph/GraphManagerPipeline.h"
 
 namespace arm_compute
 {
@@ -60,6 +61,7 @@ public:
      * @param[in] target Execution target
      * @param[in] config (Optional) Graph configuration to use
      */
+    //void finalize(Target target, const GraphConfig &config);
     void finalize(Target target, const GraphConfig &config, std::set<int> *b=NULL, int blocking=0);
     /** Executes the stream **/
     //Ehsan
@@ -72,7 +74,8 @@ public:
     void add_layer(ILayer &layer) override;
     Graph       &graph() override;
     const Graph &graph() const override;
-    /*std::chrono::time_point<std::chrono::high_resolution_clock> get_start_time(){
+    /*
+    std::chrono::time_point<std::chrono::high_resolution_clock> get_start_time(){
     	return start;
     }
     std::chrono::time_point<std::chrono::high_resolution_clock> get_finish_time(){
@@ -123,8 +126,8 @@ private:
     Graph        _g;       /**< Internal graph representation of the stream */
 
     //Ehsan
-    //std::chrono::time_point<std::chrono::high_resolution_clock> start;
-    //std::chrono::time_point<std::chrono::high_resolution_clock> finish;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    std::chrono::time_point<std::chrono::high_resolution_clock> finish;
     double input_time=0;
     double task_time=0;
     double output_time=0;

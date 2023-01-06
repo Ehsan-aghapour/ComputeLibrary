@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Workload.h"
+#include "arm_compute/graph/WorkloadPipeline.h"
 
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorHandle.h"
@@ -36,71 +36,46 @@ namespace arm_compute
 {
 namespace graph
 {
-void ExecutionTask::operator()()
+
+
+void ExecutionTaskPipeline::operator()(int nn)
 {
-    TaskExecutor::get().execute_function(*this);
+    t+=TaskExecutorPipeline::get().execute_function_pipeline(*this,nn);
 }
 
-void ExecutionTask::operator()(int nn)
-{
-    t+=TaskExecutor::get().execute_function2(*this,nn);
-}
-
-double ExecutionTask::time(int n){
+double ExecutionTaskPipeline::time(int n){
 	if(n!=0)
 		return t/n;
 	else
 		return t;
 }
 
-void ExecutionTask::reset(){
+void ExecutionTaskPipeline::reset(){
 	t=0;
 	n=0;
 }
 
 
-void execute_task(ExecutionTask &task)
-{
-    if(task.task)
-    {
-    	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
-    	//auto start=std::chrono::high_resolution_clock::now();
-        task.task->run();
-        //arm_compute::CLScheduler::get().queue().finish();
-        //auto finish=std::chrono::high_resolution_clock::now();
-        //tt[task.node->name()]+=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());
-        //std::cout<<tt<<std::endl;
-        //std::cerr<<"\t time: "<<1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count())<<std::endl;
-    }
-#ifdef ARM_COMPUTE_ASSERTS_ENABLED
-    // COMPMID-3012 - Hide the printing logic from the execute_task method in the graph API
-    else if(task.node->type() == NodeType::PrintLayer)
-    {
-        auto print_node   = dynamic_cast<PrintLayerNode *>(task.node);
-        auto input_handle = print_node->input(0)->handle();
-        auto transform    = print_node->transform();
-
-        input_handle->map(true);
-        ITensor *input = transform ? transform(&input_handle->tensor()) : &input_handle->tensor();
-        input->print(print_node->stream(), print_node->format_info());
-        input_handle->unmap();
-    }
-#endif // ARM_COMPUTE_ASSERTS_ENABLED
-}
 
 //std::map<std::string,double> task_times;
 //void execute_task(ExecutionTask &task, const std::map<std::string,double>& tt)
 
-double execute_task2(ExecutionTask &task, int nn)
+double execute_task_pipeline(ExecutionTaskPipeline &task, int nn)
 {
 	double t=0;
     if(task.task)
     {
     	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
     	//static int n=-1;
-    	std::cerr<<"start running task with blockin and ending"<<task.block<<task.ending<<std::endl;
+    	std::string s;
+    	s="running "+task.node->name()+" with blocking "+ to_string(task.block)+ " and ending "+std::to_string(task.ending)+"\n";
+    	std::cerr<<s;
     	auto start=std::chrono::high_resolution_clock::now();
+    	//std::cin>>s;
+    	//std::cerr<<s;
         task.task->run();
+        //std::cin>>s;
+        //std::cerr<<s;
         if(task.block){
         	arm_compute::CLScheduler::get().queue().finish();
         	std::cerr<<"block\n";
@@ -130,23 +105,17 @@ double execute_task2(ExecutionTask &task, int nn)
     return t;
 }
 
-void ExecutionTask::prepare()
-{
-    if(task)
-    {
-        task->prepare();
-    }
-}
 
-TaskExecutor::TaskExecutor()
-    : execute_function(execute_task),execute_function2(execute_task2)
+
+TaskExecutorPipeline::TaskExecutorPipeline()
+    : execute_function_pipeline(execute_task_pipeline)
 {
 }
-
-TaskExecutor &TaskExecutor::get()
+TaskExecutorPipeline &TaskExecutorPipeline::get()
 {
-    static TaskExecutor executor;
+    static TaskExecutorPipeline executor;
     return executor;
 }
+
 } // namespace graph
 } // namespace arm_compute

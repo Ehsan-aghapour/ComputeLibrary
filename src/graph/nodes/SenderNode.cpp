@@ -68,7 +68,7 @@ TensorDescriptor SenderNode::configure_output(size_t idx) const
 
 NodeType SenderNode::type() const
 {
-    return NodeType::Output;
+    return NodeType::Sender;
 }
 
 void SenderNode::accept(INodeVisitor &v)
