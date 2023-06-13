@@ -31,7 +31,8 @@ namespace arm_compute
 namespace graph
 {
 ReceiverNode::ReceiverNode(TensorDescriptor desc)
-    : _desc(std::move(desc))
+		: _desc(desc)
+    //: _desc(std::move(desc))
 {
     _outputs.resize(1, NullTensorID);
     receiver_tensor=new TensorPipelineReceiver();
@@ -43,9 +44,11 @@ bool ReceiverNode::forward_descriptors()
     {
         Tensor *t = output(0);
         ARM_COMPUTE_ERROR_ON(t == nullptr);
+        //std::cerr<<"Tensor receiver: "<<t<<std::endl;
         t->desc() = configure_output(0);
         //Add the tensor pointer into the TensorPipelineReceiver
         receiver_tensor->set_tensor(t);
+        receiver_tensor->set_graph_id(_graph->id());
         return true;
     }
     return false;

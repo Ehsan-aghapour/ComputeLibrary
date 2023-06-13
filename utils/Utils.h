@@ -464,7 +464,6 @@ public:
             {
                 ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != _shape[i], "Tensor dimensions mismatch");
             }
-
             switch(tensor.info()->data_type())
             {
                 case arm_compute::DataType::QASYMM8:
@@ -481,7 +480,7 @@ public:
                     else
                     {
                         // If tensor has padding or is in fortran order accessing tensor elements through execution window.
-                        Window             window;
+                    	Window             window;
                         const unsigned int num_dims = _shape.size();
                         if(_fortran_order)
                         {
@@ -507,7 +506,6 @@ public:
                             }
                         }
                         window.use_tensor_dimensions(permuted_shape);
-
                         execute_window_loop(window, [&](const Coordinates & id)
                         {
                             Coordinates dst(id);

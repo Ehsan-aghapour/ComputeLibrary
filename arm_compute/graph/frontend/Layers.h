@@ -310,8 +310,10 @@ public:
         std::move(rest_sub_streams)...);
 
         //Ehsan
+        std::cerr<<"Concat layer, substreams\n";
         for (unsigned int i=0;i<_sub_streams.size();i++){
-        	input_nodes.push_back( std::make_pair(_sub_streams[i]->get_tail_p(), _sub_streams[i]->get_graph_id_p()));
+        	std::cerr<<_sub_streams[i]->tail_node()<<" "<<_sub_streams[i]->get_tail_graph_id()<<std::endl;
+        	input_nodes.push_back( std::make_pair(_sub_streams[i]->tail_node(), _sub_streams[i]->get_tail_graph_id()));
         }
     }
     //Ehsan
@@ -346,7 +348,7 @@ public:
 
         //Ehsan
         for (unsigned int i=0;i<_sub_streams.size();i++){
-			input_nodes.push_back( std::make_pair(_sub_streams[i]->get_tail_p(), _sub_streams[i]->get_graph_id_p()));
+			input_nodes.push_back( std::make_pair(_sub_streams[i]->tail_node(), _sub_streams[i]->get_tail_graph_id()));
 		}
     }
     /** Construct a concat layer
@@ -360,7 +362,7 @@ public:
         _sub_streams.push_back(std::make_unique<SubStream>(std::move(sub_stream)));
         //Ehsan
         for (unsigned int i=0;i<_sub_streams.size();i++){
-			input_nodes.push_back( std::make_pair(_sub_streams[i]->get_tail_p(), _sub_streams[i]->get_graph_id_p()));
+			input_nodes.push_back( std::make_pair(_sub_streams[i]->tail_node(), _sub_streams[i]->get_tail_graph_id()));
 		}
     }
     NodeID create_layer(IStream &s) override
@@ -382,6 +384,7 @@ public:
                     const auto tail_node = s.graph().node(ss->tail_node());
                     if(tail_node != nullptr && tail_node->type() != NodeType::Output)
                     {
+                    	std::cerr<<"substream tailnode:"<<ss->tail_node()<<" on graph: "<<ss->get_tail_graph_id()<<"\n";
                         nodes.push_back({ ss->tail_node(), 0 });
                     }
                 }
@@ -700,8 +703,8 @@ public:
         : _ss0(std::move(sub_stream0)), _ss1(std::move(sub_stream1)), _op(op)
     {
         //Ehsan
-		input_nodes.push_back( std::make_pair(_ss0.get_tail_p(), _ss0.get_graph_id_p()));
-		input_nodes.push_back( std::make_pair(_ss1.get_tail_p(), _ss1.get_graph_id_p()));
+		input_nodes.push_back( std::make_pair(_ss0.tail_node(), _ss0.get_tail_graph_id()));
+		input_nodes.push_back( std::make_pair(_ss1.tail_node(), _ss1.get_tail_graph_id()));
 
     }
     //Ehsan

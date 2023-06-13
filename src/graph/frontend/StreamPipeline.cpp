@@ -40,10 +40,10 @@ void StreamPipeline::set_common_params(arm_compute::utils::CommonGraphParams  _c
 	common_params=_common_params;
 }
 StreamPipeline::StreamPipeline(size_t id, std::string _name)
-    : _manager(),  num_graphs(0), name(std::move(_name)), current_layer(0)
+    : _manager(),  num_graphs(0), name(std::move(_name))//, current_layer(0)
 {
 	std::cerr<<"hey\n";
-	graph_id=0;
+	tail_graph_id=0;
 }
 
 
@@ -70,11 +70,13 @@ cpu_set_t* StreamPipeline::set_cores(cpu_set_t *set,char cluster){
 	CPU_ZERO(set);
 	if(cluster=='L'){
 		for(int i=0;i<common_params.little_cores;i++){
+			//std::cerr<<"set core "<<i<<std::endl;
 			CPU_SET(i,set);
 		}
 	}
 	if(cluster=='B'){
 		for(int i=common_params.little_cores;i<common_params.total_cores;i++){
+			//std::cerr<<"set core "<<i<<std::endl;
 			CPU_SET(i,set);
 		}
 	}
@@ -83,11 +85,29 @@ cpu_set_t* StreamPipeline::set_cores(cpu_set_t *set,char cluster){
 
 void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::set<int> *b, int blocking)
 {
-
+	int gid=3;
+	int nodid=16;
+	//gid=0;
+	//nodid=42;
+	Graph& gg=*(_gs[gid].get());
+	auto nn=gg.node(nodid);
+	std::cerr<<"name:"<<nn->name()<<std::endl;
+	int in_nn=nn->num_inputs();
+	std::cerr<<"num inputs:"<<in_nn<<std::endl;
+	int inedges=nn->input_edges().size();
+	for(int i=0;i<inedges;i++){
+		std::cerr<<nn->input(i)->desc().shape<<std::endl;
+	}
+	int out_nn=nn->num_outputs();
+	std::cerr<<"num outputs:"<<out_nn<<std::endl;
+	//int outedges=nn->output_edges().size();
+	std::cerr<<nn->output(0)->desc().shape<<std::endl;
+	std::string test;
+	//std::cin>>test;
 	std::cerr<<"Finalizing all graph\n";
 	_manager.set_num_graphs(num_graphs);
 	std::vector<std::thread> threads;
-	bool p=true;
+	bool p=false;
 	if(p){
 		for(auto i=0;i<_gs.size();i++){
 
@@ -104,13 +124,13 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 			finalize_parallel(i,b,blocking);
 		}
 	}
-	for (int c=0;c<_ctxs.size();c++){
-		std::cerr<<"context:\n";
+	/*for (int c=0;c<_ctxs.size();c++){
+		//std::cerr<<"context:\n";
 		for(const auto& elem : _ctxs[c].memory_managers())
 		{
 		   std::cout << std::to_string((int)elem.first) << " " << std::to_string((int)elem.second.target)  << "\n";
 		}
-	}
+	}*/
 }
 
 void StreamPipeline::finalize_parallel(int i,std::set<int> *b, int blocking)
@@ -122,7 +142,7 @@ void StreamPipeline::finalize_parallel(int i,std::set<int> *b, int blocking)
 	if(PE[i]=='L')
 		cluster='L';
 	std::stringstream stream;
-	stream<<"Thread "<<i<<" setting affinity to "<<cluster<<std::endl;
+	stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
 	std::cerr<<stream.str();
 	stream.str(std::string());
 	set_cores(&set,cluster);
@@ -192,7 +212,17 @@ void StreamPipeline::warmup(int nn)
 
 void StreamPipeline::run_parallel(int i, int n)
 {
+	cpu_set_t set;
+	char cluster='B';
+	if(PE[i]=='L')
+		cluster='L';
 	std::stringstream stream;
+	stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
+	std::cerr<<stream.str();
+	stream.str(std::string());
+	set_cores(&set,cluster);
+	ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
+	stream.str(std::string());
 	stream<<"runing graph "<<i<<std::endl;
 	std::cerr<<stream.str();
     _manager.execute_graph(*_gs[i],n);
@@ -201,7 +231,17 @@ void StreamPipeline::run_parallel(int i, int n)
 
 void StreamPipeline::run_w_parallel(int i, int n)
 {
+	cpu_set_t set;
+	char cluster='B';
+	if(PE[i]=='L')
+		cluster='L';
 	std::stringstream stream;
+	stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
+	std::cerr<<stream.str();
+	stream.str(std::string());
+	set_cores(&set,cluster);
+	ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
+	stream.str(std::string());
 	stream<<"runing graph "<<i<<std::endl;
 	std::cerr<<stream.str();
     _manager.warmup_and_execute_graph(*_gs[i],n);
@@ -236,13 +276,13 @@ void StreamPipeline::run(int n)
 
 void StreamPipeline::measure(int n)
 {
-	_manager.print_times(*_gs[graph_id], n);
+	_manager.print_times(*_gs[tail_graph_id], n);
 	//_manager.print_times(_g, n);
 }
 
 void StreamPipeline::reset()
 {
-	_manager.reset(*_gs[graph_id]);
+	_manager.reset(*_gs[tail_graph_id]);
 	//_manager.reset(_g);
 }
 
@@ -256,50 +296,63 @@ void StreamPipeline::reset()
 
 
 
-int StreamPipeline::target_graph(int layer){
-	for(int i=0; i<start_layer.size(); i++){
-		if(layer>=start_layer[i] && layer<=end_layer[i]){
-			return i;
-		}
-	}
-	return start_layer.size()-1;
-	//return -1;
-}
+
 
 void StreamPipeline::add_layer(ILayer &layer)
 {
+	std::cerr<<"StreamPipeline add_layer, on graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
     auto nid   = layer.create_layer(*this);
-    std::cerr<<"(streampipeline) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
+    std::cerr<<"Graph:"<<IStreamPipeline::_target_graph<<"  "<<_tail_node<<"->"<<nid<<std::endl;
     _tail_node=nid;
+    tail_graph_id=IStreamPipeline::_target_graph;
 }
 
 const Graph &StreamPipeline::graph() const
 {
 	//return _g;
-    return *(_gs[graph_id]);
+    return *(_gs[IStreamPipeline::_target_graph]);
 }
 
 Graph &StreamPipeline::graph()
 {
 	//return _g;
-    return *(_gs[graph_id]);
+    return *(_gs[IStreamPipeline::_target_graph]);
 }
 
 StreamPipeline & StreamPipeline::operator<<(ILayer &layer)
 {
-	std::cerr<<"(streampipeline) "<<current_layer<<" Add Layer:"<<layer.name()<<std::endl;
-	layer.add_input_node(this->get_tail_p(),this->get_graph_id_p());
-	next_layer(layer.get_input_nodes());
+	IStreamPipeline::_target_graph=target_graph(current_layer);
+	std::cerr<<"(streampipeline) "<<" << operator, layer: "<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
+	//Added by me to add input nodes of a layer into the input_nodes attribute of the layer for later that we want to check if the input nodes are inside this graph
+	layer.add_input_node(_tail_node,tail_graph_id);
+	/*Be careful that you shoud directly add _tail_node
+	  Because calling tail_node() function checks if there is mapped node in _target_graph for _tail_node and return that
+	  So if you want to use _tail_node() you should also use _target_graph
+	  So you need to check if it gives the mapped node then add that with _target graph, but if not (there is no mapped node in _target_graph) then use tail_graph_id
+	auto _n=node_map.find(std::make_pair(_tail_node, tail_graph_id), target_graph);
+	if (_n.second==tail_graph_id){
+		layer.add_input_node(_tail_node,tail_graph_id);
+		//or
+		//layer.add_input_node(tail_node(),get_tail_graph_id());
+	}
+	if (_n.second==_target_graph){
+		layer.add_input_node(_n.first,_n.second);
+		//or
+		//layer.add_input_node(tail_node(),_target_graph);
+	}
+	*/
+	//Check input nodes if they are not in this graph add transfer and/or receiver nodes
+	next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id);
     add_layer(layer);
     std::cerr<<"*******************************\n";
     return *this;
 }
 StreamPipeline & StreamPipeline::operator<<(ILayer &&layer)
 {
-
-	std::cerr<<"(streampipeline) "<<current_layer<<" Add Layer:"<<layer.name()<<std::endl;
-	layer.add_input_node(this->get_tail_p(),this->get_graph_id_p());
-	next_layer(layer.get_input_nodes());
+	IStreamPipeline::_target_graph=target_graph(current_layer);
+	std::cerr<<"(streampipeline) "<<" << operator, layer: "<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
+	layer.add_input_node(_tail_node,tail_graph_id);
+	next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id);
     add_layer(layer);
     std::cerr<<"*******************************\n";
     return *this;
@@ -353,17 +406,20 @@ StreamPipeline & StreamPipeline::operator<<(FastMathHint fast_math_hint)
     return *this;
 }
 
-/*NodeID StreamPipeline::tail_node(int target)
+/*NodeID StreamPipeline::maped_node(NodeID tail, int graph_id, int target_graph)
 {
-	return Tail_node[target];
+
+	auto _n=node_map.find(std::make_pair(tail, graph_id), target_graph);
+	return _n.first;
+	//return Tail_node[target];
 }*/
 
-NodeID StreamPipeline::tail_node()
+/*NodeID StreamPipeline::tail_node()
 {
-	std::cerr<<"(streampipeline) tail_node()- Tail_node: "<<_tail_node<<std::endl;
+	//std::cerr<<"(streampipeline) tail_node()- Tail_node: "<<_tail_node<<std::endl;
 	return _tail_node;
 
-}
+}*/
 void StreamPipeline::add_graph(int start, int end, char _PE, char _Host_PE){
     	int id=num_graphs;
     	num_graphs++;
@@ -402,71 +458,82 @@ void StreamPipeline::add_graph(int start, int end, char _PE, char _Host_PE){
     	std::cerr<<"Adding Graph"<<id<<" target "<<std::to_string((int)(target))<<" PE: "<<_PE<<
     			" Host PE: "<<_Host_PE<<" Layers: "<<start<<"-"<<end<<std::endl;
 }
-NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID*,int*>> input_nodes ){
+NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes, NodeID& last_tail_node, int& last_tail_graph ){
 	IStreamPipeline::_target_graph=target_graph(current_layer);
+	/*For creating the layer after the last node, in case that the layer has multiple layers which are from other graphs, then we need to change the tail node and tail graph of the stream
+	to the last node
+	std::pair<NodeID,int> last_node=std::make_pair(this->tail_node(),this->get_tail_graph_id());*/
+	//If this layer is starting layer of a subgraph
 	if (current_layer==start_layer[IStreamPipeline::_target_graph]){
 		_hints=all_hints[IStreamPipeline::_target_graph];
 		std::cerr<<"Starting Graph "<<IStreamPipeline::_target_graph<<" containing layers "<<start_layer[IStreamPipeline::_target_graph]<<"-"<<end_layer[IStreamPipeline::_target_graph]<<std::endl;
 	}
+	//If this layer is ending layer of a subgraph
 	if (current_layer==end_layer[IStreamPipeline::_target_graph]){
-		std::cerr<<"Ending layer of Graph "<<graph_id<<" containing layers "<<start_layer[graph_id]<<"-"<<end_layer[graph_id]<<std::endl;
+		std::cerr<<"Ending layer of Graph "<<IStreamPipeline::_target_graph<<" containing layers "<<start_layer[IStreamPipeline::_target_graph]<<"-"<<end_layer[IStreamPipeline::_target_graph]<<std::endl;
 	}
 
-	for(auto input_node:input_nodes){
+	//check input nodes of this layer to see in which subgraph they are
+	for(auto &input_node:input_nodes){
 		//If input node is in another graph
-		std::cerr<<"input node id: "<<*(input_node.first)<<" graph: "<<*(input_node.second)<<std::endl;
-		if((_gs[IStreamPipeline::_target_graph])->node(*(input_node.first))==nullptr && *(input_node.first)!=EmptyNodeID){
+		std::cerr<<"input node id: "<<input_node.first<<" graph: "<<input_node.second<<std::endl;
+		//if((_gs[IStreamPipeline::_target_graph])->node(input_node.first)==nullptr && input_node.first!=EmptyNodeID){
+		if(input_node.second!=IStreamPipeline::_target_graph){
 			//Find the node that is mapped to the input node
-			std::cerr<<"The input node "<<*(input_node.first)<<"-"<<*(input_node.second)<<" is not in target graph: "<<IStreamPipeline::_target_graph<<std::endl;
+			std::cerr<<"The input node "<<input_node.first<<"-"<<input_node.second<<" is not in target graph: "<<IStreamPipeline::_target_graph<<std::endl;
 			auto mapped_node=node_map.find(input_node, IStreamPipeline::_target_graph);
-			//No node mapped to input node need to create a T node in origin graph and R node in _target_graph
+			//No node mapped to input node; need to create a T node in origin graph and R node in _target_graph
 			//and mapped them to the input_node (to track node mapping)
 			if ((mapped_node.second)==-1){
 				//create a T node and append to the node key.first in graph key.second (and add it to mapping: node_map.insert(key,std::make_pair(node_id,key.second))))
 				//create a R node in new graph (and add it to mapping: node_map.insert(key,std::make_pair(node_id,new__target_graph)) )
 				// Add Transmitter to the previous graph containing input node for this node
-				std::cerr<<"Input node for the layer "<<current_layer<<" is in graph: "<<*(input_node.second)<<
+				std::cerr<<"Input node for the layer "<<current_layer<<" is in graph: "<<input_node.second<<
 						" Adding Transmitter to that graph\n";
 
 
 				//ITensorAccessorUPtr _accessor=get_Sender_accessor(common_params);
 				//GraphBuilder::add_sender_node(*(_gs[i]), common_params_node, input, std::move(_accessor));
-				int g_id=*(input_node.second);
+				int g_id=input_node.second;
 				Graph& g=*(_gs[g_id].get());
 				//NodeParams  common_params_node = { "Transmitter", hints().target_hint };
 
-				std::string node_name=g.node(*(input_node.first))->name();
-				NodeIdxPair input         = { *(input_node.first), 0 };
+				std::string node_name=g.node(input_node.first)->name();
+				NodeIdxPair input         = { input_node.first, 0 };
 				NodeParams  common_params_node = { "Sender_"+node_name, all_hints[g_id].target_hint };
 				common_params.labels="Sender";
 				NodeID tail_sender=GraphBuilder::add_sender_node(g, common_params_node, input);
 				SenderNode* s=dynamic_cast<SenderNode*>(g.node(tail_sender));
-				node_map.insert(std::make_pair(*(input_node.first),*(input_node.second)),std::make_pair(tail_sender,g_id));
+				node_map.insert(std::make_pair(input_node.first,input_node.second),std::make_pair(tail_sender,g_id));
 				//Add Receiver Node to the next graph
 				common_params_node = { "Receiver_"+node_name, all_hints[IStreamPipeline::_target_graph].target_hint };
 				NodeID tail_receiver = GraphBuilder::add_receiver_node(*(_gs[IStreamPipeline::_target_graph]), common_params_node, s->get_sender_tensor()->get_tensor()->desc());
 				ReceiverNode* r=dynamic_cast<ReceiverNode*>(_gs[IStreamPipeline::_target_graph]->node(tail_receiver));
-				node_map.insert(std::make_pair(*(input_node.first),*(input_node.second)),std::make_pair(tail_receiver,IStreamPipeline::_target_graph));
-				*(input_node.first)=tail_receiver;
-				*(input_node.second)=IStreamPipeline::_target_graph;
+				node_map.insert(std::make_pair(input_node.first,input_node.second),std::make_pair(tail_receiver,IStreamPipeline::_target_graph));
+				//Moving the input_node from prev graph into equivalent node in this graph
+				input_node.first=tail_receiver;
+				input_node.second=IStreamPipeline::_target_graph;
+
 				s->get_sender_tensor()->add_receiver(r->get_receiver_tensor());
+				std::cerr<<"Add sender: "<<tail_sender<<" receiver node: "<<tail_receiver<<std::endl;
 			}
 			//There is a mapped node in the target graph for the input node which is originally from other graphs
 			else if((mapped_node.second)==IStreamPipeline::_target_graph){
 				//change the tail node from original graph to mapped node in target graph
-				*(input_node.first)=mapped_node.first;
-				*(input_node.second)=mapped_node.second;
+				input_node.first=mapped_node.first;
+				input_node.second=mapped_node.second;
 			}
-			else if((mapped_node.second)==*(input_node.second)){
+			//When the R node is not in target graph(but there is T node in source graph) the mapped node is T node in source graph
+			else if((mapped_node.second)==input_node.second){
 				//create a R node in new graph (and add it to mapping: node_map.insert(key,std::make_pair(node_id,new_graph_id)) )
 				//add R node into the T node(v.first) of origin graph graph[v.second].node(v.first).add_receiver(R);
-				std::cerr<<"Input node for the layer "<<current_layer<<" is in graph: "<<*(input_node.second)<<
+				std::cerr<<"Input node for the layer "<<current_layer<<" is in graph: "<<input_node.second<<
 						"and there is a sender node (mapped) for that node\n";
-				int g_id=*(input_node.second);
+				int g_id=input_node.second;
 				Graph& g=*(_gs[g_id].get());
 				SenderNode* s=dynamic_cast<SenderNode*>(g.node(mapped_node.first));
 				//NodeParams  common_params_node = { "Receiver", hints().target_hint };
-				std::string node_name=g.node(*(input_node.first))->name();
+				std::string node_name=g.node(input_node.first)->name();
 				NodeParams  common_params_node = { "Receiver_"+node_name, all_hints[IStreamPipeline::_target_graph].target_hint };
 				common_params.labels="Receiver";
 				//ITensorAccessorUPtr _accessor=get_Sender_accessor(common_params);
@@ -474,21 +541,35 @@ NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID*,int*>> input_nod
 				//Add Receiver Node to the next graph
 
 				NodeID tail_receiver = GraphBuilder::add_receiver_node(*(_gs[IStreamPipeline::_target_graph]), common_params_node, s->get_sender_tensor()->get_tensor()->desc());
-				node_map.insert(std::make_pair(*(input_node.first),*(input_node.second)),std::make_pair(tail_receiver,IStreamPipeline::_target_graph));
-				*(input_node.first)=tail_receiver;
-				*(input_node.second)=IStreamPipeline::_target_graph;
+				node_map.insert(std::make_pair(input_node.first,input_node.second),std::make_pair(tail_receiver,IStreamPipeline::_target_graph));
+				input_node.first=tail_receiver;
+				input_node.second=IStreamPipeline::_target_graph;
 				ReceiverNode* r=dynamic_cast<ReceiverNode*>(_gs[IStreamPipeline::_target_graph]->node(tail_receiver));
 				s->get_sender_tensor()->add_receiver(r->get_receiver_tensor());
 			}
 			else{
 				std::cerr<<"Error: Mapped Node\n";
 			}
+
 		}
 	}
 
-	std::cerr<<"Current layer: "<<current_layer<<std::endl;
+	//std::cerr<<"Current layer: "<<current_layer<<std::endl;
+
+	//If the last node was in another graph then we should change the tail_node and tail_graph of the stream(streampipeline or substream)
+	//be aware that when adding sender and receiver nodes (GraphBuilder::add_receiver_node) you directly add the nodes into the graph
+	//rather than adding with add_layer of the stream, so the tail node and tail graph will not change.
+	//std::cerr<<"next function tail node: "<<this->tail_node()<<" and tail graph: "<<this->tail_graph_id<<std::endl;
+	std::pair<NodeID,int> mapped_node=std::make_pair(last_tail_node,last_tail_graph);
+	if (last_tail_graph!=IStreamPipeline::_target_graph){
+		mapped_node=node_map.find(mapped_node, IStreamPipeline::_target_graph);
+		last_tail_node=mapped_node.first;
+		last_tail_graph=mapped_node.second;
+	}
+
+
 	current_layer++;
-	return 0;
+	return mapped_node.first;
 }
 void StreamPipeline::prnt(){
 	std::cerr<<"hi\n";

@@ -76,13 +76,13 @@ void CLTensorHandle::release_if_unused()
 
 const arm_compute::ITensor &CLTensorHandle::tensor() const
 {
-	std::cerr<<"const tensor in CL\n";
+	//std::cerr<<"const tensor in CL\n";
     return _tensor;
 }
 
 arm_compute::ITensor &CLTensorHandle::tensor()
 {
-	std::cerr<<"tensor in CL\n";
+	//std::cerr<<"tensor in CL\n";
     return _tensor;
 }
 

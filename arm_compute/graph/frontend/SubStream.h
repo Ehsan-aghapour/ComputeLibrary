@@ -58,9 +58,18 @@ public:
 	void add_layer(ILayer &layer) override;
 	Graph       &graph() override;
 	const Graph &graph() const override;
+
+
 	//Ehsan
+
 	SubStream &operator<<(ILayer &layer);
 	SubStream &operator<<(ILayer &&layer);
+	/*NodeID tail_node() override{
+		return _tail_node;
+	}
+	NodeID tail_node(int target_graph) override{
+		return _s.maped_node(_tail_node, tail_graph_id, target_graph);
+	}*/
 
 private:
     IStream &_s; /**< Parent stream (assume that the lifetime of the parent is longer) */

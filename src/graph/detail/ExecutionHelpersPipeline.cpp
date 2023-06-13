@@ -94,17 +94,17 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
                                << std::endl);
          */
 
-        std::cerr<<"node name: "<<node->name()<<std::endl;
+        //std::cerr<<"node name: "<<node->name()<<std::endl;
         if(node != nullptr)
         {
-        	std::cerr<<"node is not null\n";
+        	//std::cerr<<"node is not null\n";
             Target                     assigned_target = node->assigned_target();
             backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
             std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
-            std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
+            //std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
             if(func != nullptr || is_utility_node(node))
             {
-            	std::cerr<<"adding to tasks\n";
+            	std::cerr<<node->name()<<" adding to tasks\n";
                 workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
             }
         }
@@ -126,12 +126,15 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 			//std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
         	ReceiverNode* rec=dynamic_cast<ReceiverNode*>(node.get());
         	rec->get_receiver_tensor()->set_name(rec->common_node_params().name);
+        	rec->get_receiver_tensor()->set_tensor(rec->output(0));
 			workload.receivers.push_back(rec->get_receiver_tensor());
 		}
         if(node != nullptr && node->type() == NodeType::Sender)
 		{
         	SenderNode* sender=dynamic_cast<SenderNode*>(node.get());
         	sender->get_sender_tensor()->set_name(sender->common_node_params().name);
+        	//As pm (pass manager in graph manager will change tensor ids it is required to again set them here)
+        	sender->get_sender_tensor()->set_tensor(sender->input(0));
 			workload.senders.push_back(sender->get_sender_tensor());
 			//Ehsan
 			//std::cout<<"\noutput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
@@ -180,9 +183,20 @@ bool call_all_receivers(ExecutionWorkload &workload)
     //Ehsan: size of inputs is 1
     //std::string c;
 
-    std::cerr<<"number of receivers: "<<workload.receivers.size()<<std::endl;
+    //std::cerr<<"number of receivers: "<<workload.receivers.size()<<std::endl;
     //std::string t;
     //std::cin>>t;
+
+    //First just mark receivers as ready then try to receive data one by one (because receive data waits at first receiver till sender just send data
+    std::for_each(std::begin(workload.receivers), std::end(workload.receivers), [&](TensorPipelineReceiver * receiver_tensor)
+	{
+#if My_print > 0
+		std::cerr<<"set Receiver ready"<<std::endl;
+		std::cerr<<receiver_tensor->desc().shape <<std::endl;
+#endif
+		receiver_tensor->set_receiver_ready();
+	});
+
     std::for_each(std::begin(workload.receivers), std::end(workload.receivers), [&](TensorPipelineReceiver * receiver_tensor)
     {
 #if My_print > 0
@@ -236,7 +250,6 @@ void call_all_tasks_pipeline(ExecutionWorkload &workload,int nn)
     ARM_COMPUTE_ERROR_ON(workload.ctx == nullptr);
 
     // Acquire memory for the transition buffers
-    std::cerr<<"bmem\n";
     for(auto &mm_ctx : workload.ctx->memory_managers())
     {
         if(mm_ctx.second.cross_group != nullptr)
@@ -244,7 +257,6 @@ void call_all_tasks_pipeline(ExecutionWorkload &workload,int nn)
             mm_ctx.second.cross_group->acquire();
         }
     }
-    std::cerr<<"amem\n";
     // Execute tasks
 #if streamline > 0
     ANNOTATE_SETUP;
@@ -260,14 +272,11 @@ void call_all_tasks_pipeline(ExecutionWorkload &workload,int nn)
     for(auto &task : workload.tasks)
     {
     	ii++;
-    	//wait until last task finish
-    	if(ii==workload.tasks.size()){
-    		//task.block=1;
-    		task(1);
-    	}
     	std::cerr<<ii<<"  "<<task.node->name()<<std::endl;
-    	if(nn==0)
+
+    	if(nn==0 && ii<workload.tasks.size()){
     		task();
+    	}
     	else{
 #if streamline > 0
     		ANNOTATE_CHANNEL_COLOR(cc,((c%2)==0)?ANNOTATE_GREEN:ANNOTATE_YELLOW, (std::to_string(c)+" "+task.node->name()).c_str() );

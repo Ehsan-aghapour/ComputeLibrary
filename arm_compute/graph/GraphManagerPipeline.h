@@ -89,6 +89,9 @@ public:
     //Ehsan
     void execute_graph(Graph &graph);
     void execute_graph(Graph &graph, int nn=0);
+    //if there is no buffer in between stages
+    void warmup_and_execute_graph_no_buffer(Graph &graph, int nn);
+    //If you want to buffer output of a stage if next stage is busy:
     void warmup_and_execute_graph(Graph &graph, int nn);
     //void execute_graph(Graph &graph, bool annotate, int nn=0);
     //void execute_graph(Graph &graph, double &in, double &task, double &out, int nn=0);
@@ -159,6 +162,7 @@ private:
 	std::condition_variable 				condVar;
 	bool									ready=false;
 	int										c=0;
+	std::atomic<bool>						pipeline_ready;
 	std::vector<std::string>				input_images;
 };
 } // namespace graph

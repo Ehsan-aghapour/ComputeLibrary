@@ -85,19 +85,22 @@ void allocate_all_input_tensors(INode &node)
 {
     for(unsigned int i = 0; i < node.num_inputs(); ++i)
     {
-    	std::cerr<<"Allocate all inputs of node: "<<node.name()<<std::endl;
         Tensor *tensor = node.input(i);
+
         if(tensor != nullptr && !tensor->bound_edges().empty())
         {
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
 #if My_print > 0
             //Ehsan
-            std::cout<<"\nExecutionHelpers, Allocating input tensor for outpu node, node shape:"<<tensor->handle()->tensor().info()->tensor_shape()
+            if(node.type()!=NodeType::Const)
+            	std::cerr<<i<<"-->ExecutionHelpers, Allocating input tensor for outpu node, node shape:"<<tensor->handle()->tensor().info()->tensor_shape()
             		<<" tensor shape:"<<tensor->desc().shape
 					<<std::endl;
 #endif
             tensor->handle()->allocate();
         }
+        if(node.type()!=NodeType::Const)
+        	std::cerr<<i<<" input tesonrs Done\n\n";
     }
 }
 
@@ -105,19 +108,21 @@ void allocate_all_output_tensors(INode &node)
 {
     for(unsigned int i = 0; i < node.num_outputs(); ++i)
     {
-    	std::cerr<<"Allocate all outputs of node: "<<node.name()<<std::endl;
         Tensor *tensor = node.output(i);
         if(tensor != nullptr && !tensor->bound_edges().empty())
         {
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
 #if My_print > 0
             //Ehsan
-            std::cout<<"\nExecutionHelpers, Allocating output tensor for input and const node, CLTensor shape:"<<tensor->handle()->tensor().info()->tensor_shape()
+            if(node.type()!=NodeType::Const)
+            	std::cerr<<i<<"->ExecutionHelpers, Allocating output tensor for input and const node, CLTensor shape:"<<tensor->handle()->tensor().info()->tensor_shape()
             		<<" tensor shape:"<<tensor->desc().shape
 					<<std::endl;
 #endif
             tensor->handle()->allocate();
         }
+        if(node.type()!=NodeType::Const)
+        	std::cerr<<i<<" output tensors Done\n\n";
     }
 }
 
@@ -240,6 +245,9 @@ void release_unused_tensors(Graph &g)
     {
         if(tensor != nullptr && tensor->handle() != nullptr)
         {
+        	/*if(!tensor->handle()->tensor().is_used()){
+        		std::cerr<<tensor.get()->id()<<" - "<<tensor.get()->desc().shape[0]<<" releaaaaasing\n";
+        	}*/
             tensor->handle()->release_if_unused();
         }
     }
@@ -277,8 +285,8 @@ bool call_all_input_node_accessors(ExecutionWorkload &workload)
     //Ehsan: size of inputs is 1
     //std::string c;
     std::stringstream stream;
-	stream<<"size of input: "<<workload.inputs.size()<<std::endl;
-	std::cerr<<stream.str();
+	//stream<<"size of input: "<<workload.inputs.size()<<std::endl;
+	//std::cerr<<stream.str();
 	stream.str(std::string());
     //std::string t;
     //std::cin>>t;

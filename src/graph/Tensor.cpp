@@ -124,7 +124,7 @@ bool Tensor::my_call_accessor()
     //std::cerr<<"*******my_call_accessor************************\n\n";
     ////ANNOTATE_CHANNEL_END(c++);
     // Return in case of null backend buffer
-    std::cerr<<typeid(_handle->tensor()).name()<<std::endl;
+    //std::cerr<<typeid(_handle->tensor()).name()<<std::endl;
     if(_handle->tensor().buffer() == nullptr)
     {
         return false;
@@ -135,7 +135,7 @@ bool Tensor::my_call_accessor()
     //std::string cc;
     //std::cout<<"salammm\n";
     ////start=std::chrono::high_resolution_clock::now();
-    std::cerr<<"accessor\n";
+    //std::cerr<<"accessor\n";
     bool retval = _accessor->access_tensor(_handle->tensor());
     ////finish=std::chrono::high_resolution_clock::now();
     ////std::cerr<<"access: "<<(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count())<<std::endl;

@@ -504,7 +504,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     //std::string mtd=cnmethods[int(conv_algorithm)];
     //std::cout<<"function helpers create convolution layer, node "<<node.name()<<" Convolution method: "<<mtd<<std::endl;
 
-    #if My_print > -1
+    #if My_print > 0
     //Ehsan
     std::cout<<"\nFunctionHelpers.cpp::create_convolution_layer(node,ctx)\n "
     		<<" Node name:"<<node.name()

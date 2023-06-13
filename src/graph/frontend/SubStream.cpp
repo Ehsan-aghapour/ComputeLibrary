@@ -36,16 +36,19 @@ SubStream::SubStream(IStream &s)
     : _s(s)
 {
     _hints     = s.hints();
-    std::cerr<<"new sub stream with tail node: "<<s.tail_node()<<std::endl;
+    std::cerr<<"new sub stream with tail node: "<<s.tail_node()<<" and tail graph: "<<s.get_tail_graph_id()<<std::endl;
     _tail_node = s.tail_node();
-    graph_id=s.get_graph_id();
+    tail_graph_id=s.get_tail_graph_id();
+    //tail_graph_id=IStreamPipeline::_target_graph;
 }
 
 void SubStream::add_layer(ILayer &layer)
 {
+	std::cerr<<"(substream) "<<" Add Layer:"<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
     auto nid   = layer.create_layer(*this);
-    std::cerr<<"(SubStream) Adding layer "<<layer.name()<<" "<<_tail_node<<"->"<<nid<<std::endl;
+    std::cerr<<"Graph:"<<IStreamPipeline::_target_graph<<"  "<<_tail_node<<"->"<<nid<<std::endl;
     _tail_node = nid;
+    tail_graph_id=IStreamPipeline::_target_graph;
 }
 
 const Graph &SubStream::graph() const
@@ -62,19 +65,20 @@ Graph &SubStream::graph()
 
 SubStream & SubStream::operator<<(ILayer &layer)
 {
-
-	layer.add_input_node(this->get_tail_p(),this->get_graph_id_p());
-	_s.next_layer(layer.get_input_nodes());
-	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
+	IStreamPipeline::_target_graph=target_graph(current_layer);
+	std::cerr<<"(substream) "<<" << operator, layer: "<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
+	layer.add_input_node(_tail_node,tail_graph_id);
+	_s.next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id);
     add_layer(layer);
     std::cerr<<"*******************************\n";
     return *this;
 }
 SubStream & SubStream::operator<<(ILayer &&layer)
 {
-	layer.add_input_node(this->get_tail_p(),this->get_graph_id_p());
-	_s.next_layer(layer.get_input_nodes());
-	std::cerr<<"(SubStream) Layer Name:"<<layer.name()<<std::endl;
+	IStreamPipeline::_target_graph=target_graph(current_layer);
+	std::cerr<<"(substream) "<<" << operator, layer: "<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
+	layer.add_input_node(_tail_node,tail_graph_id);
+	_s.next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id);
 	add_layer(layer);
 	std::cerr<<"*******************************\n";
     return *this;

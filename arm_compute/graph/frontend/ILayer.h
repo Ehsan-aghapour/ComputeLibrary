@@ -70,8 +70,10 @@ public:
     }
 
     //Ehsan
-    std::vector<std::pair<NodeID*,int*>> get_input_nodes(){return input_nodes;};
-    void add_input_node(NodeID* node, int* graph_id){ input_nodes.push_back(std::make_pair(node,graph_id));};
+    //std::vector<std::pair<NodeID*,int*>> get_input_nodes(){return input_nodes;};
+    std::vector<std::pair<NodeID,int>>& get_input_nodes(){return input_nodes;};
+    void add_input_node(NodeID node, int graph_id){ input_nodes.push_back(std::make_pair(node,graph_id));};
+    void add_input_node_ptr(NodeID node, int graph_id){ input_nodes.push_back(std::make_pair(node,graph_id));};
     /*virtual std::vector<std::unique_ptr<SubStream>> get_sub_streams();
 
     void restore_tail_nodes(std::vector<std::unique_ptr<SubStream>> sub_streams){
@@ -90,7 +92,8 @@ protected:
     std::string _name = {};
 
     //Ehsan
-    std::vector<std::pair<NodeID*,int*>> input_nodes;
+    //pair of NodeId and graphID
+    std::vector<std::pair<NodeID,int>> input_nodes;
 };
 } // namespace frontend
 } // namespace graph

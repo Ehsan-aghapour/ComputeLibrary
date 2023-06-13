@@ -309,14 +309,10 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 void NEGEMM::run()
 {
     prepare();
-    std::cerr<<"0\n";
     MemoryGroupResourceScope scope_mg(_memory_group);
-    std::cerr<<"1\n";
     if(_asm_glue->is_configured())
     {
-    	std::cerr<<"2\n";
         _asm_glue->run();
-        std::cerr<<"2-1\n";
         if(_run_alpha_scale)
         {
             _alpha_scale_func.run();
@@ -325,7 +321,6 @@ void NEGEMM::run()
 
     else
     {
-    	std::cerr<<"3\n";
         if(!_run_vector_matrix_multiplication)
         {
             // Run interleave kernel
@@ -337,15 +332,12 @@ void NEGEMM::run()
                 NEScheduler::get().schedule(_transpose_kernel.get(), Window::DimY);
             }
         }
-        std::cerr<<"4\n";
         NEScheduler::get().schedule(_mm_kernel.get(), _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
-        std::cerr<<"5\n";
         // Run bias addition kernel
         if(_run_bias_addition)
         {
             _add_bias.run();
         }
-        std::cerr<<"6\n";
     }
 
     // Run matrix addition kernel
@@ -353,13 +345,11 @@ void NEGEMM::run()
     {
         NEScheduler::get().schedule(_ma_kernel.get(), Window::DimY);
     }
-    std::cerr<<"7\n";
     // Run activation function
     if(_run_activation)
     {
         _activation_func.run();
     }
-    std::cerr<<"8\n";
 }
 
 void NEGEMM::prepare()

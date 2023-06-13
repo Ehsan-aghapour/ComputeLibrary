@@ -50,82 +50,6 @@ namespace frontend
 class ILayer;
 
 
-class NodeMap{
-public:
-    void insert(std::pair<NodeID,int> key, std::pair<NodeID,int> value ){
-        if (mm.find(key)!=mm.end()){
-            auto vv=mm[key];
-            bool exist=false;
-            for(auto v:vv){
-                if (v==value){
-                    std::cerr<<"Already exist!\n";
-                    exist=true;
-                }
-            }
-            if(!exist){
-                mm[key].push_back(value);
-            }
-        }
-        else{
-            std::vector<std::pair<NodeID,int>> vv;
-            vv.push_back(value);
-            mm.insert(std::make_pair(key,vv) );
-        }
-    }
-
-    std::pair<int,int> find(std::pair<NodeID,int> key, int target_graph){
-        std::pair<NodeID,int> r={0,-2};
-        if(mm.find(key)==mm.end()){
-            std::cerr<<"There is no mapping for node graph \n";
-            r={0,-1};
-            //create a T node and append to the node key.first in graph key.second (add it to mapping also)
-            //create a R node in new graph (and add it to mapping)
-        }
-        else{
-            auto maps=mm[key];
-            bool exist=false;
-            for(auto v:maps){
-                if(v.second==target_graph){
-                    std::cerr<<"There is a mapped node in this graph\n";
-                    exist=true;
-                    r=v;
-                    //change the tail node from key.first to v.first
-                    break;
-                }
-            }
-            if(!exist){
-                for(auto v:maps){
-                    if(v.second==key.second){
-                        std::cerr<<"The T node in that graph is node: "<<v.first<<"\n";
-                        r=v;
-                        //create a R node in new graph (and add it to mapping)
-                        //add R node into the T node(v.first) of origin graph
-                        break;
-                    }
-                }
-            }
-        }
-        std::cerr<<"mappd node for node "<<key.first<<" in graph "<<key.second<<" is node "<<r.first<<" in graph "<<r.second<<std::endl;
-        return r;
-    }
-    std::pair<int,int> find(std::pair<NodeID*,int*> key, int target_graph){
-    	return find(std::make_pair(*(key.first), *(key.second)), target_graph);
-    }
-
-
-    void print(){
-        for(auto entry:mm){
-            std::cerr<<"\n\n\n"<<entry.first.first<<" in graph "<<entry.first.second<<std::endl;
-            for(auto v: entry.second){
-                std::cerr<<"equals to: "<<v.first<<" in graph "<<v.second<<std::endl;
-            }
-        }
-    }
-
-
-private:
-    std::map< std::pair<NodeID,int> , std::vector< std::pair<NodeID,int>> > mm;
-};
 
 
 /** Stream frontend class to construct simple graphs in a stream fashion */
@@ -223,15 +147,19 @@ public:
     int get_next_id(){
     	return num_graphs;
     }
-    NodeID tail_node() override;
+    //NodeID tail_node() override;
     //NodeID tail_node(int target);
+    //NodeID maped_node(NodeID tail, int graph_id, int target_graph=IStreamPipeline::_target_graph) override;
+    /*NodeID tail_node(int target_graph) override{
+		return maped_node(_tail_node, tail_graph_id, target_graph);
+	}*/
 
     void add_graph(int start, int end, char _PE, char _Host_PE);
-    NodeID next_layer(std::vector<std::pair<NodeID*,int*>>) override;
+    NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&) override;
     void set_common_params(arm_compute::utils::CommonGraphParams);
     void prnt();
     void forward_tail(NodeID nid) override;
-    int target_graph(int layer);
+    //int target_graph(int layer);
     /*StreamHints &hints() override{
     	std::cerr<<"calling hints in streampipeline\n";
     	return all_hints[graph_id];
@@ -267,15 +195,17 @@ private:
 
     std::string			name;
     std::vector<char>	PE;
-    std::vector<int>	start_layer;
-    std::vector<int>	end_layer;
+    //Start and end layer of subgraphs(i)
+    //std::vector<int>	start_layer;
+    //std::vector<int>	end_layer;
     std::vector<char>	Host_PE;
     std::vector<StreamHints> all_hints;
     //std::vector<NodeID>	Tail_node;
-    int					current_layer;
+    //The current layer that should be checked
+    //int					current_layer;
     arm_compute::utils::CommonGraphParams  common_params;
     std::vector<GraphConfig> 				configs;
-    NodeMap				node_map;
+    //NodeMap				node_map;
     int					n_warmup=2;
 };
 } // namespace frontend

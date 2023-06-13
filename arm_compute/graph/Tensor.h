@@ -97,6 +97,7 @@ public:
     bool call_accessor();
 
     //Ehsan
+    virtual
     bool my_call_accessor();
     /** Binds the tensor with an edge
      *

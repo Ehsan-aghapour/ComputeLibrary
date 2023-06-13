@@ -40,6 +40,8 @@ GraphManagerPipeline::GraphManagerPipeline()
     : GraphManager()
 {
 	set_num_graphs(1);
+	pipeline_ready.store(false);
+	measure_when_full=false;
 }
 
 
@@ -71,7 +73,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     }
 #if My_print > -1
     //Ehsan
-    std::cout<<"*********force target is: "<<target<<std::endl;
+    //std::cout<<"*********force target is: "<<target<<std::endl;
 #endif
     force_target_to_graph(graph, forced_target);
 
@@ -88,15 +90,26 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
      */
     //std::cerr<<"2\n";
     detail::configure_all_tensors(graph);
+    /*if(graph.id()==2){
+    	std::cerr<<"node name  -- > "<<graph.node(0)->name()<<std::endl;
+    	std::cerr<<"node name  -- > "<<graph.node(1)->name()<<std::endl;
+    	std::cerr<<"node name  -- > "<<graph.node(2)->name()<<std::endl;
+    	std::cerr<<"node name  -- > "<<graph.node(11)->name()<<std::endl;
+    	std::cerr<<"relu input id: "<<graph.node(1)->input_id(0)<<std::endl;
+    	std::cerr<<"rec output id: "<<graph.node(0)->output_id(0)<<std::endl;
+    	std::cerr<<"sender input id: "<<graph.node(11)->input_id(0)<<std::endl;
+    }*/
     //std::cerr<<"3\n";
     // Apply backend mutating passes
 
     //std::cerr<<"befor pass 2 graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
     pm.run_type(graph, IGraphMutator::MutationType::Backend);
+
     // Perform topological sort
     std::vector<NodeID> topological_sorted_nodes = dfs(graph);
-    std::cerr<<"size of topological sorted nodes: "<<topological_sorted_nodes.size()<<std::endl;
+
+    //std::cerr<<"size of topological sorted nodes: "<<topological_sorted_nodes.size()<<std::endl;
     // Validate all nodes
     detail::validate_all_nodes(graph);
     //std::cerr<<"4\n";
@@ -109,12 +122,28 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 #endif
     // Allocate const tensors and call accessors
     //std::cerr<<"5\n";
+
     detail::allocate_const_tensors_pipeline(graph);
     detail::call_all_const_node_accessors(graph);
-    std::cerr<<"prepare:\n";
+    //std::cerr<<"prepare:\n";
     // Prepare graph
+    /*if(graph.id()==2){
+    	std::string sss;
+    	std::cerr<<"hey0 value dare?:"<<graph.tensor(0)->handle()->tensor().buffer()[5]<<std::endl;
+    	std::cin>>sss;
+    }
     detail::prepare_all_tasks(workload);
-    std::cerr<<workload.inputs.size()<<std::endl;
+    if(graph.id()==2){
+        	std::string sss;
+        	std::cerr<<"hey1 value dare?:"<<graph.tensor(1)->handle()->tensor().buffer()[5]<<std::endl;
+        	std::cin>>sss;
+        }
+    if(graph.id()==2){
+            	std::string sss;
+            	std::cerr<<"hey2 value dare?:"<<graph.tensor(2)->handle()->tensor().buffer()[5]<<std::endl;
+            	std::cin>>sss;
+            }*/
+    //std::cerr<<workload.inputs.size()<<std::endl;
     //Ehsan
     //std::cerr<<"3"<<std::endl;
     int ii=0;
@@ -148,19 +177,19 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     	workload.tasks[workload.tasks.size()-1].block=1;
     }
     //std::cerr<<"7\n";
-    std::cerr<<"4"<<std::endl;
-#if My_print > -1
+    //std::cerr<<"4"<<std::endl;
+#if My_print > 0
     //Ehsan
         DotGraphPrinter p;
         p.print(graph,std::cout);
 #endif
-    std::cerr<<"5\n";
+    //std::cerr<<"5\n";
     // Setup tensor memory (Allocate all tensors or setup transition manager)
-    std::cerr<<"Big cores: "<<ctx.config().big_cores<<std::endl;
-    std::cerr<<ctx.config().use_transition_memory_manager<<std::endl;
+    std::cerr<<"Big cores: "<<ctx.config().big_cores<<" Small cores: "<<ctx.config().little_cores<<std::endl;
+    //std::cerr<<ctx.config().use_transition_memory_manager<<std::endl;
     if(ctx.config().use_transition_memory_manager)
     {
-#if My_print > -1
+#if My_print > 0
     	//Ehsan
     	std::cerr<<"transition memory mangaer is used\n";
 #endif
@@ -169,13 +198,13 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     }
     else
     {
-    	std::cerr<<"else\n";
+    	//std::cerr<<"else\n";
         detail::allocate_all_tensors(graph);
     }
-    std::cerr<<"8\n";
+    //std::cerr<<"8\n";
     // Finalize Graph context
     ctx.finalize();
-    std::cerr<<"9\n";
+    //std::cerr<<"9\n";
     // Register graph
     std::lock_guard<std::mutex> lock(_mtx);
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
@@ -231,7 +260,7 @@ void GraphManagerPipeline::execute_graph(Graph &graph, int nn)
 		stream.str(std::string());
         detail::call_all_input_node_accessors(it->second);
 
-        std::cerr<<"call all input called\n";
+        std::cerr<<"input called\n";
         auto tfinish=std::chrono::high_resolution_clock::now();
         double x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
         std::cerr<<"size of input_time: "<<input_time.size()<<std::endl;
@@ -300,6 +329,206 @@ void GraphManagerPipeline::execute_graph(Graph &graph, int nn)
 }
 
 
+/*
+ * If there is no buffer in between stages
+ */
+void GraphManagerPipeline::warmup_and_execute_graph_no_buffer(Graph &graph, int nn)
+{
+    // Check if graph is finalized
+	/*if(graph.id()==1){
+		std::cerr<<"test:\n";
+		print_times(graph,1);
+	}*/
+	std::stringstream stream;
+	stream<<"start of execute graph "<<graph.id()<<" in graph manager\n";
+	//stream<<"number of workloads: "<<_workloads.size()<<std::endl;
+	std::cerr<<stream.str();
+	stream.str(std::string());
+    auto it = _workloads.find(graph.id());
+    ARM_COMPUTE_ERROR_ON_MSG(it == std::end(_workloads), "Graph is not registered!");
+    //Ehsan measure input, task and output timings:
+
+    /*int cc=warmup_n+(num_graphs-1)-graph.id();
+    for(int k=0; k<cc;k++)
+        {
+		// Call input accessors
+		auto tstart=std::chrono::high_resolution_clock::now();
+		//stream<<"graph_id:"<<graph.id()<<std::endl;
+		//std::cerr<<stream.str();
+		stream<<"graph_id:"<<graph.id()<<" calling inputs"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		detail::call_all_input_node_accessors(it->second);
+
+		std::cerr<<"call all input called\n";
+		auto tfinish=std::chrono::high_resolution_clock::now();
+		double x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+		std::cerr<<"size of input_time: "<<input_time.size()<<std::endl;
+
+		input_time[graph.id()] +=x1;
+
+
+
+		//Call All receivers
+		tstart=std::chrono::high_resolution_clock::now();
+		stream<<"graph_id:"<<graph.id()<<" calling receivers"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		detail::call_all_receivers(it->second);
+
+		std::cerr<<"receivers called\n";
+		tfinish=std::chrono::high_resolution_clock::now();
+		x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+		input_time[graph.id()] +=x1;
+
+
+
+
+
+		// Run graph
+		//std::cerr<<"\ntask:"<<task<<std::endl;
+		stream<<"graph_id:"<<graph.id()<<" Calling all tasks"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		detail::call_all_tasks_pipeline(it->second,nn);
+		tstart=std::chrono::high_resolution_clock::now();
+		double x2=std::chrono::duration_cast<std::chrono::duration<double>>(tstart-tfinish).count();
+		task_time[graph.id()] += x2;
+
+
+
+		//Call All Senders
+		tstart=std::chrono::high_resolution_clock::now();
+		stream<<"graph_id:"<<graph.id()<<" Calling all senders"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		transmition_time[graph.id()]+=detail::call_all_senders(it->second);
+
+		std::cerr<<"senders called\n";
+		tfinish=std::chrono::high_resolution_clock::now();
+		x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+		output_time[graph.id()] +=x1;
+
+
+
+
+		// Call output accessors
+		double x3=0;
+		stream<<"graph_id:"<<graph.id()<<" calling outputs"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		detail::call_all_output_node_accessors(it->second);
+		tfinish=std::chrono::high_resolution_clock::now();
+		x3=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+
+		stream<<"Graph"<<graph.id()<<"   Input: "<<x1*1000<<"   Task: "<<x2*1000<<"   Out: "<<x3*1000<<"   Proc: "<<(x2+x3)*1000<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		output_time[graph.id()] +=x3;
+	}*/
+
+
+
+
+
+
+    int cc=warmup_n+(num_graphs-1)-graph.id();
+    int n=10;
+    for(int k=0; k<n;k++)
+    {
+
+    	if(k==cc){
+    		reset_timing(graph.id());
+    		//Because there is no buffering so till last stage did not get frame [warmup_n] from previous stage, the previous stage cannot start processing next frame
+    		if(graph.id()==num_graphs-1){
+    			std::cerr<<"stage "<<graph.id()<<" processed "<<cc<<" frames and will set ready to true after 2 seconds\n";
+    			std::this_thread::sleep_for(std::chrono::milliseconds(20000));
+    		}
+    		if(!parallel){
+    			//start power measurement
+    			std::cerr<<"non parallel or start with empty pipeline so just first stage synchronized\n";
+    		}
+    	}
+    	// Call input accessors
+		auto tstart=std::chrono::high_resolution_clock::now();
+		//stream<<"graph_id:"<<graph.id()<<std::endl;
+		//std::cerr<<stream.str();
+		stream<<"graph_id:"<<graph.id()<<" calling inputs"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+        detail::call_all_input_node_accessors(it->second);
+
+        std::cerr<<"input called\n";
+        auto tfinish=std::chrono::high_resolution_clock::now();
+        double x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+        //std::cerr<<"size of input_time: "<<input_time.size()<<std::endl;
+
+        input_time[graph.id()] +=x1;
+
+
+
+        //Call All receivers
+        tstart=std::chrono::high_resolution_clock::now();
+        stream<<"graph_id:"<<graph.id()<<" calling receivers"<<std::endl;
+        std::cerr<<stream.str();
+        stream.str(std::string());
+		detail::call_all_receivers(it->second);
+
+		std::cerr<<"receivers called\n";
+		tfinish=std::chrono::high_resolution_clock::now();
+		x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+		input_time[graph.id()] +=x1;
+
+
+
+        // Run graph
+		//std::cerr<<"\ntask:"<<task<<std::endl;
+		stream<<"graph_id:"<<graph.id()<<" Calling all tasks"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		detail::call_all_tasks_pipeline(it->second,nn);
+		tstart=std::chrono::high_resolution_clock::now();
+		double x2=std::chrono::duration_cast<std::chrono::duration<double>>(tstart-tfinish).count();
+		task_time[graph.id()] += x2;
+
+
+
+		//Call All Senders
+		tstart=std::chrono::high_resolution_clock::now();
+		stream<<"graph_id:"<<graph.id()<<" Calling all senders"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+		transmition_time[graph.id()]+=detail::call_all_senders(it->second);
+
+		std::cerr<<"senders called\n";
+		tfinish=std::chrono::high_resolution_clock::now();
+		x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+		output_time[graph.id()] +=x1;
+
+
+
+
+        // Call output accessors
+		double x3=0;
+		stream<<"graph_id:"<<graph.id()<<" calling outputs"<<std::endl;
+		std::cerr<<stream.str();
+		stream.str(std::string());
+        detail::call_all_output_node_accessors(it->second);
+        tfinish=std::chrono::high_resolution_clock::now();
+        x3=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
+
+        stream<<"Graph"<<graph.id()<<"   Input: "<<x1*1000<<"   Task: "<<x2*1000<<"   Out: "<<x3*1000<<"   Proc: "<<(x2+x3)*1000<<std::endl;
+        std::cerr<<stream.str();
+        stream.str(std::string());
+        output_time[graph.id()] +=x3;
+    }
+}
+
+
+
+/*If you want to buffer output of a stage if next stage is busy:
+ * It also works with no buffer scenario
+ */
 
 void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 {
@@ -402,7 +631,7 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 
 
     int cc=warmup_n+(num_graphs-1)-graph.id();
-    int n=4;
+    int n=10;
     for(int k=0; k<n;k++)
     {
 
@@ -422,10 +651,10 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 		stream.str(std::string());
         detail::call_all_input_node_accessors(it->second);
 
-        std::cerr<<"call all input called\n";
+        std::cerr<<"input called\n";
         auto tfinish=std::chrono::high_resolution_clock::now();
         double x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
-        std::cerr<<"size of input_time: "<<input_time.size()<<std::endl;
+        //std::cerr<<"size of input_time: "<<input_time.size()<<std::endl;
 
         input_time[graph.id()] +=x1;
 
@@ -443,7 +672,14 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 		x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 		input_time[graph.id()] +=x1;
 
-
+		/*
+		 * All stages process the (cc=n_warmup+num_stages-graph_id(stage_id) ) frames and load input and wait
+		 * the last stage which reach to this state(which is first stage, set pipeline_ready to true and notify all stages to start with
+		 * full pipeline (which all stages already loaded their input. The timings are reset before this loading input(and receivers, but start of power measuerement and ...
+		 * are start with task processing for first frame of all stages
+		 * Another method, that works when there is no q between stages is that, when the last stage process n_warmup frame, then we can start power measurement
+		 *
+		 */
 		if(k==cc){
 			if(measure_when_full && parallel)
 			{
@@ -452,19 +688,23 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 				std::cerr<<stream.str();
 				stream.str(std::string());
 				c=c+1;
+				std::cerr<<"graph(stage) "<<graph.id()<<" num_stages: "<<num_graphs<<std::endl;
 				if(c==num_graphs){
 					//start power measurement
+					std::cerr<<"stage "<<graph.id()<<" arrived later than all stages and will set ready to true after 2 seconds\n";
+					std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+					pipeline_ready.store(true);
 					condVar.notify_all();
 				}
 				else{
-					condVar.wait(lck, [this]{ return (c==num_graphs); });
+					condVar.wait(lck, [this]{ return (pipeline_ready.load()); });//or return(c==num_graphs)
 				}
 				lck.unlock();
 			}
-			/*else if(graph.id()==0){
+			//else if(graph.id()==0){
 				//start power measurement
-				std::cerr<<"non parallel or start with empty pipeline so just first stage synchronized\n";
-			}*/
+				//std::cerr<<"non parallel or start with empty pipeline so just first stage synchronized\n";
+			//}
 		}
 
 

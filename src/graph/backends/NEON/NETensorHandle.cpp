@@ -76,13 +76,13 @@ void NETensorHandle::release_if_unused()
 
 const arm_compute::ITensor &NETensorHandle::tensor() const
 {
-	std::cerr<<"const tensor in neon\n";
+	//std::cerr<<"const tensor in neon\n";
     return _tensor;
 }
 
 arm_compute::ITensor &NETensorHandle::tensor()
 {
-	std::cerr<<"tensor in neon\n";
+	//std::cerr<<"tensor in neon\n";
     return _tensor;
 }
 

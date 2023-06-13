@@ -178,3 +178,26 @@ Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other
 countries.
 
 Tizen is a registered trademark of The Linux Foundation.
+
+
+
+
+
+
+
+
+
+
+
+## Pipe-All2
+
+
+
+
+
+
+
+
+
+
+

@@ -78,7 +78,7 @@ template <typename NT, typename... Args>
 NodeID create_simple_single_input_output_node(Graph &g, NodeParams &params, NodeIdxPair input, Args &&... args)
 {
     check_nodeidx_pair(input, g);
-
+    std::cerr<<"gb _nodes size: "<<g.nodes().size()<<std::endl;
     NodeID nid = g.add_node<NT>(std::forward<Args>(args)...);
     g.add_connection(input.node_id, input.index, nid, 0);
     set_node_params(g, nid, params);
@@ -172,6 +172,7 @@ NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair in
 NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
                                          const QuantizationInfo &out_quant_info)
 {
+	std::cerr<<"GraphBuilder creating activation node, input: "<<input.node_id<<std::endl;
     return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info, out_quant_info);
 }
 
