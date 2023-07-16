@@ -48,6 +48,11 @@ for v in variables:
 test_env = env.Clone()
 vars.Update(test_env)
 
+#NPU_LIBS=['rknn_api','log','stdc++','dl']
+#NPU_LINKFLAGS=['-Wl','-rpath','build/','-static-libstdc++']
+#test_env.Append(LIBS=NPU_LIBS,LIBPATH='build/',LINKFLAGS=NPU_LINKFLAGS)
+#env.Append(LIBS=NPU_LIBS,LIBPATH='/build/',LINKFLAGS=NPU_LINKFLAGS)
+
 Help(new_options.GenerateHelpText(test_env))
 
 # Check if we need to build the test framework

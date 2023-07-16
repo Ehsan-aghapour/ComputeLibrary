@@ -58,12 +58,7 @@ bool SenderNode::forward_descriptors()
 	//if(input_edges.size()>0)
 	//std::cerr<<"Tensor Sender: "<<input(0)<<std::endl;
 	auto tt=input(0);
-	if(tt==nullptr){
-		std::cerr<<"\n\n\n\nnull!\n\n\n\n";
-	}
-	else{
-		std::cerr<<name()<<"senderrr: "<<tt->id()<<"--"<<input_id(0)<<" graph: "<<_graph->id()<<std::endl;
-	}
+
 	sender_tensor->set_tensor(input(0));
 	sender_tensor->set_graph_id(_graph->id());
     return true;

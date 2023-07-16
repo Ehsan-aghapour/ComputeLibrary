@@ -137,6 +137,7 @@ public:
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
+        //std::cerr<<"activation layer before add_\n";
         return GraphBuilder::add_activation_node(s.graph(), common_params, input, _act_info, std::move(_out_quant_info));
     }
 
@@ -310,9 +311,9 @@ public:
         std::move(rest_sub_streams)...);
 
         //Ehsan
-        std::cerr<<"Concat layer, substreams\n";
+        //std::cerr<<"Concat layer, substreams\n";
         for (unsigned int i=0;i<_sub_streams.size();i++){
-        	std::cerr<<_sub_streams[i]->tail_node()<<" "<<_sub_streams[i]->get_tail_graph_id()<<std::endl;
+        	//std::cerr<<_sub_streams[i]->tail_node()<<" "<<_sub_streams[i]->get_tail_graph_id()<<std::endl;
         	input_nodes.push_back( std::make_pair(_sub_streams[i]->tail_node(), _sub_streams[i]->get_tail_graph_id()));
         }
     }
@@ -384,7 +385,7 @@ public:
                     const auto tail_node = s.graph().node(ss->tail_node());
                     if(tail_node != nullptr && tail_node->type() != NodeType::Output)
                     {
-                    	std::cerr<<"substream tailnode:"<<ss->tail_node()<<" on graph: "<<ss->get_tail_graph_id()<<"\n";
+                    	//std::cerr<<"substream tailnode:"<<ss->tail_node()<<" on graph: "<<ss->get_tail_graph_id()<<"\n";
                         nodes.push_back({ ss->tail_node(), 0 });
                     }
                 }

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_GRAPH_ISTREAM_PIPELINE_H
 
 #include "arm_compute/graph/frontend/IStream.h"
+#include <regex>
 
 namespace arm_compute
 {
@@ -104,7 +105,7 @@ public:
                 }
             }
         }
-        std::cerr<<"mappd node for node "<<key.first<<" in graph "<<key.second<<" is node "<<r.first<<" in graph "<<r.second<<std::endl;
+        //std::cerr<<"mappd node for node "<<key.first<<" in graph "<<key.second<<" is node "<<r.first<<" in graph "<<r.second<<std::endl;
         return r;
     }
     std::pair<int,int> find(std::pair<NodeID*,int*> key, int target_graph){
@@ -162,6 +163,8 @@ public:
         //return _tail_node;
     	auto _n=node_map.find(std::make_pair(_tail_node, tail_graph_id), _target_graph);
 		if (_n.second==_target_graph){
+			tail_graph_id=_target_graph;
+			_tail_node=_n.first;
 			return _n.first;
 		}
 		else{
@@ -172,6 +175,8 @@ public:
     NodeID tail_node(int target_graph){
     	auto _n=node_map.find(std::make_pair(_tail_node, tail_graph_id), target_graph);
     	if (_n.second==target_graph){
+    		tail_graph_id=target_graph;
+    		_tail_node=_n.first;
     		return _n.first;
     	}
     	else{
@@ -219,6 +224,9 @@ public:
     }
 
     int target_graph(int layer){
+    	if(start_layer.size()==0){
+    		return 0;
+    	}
     	for(int i=0; i<start_layer.size(); i++){
     		if(layer>=start_layer[i] && layer<=end_layer[i]){
     			return i;
@@ -231,8 +239,8 @@ public:
 protected:
     inline static int 			current_layer={0};
 
-    inline static int			_target_graph;
-    int		tail_graph_id=-1;;
+    inline static int			_target_graph={0};
+    int		tail_graph_id=0;
     inline static NodeMap				node_map;
     inline static std::vector<int>	start_layer;
     inline static std::vector<int>	end_layer;

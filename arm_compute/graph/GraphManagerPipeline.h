@@ -160,7 +160,8 @@ private:
 	bool									measure_when_full=true&&parallel;
 	std::mutex 								_mtx = {};
 	std::condition_variable 				condVar;
-	bool									ready=false;
+	std::condition_variable 				condVar_serial;
+	bool									ready=true;
 	int										c=0;
 	std::atomic<bool>						pipeline_ready;
 	std::vector<std::string>				input_images;

@@ -49,7 +49,7 @@ class Example_Pipeline: public Example
 public:
 	Example_Pipeline(int _id, std::string _name)
 	//:	cmd_parser(), common_opts(cmd_parser), common_params(), graph(_id,std::move(_name))
-	: 	cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "AlexNet")
+	: 	cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, _name)
 	{
 
 	}
@@ -92,13 +92,13 @@ public:
 		size_t image_index = 0;
 		if(imgs){
 			//read_directory(common_params.image, images_list);
-			std::cerr<<"UtilsPipeline.h- image directory is: "<<common_params.image<<std::endl;
+			//std::cerr<<"[UtilsPipeline.h] image directory is: "<<common_params.image<<std::endl;
 			read_directory(common_params.image, graph.manager()->get_input_list());
-			std::cerr<<graph.manager()->get_input_list().size()<<" Input images are read from "<<common_params.image<<std::endl;
+			std::cout<<graph.manager()->get_input_list().size()<<" Input images are read from "<<common_params.image<<std::endl;
 			//common_params.image = images_list[image_index];
 			//common_params.image = graph.manager()->get_input_list()[0];
 			common_params.image=common_params.image+"/";
-			std::cerr<<"UtilsPipeline.h- image directory is: "<<common_params.image<<std::endl;
+			std::cout<<"[UtilsPipeline.h] image directory is: "<<common_params.image<<std::endl;
 		}
 		// Print parameter values
 		std::cout << common_params << std::endl;

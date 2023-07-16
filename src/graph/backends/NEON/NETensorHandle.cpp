@@ -33,26 +33,31 @@ namespace graph
 namespace backends
 {
 NETensorHandle::NETensorHandle(const ITensorInfo &info)
-    : _tensor()
+    //: _tensor()
 {
-    _tensor.allocator()->init(info);
+    //_tensor.allocator()->init(info);
+	_tensor=new arm_compute::Tensor();
+	_tensor->allocator()->init(info);
 }
 
 void NETensorHandle::allocate()
 {
-    _tensor.allocator()->allocate();
+    //_tensor.allocator()->allocate();
+	_tensor->allocator()->allocate();
 }
 
 void NETensorHandle::free()
 {
-    _tensor.allocator()->free();
+    //_tensor.allocator()->free();
+	_tensor->allocator()->free();
 }
 
 void NETensorHandle::manage(IMemoryGroup *mg)
 {
     if(mg != nullptr)
     {
-        mg->manage(&_tensor);
+        //mg->manage(&_tensor);
+    	mg->manage(_tensor);
     }
 }
 
@@ -68,22 +73,28 @@ void NETensorHandle::unmap()
 void NETensorHandle::release_if_unused()
 {
     // TODO (geopin01): Release tensor only if all sub-tensors are marked as not used
-    if(!_tensor.is_used())
+    /*if(!_tensor.is_used())
     {
         _tensor.allocator()->free();
-    }
+    }*/
+	if(!_tensor->is_used())
+	{
+		_tensor->allocator()->free();
+	}
 }
 
 const arm_compute::ITensor &NETensorHandle::tensor() const
 {
 	//std::cerr<<"const tensor in neon\n";
-    return _tensor;
+    //return _tensor;
+	return *_tensor;
 }
 
 arm_compute::ITensor &NETensorHandle::tensor()
 {
 	//std::cerr<<"tensor in neon\n";
-    return _tensor;
+    //return _tensor;
+    return *_tensor;
 }
 
 ITensorHandle *NETensorHandle::parent_handle()
@@ -100,6 +111,16 @@ Target NETensorHandle::target() const
 {
     return Target::NEON;
 }
+
+//Ehsan
+void NETensorHandle::set_tensor(arm_compute::ITensor* _t){
+	_tensor=dynamic_cast<arm_compute::Tensor*>(_t);
+}
+//Ehsan
+arm_compute::ITensor *NETensorHandle::tensor_ptr(){
+	return _tensor;
+}
+
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute

@@ -153,6 +153,7 @@ void CLTensorAllocator::allocate()
     }
     else
     {
+    	//std::cerr<<"\n\n\n\n\n**********************\n\n\n";
     	//Ehsan here, and is_data_type_quantized_per_channel(info().data_type()) = 0
         _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment());
     }

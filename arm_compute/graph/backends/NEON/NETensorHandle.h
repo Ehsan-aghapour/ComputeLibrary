@@ -59,12 +59,19 @@ public:
     void                        release_if_unused() override;
     arm_compute::ITensor       &tensor() override;
     const arm_compute::ITensor &tensor() const override;
+
+    //Ehsan
+    void set_tensor(arm_compute::ITensor*) override;
+    virtual arm_compute::ITensor *tensor_ptr() override;
+
     ITensorHandle              *parent_handle() override;
     bool                        is_subtensor() const override;
     Target                      target() const override;
 
 private:
-    arm_compute::Tensor _tensor; /**< Backend Tensor */
+    //Ehsan
+    arm_compute::Tensor* _tensor;
+    //arm_compute::Tensor _tensor; /**< Backend Tensor */
 };
 } // namespace backends
 } // namespace graph

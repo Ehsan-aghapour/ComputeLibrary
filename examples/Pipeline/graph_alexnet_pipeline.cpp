@@ -73,14 +73,13 @@ public:
             cmd_parser.print_help(argv[0]);
             return false;
         }
-#endif
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
-
+#endif
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
 
@@ -95,14 +94,14 @@ public:
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
-        std::cerr<<"type of the graph: "<<typeid(graph).name()<<std::endl;
+        //std::cerr<<"type of the graph: "<<typeid(graph).name()<<std::endl;
 
         graph << common_params.target
               << common_params.fast_math_hint
 #if gtest==1
               << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor)));
               // Layer 1
-			  std::cerr<<"type of the graph: "<<typeid(graph).name()<<std::endl;
+			  //std::cerr<<"type of the graph: "<<typeid(graph).name()<<std::endl;
               graph<< ConvolutionLayer(
                   11U, 11U, 96U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv1_w.npy", weights_layout),

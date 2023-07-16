@@ -42,6 +42,10 @@ for v in variables:
 framework_env = env.Clone()
 vars.Update(framework_env)
 
+#NPU_LIBS=['rknn_api','log','stdc++','dl']
+#NPU_LINKFLAGS=['-Wl','-rpath','build/','-static-libstdc++']
+#framework_env.Append(LIBS=NPU_LIBS,LIBPATH='/build/',LINKFLAGS=NPU_LINKFLAGS)
+
 Help(new_options.GenerateHelpText(framework_env))
 
 if(env['opencl']):
@@ -77,7 +81,8 @@ if not framework_env['mali']:
 else:
     framework_env.Append(CPPDEFINES = ['MALI_ENABLED'])
 
-arm_compute_test_framework = framework_env.StaticLibrary('arm_compute_test_framework', files)
+NPU_LIBS=['rknn_api','rockx','log','z','stdc++']
+arm_compute_test_framework = framework_env.StaticLibrary('arm_compute_test_framework', files, LIBS=NPU_LIBS)
 
 Default(arm_compute_test_framework)
 Export('arm_compute_test_framework')

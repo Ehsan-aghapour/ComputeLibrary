@@ -78,7 +78,7 @@ template <typename NT, typename... Args>
 NodeID create_simple_single_input_output_node(Graph &g, NodeParams &params, NodeIdxPair input, Args &&... args)
 {
     check_nodeidx_pair(input, g);
-    std::cerr<<"gb _nodes size: "<<g.nodes().size()<<std::endl;
+    //std::cerr<<"gb _nodes size: "<<g.nodes().size()<<std::endl;
     NodeID nid = g.add_node<NT>(std::forward<Args>(args)...);
     g.add_connection(input.node_id, input.index, nid, 0);
     set_node_params(g, nid, params);
@@ -128,6 +128,7 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
     NodeID nid = g.add_node<OutputNode>();
     g.add_connection(input.node_id, input.index, nid, 0);
     set_node_params(g, nid, params);
+    //auto t=ITensorAccessorUPtr();
     set_accessor_on_node(g, nid, false, 0, std::move(accessor));
 
     return nid;
@@ -143,7 +144,13 @@ NodeID GraphBuilder::add_receiver_node(Graph &g, NodeParams params, const Tensor
 	std::cerr<<s;
     auto nid = g.add_node<ReceiverNode>(desc);
     set_node_params(g, nid, params);
-    //set_accessor_on_node(g, nid, true, 0, std::move(accessor));
+    //accessor=ITensorAccessorUPtr();
+    if(accessor==nullptr && false){
+		std::string ss;
+		std::cerr<<"null accessor\n";
+		std::cin>>ss;
+	}
+    set_accessor_on_node(g, nid, true, 0, std::move(accessor));
     return nid;
 }
 
@@ -159,10 +166,64 @@ NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair in
     //Set tensor in TensorPipelineSender object inside the sender_node class
     //g.node(nid)->forward_descriptors();
     set_node_params(g, nid, params);
-    //set_accessor_on_node(g, nid, false, 0, std::move(accessor));
+    //accessor=ITensorAccessorUPtr();
+    //accessor=-1;
+    if(accessor==nullptr && false){
+    	std::string ss;
+    	std::cerr<<"null accessor\n";
+    	std::cin>>ss;
+    }
+    set_accessor_on_node(g, nid, false, 0, std::move(accessor));
 
     return nid;
 }
+
+NodeID GraphBuilder::add_npu_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, std::vector<NodeIdxPair> outputs)
+{
+	std::string s;
+	s="Adding NPU Node "+params.name+" to graph "+std::to_string(g.id())+" with target "+std::to_string((int)(params.target))+'\n';
+	std::cerr<<s;
+    //check_nodeidx_pair(input, g);
+
+
+    NodeID nid = g.add_node<NPUNode>(inputs, outputs);
+    NPUNode* n=dynamic_cast<NPUNode*>(g.node(nid));
+    n->restructure_graph();
+    std::cerr<<"npu node created\n";
+    /*unsigned int i = 0;
+    for(const auto &input : inputs)
+	{
+    	auto tt=g.node(input.node_id)->outputs();
+    	std::cerr<<"input node name: "<<g.node(input.node_id)->name()<<" number of output tensors: "<<tt.size()<<std::endl;
+    	for(auto t:tt){
+    		std::cerr<<t<<std::endl;
+    	}
+		check_nodeidx_pair(input, g);
+		g.add_connection(input.node_id, input.index, nid, i++);
+	}
+
+    i = 0;
+	for(const auto &output : outputs)
+	{
+		auto tt=g.node(output.node_id)->outputs();
+		std::cerr<<"output node name: "<<g.node(output.node_id)->name()<<" number of output tensors: "<<tt.size()<<std::endl;
+		for(auto t:tt){
+			std::cerr<<t<<std::endl;
+		}
+		check_nodeidx_pair(output, g);
+		g.add_connection(nid,i++,output.node_id, output.index);
+	}*/
+    //g.add_connection(input.node_id, input.index, nid, 0);
+    //Set tensor in TensorPipelineSender object inside the sender_node class
+    //g.node(nid)->forward_descriptors();
+    set_node_params(g, nid, params);
+    //accessor=ITensorAccessorUPtr();
+    //accessor=-1;
+
+
+    return nid;
+}
+
 
 //*****************************************************************************************************
 
@@ -172,7 +233,7 @@ NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair in
 NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
                                          const QuantizationInfo &out_quant_info)
 {
-	std::cerr<<"GraphBuilder creating activation node, input: "<<input.node_id<<std::endl;
+	//std::cerr<<"GraphBuilder creating activation node, input: "<<input.node_id<<std::endl;
     return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info, out_quant_info);
 }
 

@@ -7,6 +7,9 @@ p=../../android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/
 cp $p/$target $p/$compiler
 
 #XX=clang++ CC=clang scons Werror=0 -j16 debug=0 asserts=0 neon=1 opencl=1 os=android arch=armv7a 
-XX=clang++ CC=clang scons Werror=0 -j8 debug=0 asserts=0 neon=1 opencl=1 os=android arch=arm64-v8a benchmark=1 benchmark_tests=1
+XX=clang++ CC=clang scons --debug=explain Werror=0 -j8 debug=0 asserts=0 neon=1 opencl=1 os=android arch=arm64-v8a benchmark=1 benchmark_tests=1
+r=$?
 
-rm $p/$compiler
+#rm $p/$compiler
+
+exit $r

@@ -102,7 +102,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     detail::configure_all_tensors(graph);
     // Apply backend mutating passes
 
-    //std::cerr<<"befor pass 2 graph "<<graph.id()<<std::endl;
+    std::cerr<<"befor pass 2 graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
     pm.run_type(graph, IGraphMutator::MutationType::Backend);
     // Perform topological sort
@@ -122,33 +122,40 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     detail::call_all_const_node_accessors(graph);
     // Prepare graph
     detail::prepare_all_tasks(workload);
-
+    std::cerr<<"dfdfd\n";
     //Ehsan
     int ii=0;
     //std::set<int> blocking_set1 {1, 2, 3, 4};
     //std::set<int> *blocking_set=&blocking_set1;
-    for(auto &task : workload.tasks)
-    {
-    	if(!task.task)
-    		continue;
-    	bool b=false;
-    	if(blocking_set->find(ii) != blocking_set->end()){
-    	      b=true;
-    	      task.ending=true;
-    	}
-    	if(blocking==1){
-    		if(blocking_set!=NULL and b && target==arm_compute::graph::Target ::CL)
-    		    task.block=1;
-    	}
-    	if(blocking==2){
-    		if(blocking_set!=NULL && target==arm_compute::graph::Target ::CL){
-    			task.block=1;
-    		}
-    	}
-
-    	ii++;
+    if(blocking_set!=nullptr){
+		for(auto &task : workload.tasks)
+		{
+			std::cerr<<task.node->name()<<std::endl;
+			if(!task.task){
+				std::cerr<<"0\n";
+				continue;
+			}
+			bool b=false;
+			if(blocking_set->find(ii) != blocking_set->end()){
+				  std::cerr<<"hh\n";
+				  b=true;
+				  task.ending=true;
+			}
+			std::cerr<<"1\n";
+			if(blocking==1){
+				if(blocking_set!=NULL and b && target==arm_compute::graph::Target ::CL)
+					task.block=1;
+			}
+			if(blocking==2){
+				if(blocking_set!=NULL && target==arm_compute::graph::Target ::CL){
+					task.block=1;
+				}
+			}
+			std::cerr<<"2\n";
+			ii++;
+		}
     }
-
+    std::cerr<<"bb\n";
 #if My_print > 0
     //Ehsan
         DotGraphPrinter p;
@@ -171,7 +178,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     }
     // Finalize Graph context
     ctx.finalize();
-
+    std::cerr<<'ee\n';
     // Register graph
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id() << std::endl);

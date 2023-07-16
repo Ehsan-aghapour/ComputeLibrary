@@ -102,6 +102,7 @@ enum class Target
     NEON,        /**< Neon capable target device */
     CL,          /**< OpenCL capable target device */
     GC,          /**< GLES compute capable target device */
+	NPU,		 /**< NPU Devices */
 };
 
 /** Supported Element-wise operations */
@@ -195,7 +196,8 @@ enum class NodeType
     Dummy,
 	//Ehsan
 	Receiver,
-	Sender
+	Sender,
+	NPU
 };
 
 /** Backend Memory Manager affinity **/

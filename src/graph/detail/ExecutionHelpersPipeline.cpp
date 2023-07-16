@@ -62,6 +62,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
     workload.tasks.reserve(node_order.size());
 
     // Create tasks
+    int task_number=0;
     for(auto &node_id : node_order)
     {
         auto node = g.node(node_id);
@@ -104,7 +105,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
             //std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
             if(func != nullptr || is_utility_node(node))
             {
-            	std::cerr<<node->name()<<" adding to tasks\n";
+            	std::cerr<<"Task "<<task_number++<<": "<<node->name()<<"\n";
                 workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
             }
         }
@@ -127,6 +128,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
         	ReceiverNode* rec=dynamic_cast<ReceiverNode*>(node.get());
         	rec->get_receiver_tensor()->set_name(rec->common_node_params().name);
         	rec->get_receiver_tensor()->set_tensor(rec->output(0));
+        	//rec->forward_descriptors();
 			workload.receivers.push_back(rec->get_receiver_tensor());
 		}
         if(node != nullptr && node->type() == NodeType::Sender)

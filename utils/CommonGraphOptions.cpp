@@ -188,7 +188,6 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 	  kernel_c(parser.add_option<SimpleOption<int>>("kernel_c", 96)),
 	  stride(parser.add_option<SimpleOption<int>>("stride", 2))
 {
-	std::cerr<<"h\n";
     std::set<arm_compute::graph::Target> supported_targets
     {
         Target::NEON,

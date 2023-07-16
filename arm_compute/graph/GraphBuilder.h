@@ -76,6 +76,8 @@ public:
 	 * @return Node ID of the created node, EmptyNodeID in case of error
 	 */
     static NodeID add_sender_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
+
+    static NodeID add_npu_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, std::vector<NodeIdxPair> outputs);
     //**************************************************************************************************************
 
 

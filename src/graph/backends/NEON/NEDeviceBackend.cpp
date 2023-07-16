@@ -65,6 +65,9 @@ static detail::BackendRegistrar<NEDeviceBackend> NEDeviceBackend_registrar(Targe
 NEDeviceBackend::NEDeviceBackend()
     : _allocator()
 {
+	//std::cout<<"creating nedevicebackend\n";
+	//std::string s;
+	//std::cin>>s;
 }
 
 void NEDeviceBackend::initialize_backend()

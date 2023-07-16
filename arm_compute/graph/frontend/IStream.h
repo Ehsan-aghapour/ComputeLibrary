@@ -88,7 +88,7 @@ public:
     }
     virtual NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&){};
     //virtual NodeID* get_tail_p(){};
-	virtual int get_tail_graph_id(){};
+	virtual int get_tail_graph_id(){return 0;};
 	//virtual int* get_graph_id_p(){};
 	virtual std::pair<NodeID,int> get_position(){};
 

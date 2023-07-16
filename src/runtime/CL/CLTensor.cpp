@@ -70,9 +70,9 @@ CLTensorAllocator *CLTensor::allocator()
 
 void CLTensor::map(bool blocking)
 {
-#if My_print > 0
+#if My_print > -1
 	//Ehsan: Observation: _ctx is null at setup and runtime several times called
-	std::cout<<"contex is null? "<<(_ctx==nullptr)<<std::endl;
+	std::cerr<<"contex is null? "<<(_ctx==nullptr)<<std::endl;
 #endif
     ICLTensor::map(_ctx == nullptr ? CLScheduler::get().queue() : _ctx->gpu_scheduler()->queue(), blocking);
 }

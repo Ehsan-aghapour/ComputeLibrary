@@ -322,7 +322,7 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
     }
 
     //_already_loaded = !_already_loaded;
-    return _already_loaded;
+    return !_already_loaded;
 }
 
 ValidationInputAccessor::ValidationInputAccessor(const std::string             &image_list,
@@ -612,7 +612,7 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
     : _labels(), _output_stream(output_stream), _top_n(top_n)
 {
     _labels.clear();
-
+    std::cerr<<"output accessor reading label file "<<labels_path<<std::endl;
     std::ifstream ifs;
 
     try
@@ -622,6 +622,7 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
 
         for(std::string line; !std::getline(ifs, line).fail();)
         {
+        	//std::cerr<<line<<std::endl;
             _labels.emplace_back(line);
         }
     }

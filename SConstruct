@@ -92,6 +92,14 @@ if not env['install_dir'].startswith('/') and install_path != "":
     install_path = "%s/%s" % (build_path, install_path)
 
 env.Append(LIBPATH = [build_path])
+
+NPU_LIBS=['rknn_api','log','stdc++','dl']
+NPU_LINKFLAGS=['-Wl,-rpath,build/']
+env.Append(LIBS=NPU_LIBS,LIBPATH='build/',LINKFLAGS=NPU_LINKFLAGS)
+#env.Append(LINKFLAGS=NPU_LINKFLAGS)
+#env.Append(LIBPATH='build/')
+
+
 Export('env')
 Export('vars')
 

@@ -57,8 +57,7 @@ void read_directory(const std::string& name, stringvec& v)
 #ifndef BENCHMARK_EXAMPLES
 int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline> example)
 {
-    std::cout << "\n"
-              << argv[0] << "\n\n";
+    //std::cerr << "\n"<< argv[0] << "\n\n";
 
 
 

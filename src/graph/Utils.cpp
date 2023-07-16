@@ -27,12 +27,18 @@
 #include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/mutators/GraphMutators.h"
 
+//Ehsa
+//#include "arm_compute/graph/Types.h"
+
 namespace arm_compute
 {
 namespace graph
 {
 bool is_target_supported(Target target)
 {
+	//std::cerr<<backends::BackendRegistry::get().contains(target)<<std::endl;
+	//std::cerr<<backends::BackendRegistry::get().find_backend(target)->is_backend_supported()<<std::endl;
+
     return backends::BackendRegistry::get().contains(target) && backends::BackendRegistry::get().find_backend(target)->is_backend_supported();
 }
 
@@ -50,6 +56,10 @@ Target get_default_target()
     {
         return Target::GC;
     }
+    if(is_target_supported(Target::NPU))
+	{
+		return Target::NPU;
+	}
     ARM_COMPUTE_ERROR("No backend exists!");
 }
 
@@ -60,7 +70,12 @@ void force_target_to_graph(Graph &g, Target target)
     {
         if(node)
         {
-            node->set_assigned_target(target);
+        	if(target==arm_compute::graph::Target::NPU && node->type()==arm_compute::graph::NodeType::NPU){
+        		node->set_assigned_target(target);
+        	}
+        	else{
+        		node->set_assigned_target(arm_compute::graph::Target::NEON);
+        	}
         }
     }
 
@@ -69,7 +84,8 @@ void force_target_to_graph(Graph &g, Target target)
     {
         if(tensor)
         {
-            tensor->desc().target = target;
+            //tensor->desc().target = target;
+        	tensor->desc().target = target=arm_compute::graph::Target::NEON;
         }
     }
 }

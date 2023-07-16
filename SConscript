@@ -26,6 +26,7 @@ import subprocess
 import zlib
 import base64
 import string
+import sys
 
 VERSION = "v21.02"
 LIBRARY_VERSION_MAJOR = 22
@@ -180,7 +181,7 @@ undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else
 arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
-arm_compute_env.Append(LIBS = ['dl'])
+arm_compute_env.Append(LIBS = ['dl'], LIBPATH=['build/'])
 
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
@@ -231,6 +232,12 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
+
+    ##Ehsan
+    graph_files += Glob('src/graph/backends/NPU/*.cpp')
+    runtime_files += Glob('src/runtime/NPU/*/*.cpp')
+
+    
 
 
 if env['neon']:
@@ -327,20 +334,32 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
+
+#NPU_LIBS=['rknn_api','log','stdc++','dl']
+#NPU_LINKFLAGS=['-Wl','-rpath','build/','-static-libstdc++']
+#arm_compute_env.Append(LIBS=NPU_LIBS,LIBPATH='/build/',LINKFLAGS=NPU_LINKFLAGS)
+#arm_compute_env.Append(LINKFLAGS=NPU_LINKFLAGS)
+#arm_compute_env.Append(LIBPATH='build/')
+
 arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, core_files, static=True)
 Export('arm_compute_core_a')
+
+
+
 
 if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_core_so = build_library('arm_compute_core', arm_compute_env, core_files, static=False)
     Export('arm_compute_core_so')
 
-arm_compute_a = build_library('arm_compute-static', arm_compute_env, runtime_files, static=True, libs = [ arm_compute_core_a ])
+
+arm_compute_a = build_library('arm_compute-static', arm_compute_env, runtime_files, static=True, libs = [ arm_compute_core_a ] )
 Export('arm_compute_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_so = build_library('arm_compute', arm_compute_env, runtime_files, static=False, libs = [ "arm_compute_core" ])
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
+
 
 arm_compute_graph_env = arm_compute_env.Clone()
 

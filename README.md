@@ -1,10 +1,25 @@
-# ARMCL-PipeALL
-Pipe-line implementation in ARM Compute Library (See pipe-all branch).
+# ARMCL-DERO (Deep Edge Resource Optimizer)
+***DERO*** is an integrated, efficient CPU-GPU-NPU CNN inference design specifically developed for ARM-based Heterogeneous Multi-Processor System-on-Chips (HMPSoCs), along with any additional accelerator. It is designed to optimize the utilization of edge resources, delivering exceptional performance and energy efficiency. 
 
-git clone https://github.com/Ehsan-aghapour/ARMCL-PipeALL.git -b pipe-all
+The main design concept revolves around partitioning the network graph into partitions and executing them in parallel, using a pipeline design. The pipeline design ensures optimal utilization of all resources simultaneously, resulting in maximum throughput (measured in FPS) and energy efficiency. 
 
-# Run the Pipe-all
-We create the pipe-all for AlexNet, GoogleNet, MobileNet, ResNet50 and SqueezeNet graphs. The pipe-all versions of these graphs are graph_AlexNet_all_pipe_sync, graph_GoogleNet_all_pipe_sync, graph_MobileNet_all_pipe_sync, graph_ResNet50_all_pipe_sync, and graph_SqueezeNet_all_pipe_sync respectively.
+Alternatively, the layers can be mapped to the most suitable resource and switched dynamically between resources. layer-wise switching enables mapping each layer to its most suitable resource, thereby optimizing inference latency while maintaining energy efficiency. Additionally, it supports layer-wise DVFS (dynamic voltage and frequency scaling) to dynamically adjust the performance and power of resources based on the requirements of each layer.
+
+*DERO* extends its support beyond ARM little and big CPU clusters and ARM GPUs to include NPUs (Neural Processing Units) from various vendors, even if they employ vendor-specific libraries and are not open source. The framework has been implemented using an abstract NPU model that utilizes generic APIs, enabling seamless integration with NPUs of different types and specific vendor APIs.
+
+
+Additionally, DERO offers straightforward runtime command options for executing the CNN with specific configurations. These options include mapping layers to resource types, setting the frequency of resources for each layer, and choosing between pipeline or switching inference modes. Furthermore, DERO generates comprehensive reports that include the average throughput (measured in FPS) and latency of inference. It also provides the flexibility to configure reporting of execution times for each stage of the pipeline or execution time for each individual layer. These detailed reports serve as essential guides for identifying the optimal design configuration based on the CNN model and hardware platform.
+
+The extension of DERO built on top of ARM-CL leverages extended classes, providing seamless migration to new versions of ARM-CL. By incorporating these extended classes, additional functionalities are introduced into the core of the ARM-CL simulator. Consequently, there is no need to implement partitioning and mapping for each individual CNN model. Instead, DERO automatically partitions the CNN model and maps it to the target processor type based on user-specified configurations.
+
+DERO efficiently handles the execution of these partitions, either in sequential order or as a pipeline. It manages the data transfer between partitions, ensuring compatibility with the data types and formats of each processor involved. Furthermore, DERO intelligently addresses complex dependencies that may arise between partitions assigned to different processor types. For instance, if a partition relies on input data from one or more previous partitions, including those with branch connections (shortcuts) to the current partition, DERO handles synchronization and data transfer to manage these dependencies seamlessly.  
+
+
+
+# Run the *DERO*
+We conducted tests on DERO using various popular CNN models, including AlexNet, GoogleNet, MobileNet, ResNet50, and SqueezeNet. The original versions of these CNNs can be found in the examples directory, while the DERO versions are located in the DERO directory within the example directory. Importantly, the implementation of DERO resides at the core of the framework, making it model-agnostic. This means that DERO works seamlessly with any model, eliminating the need for separate implementations for each new model. However, to differentiate between the original ARM-CL and DERO versions, a minimal annotation is added to the CNN files. As a result, the DERO versions of the CNN files have very slight modifications compared to their original counterparts.
+
+git clone https://github.com/Ehsan-aghapour/ComputeLibrary -b Yolov3
 
 After compiling the source code and preparing the libraries based on your platform run the following command:
 
@@ -96,6 +111,8 @@ Run the AlexNet graph with this command. Select NEON or CL to run it on CPU or G
 
 <br/>
 <br/>
+
+
 <div align="center">
  <img src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png"><br><br>
 </div>
@@ -178,26 +195,3 @@ Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other
 countries.
 
 Tizen is a registered trademark of The Linux Foundation.
-
-
-
-
-
-
-
-
-
-
-
-## Pipe-All2
-
-
-
-
-
-
-
-
-
-
-

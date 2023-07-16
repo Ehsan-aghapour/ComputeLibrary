@@ -51,6 +51,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
         case Target::GC:
             os << "GC";
             break;
+        case Target::NPU:
+			os << "NPU";
+			break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

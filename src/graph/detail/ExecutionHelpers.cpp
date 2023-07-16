@@ -99,8 +99,8 @@ void allocate_all_input_tensors(INode &node)
 #endif
             tensor->handle()->allocate();
         }
-        if(node.type()!=NodeType::Const)
-        	std::cerr<<i<<" input tesonrs Done\n\n";
+        /*if(node.type()!=NodeType::Const)
+        	std::cerr<<i<<" input tesonrs Done\n\n";*/
     }
 }
 
@@ -121,8 +121,8 @@ void allocate_all_output_tensors(INode &node)
 #endif
             tensor->handle()->allocate();
         }
-        if(node.type()!=NodeType::Const)
-        	std::cerr<<i<<" output tensors Done\n\n";
+        /*if(node.type()!=NodeType::Const)
+        	std::cerr<<i<<" output tensors Done\n\n";*/
     }
 }
 
@@ -140,6 +140,7 @@ void allocate_const_tensors(Graph &g)
                     break;
                 case NodeType::Output:
                     allocate_all_input_tensors(*node);
+                    break;
                 default:
                     break;
             }
@@ -317,7 +318,7 @@ void call_all_tasks(ExecutionWorkload &workload,int nn)
     ARM_COMPUTE_ERROR_ON(workload.ctx == nullptr);
 
     // Acquire memory for the transition buffers
-    std::cerr<<"bmem\n";
+    //std::cerr<<"bmem\n";
     for(auto &mm_ctx : workload.ctx->memory_managers())
     {
         if(mm_ctx.second.cross_group != nullptr)
@@ -325,7 +326,7 @@ void call_all_tasks(ExecutionWorkload &workload,int nn)
             mm_ctx.second.cross_group->acquire();
         }
     }
-    std::cerr<<"amem\n";
+    //std::cerr<<"amem\n";
     // Execute tasks
 #if streamline > 0
     ANNOTATE_SETUP;
@@ -334,11 +335,11 @@ void call_all_tasks(ExecutionWorkload &workload,int nn)
     static int c=0;
 #endif
     int ii=0;
-    std::cerr<<"size of tasks: "<<workload.tasks.size()<<std::endl;
+    //std::cerr<<"size of tasks: "<<workload.tasks.size()<<std::endl;
     for(auto &task : workload.tasks)
     {
     	ii++;
-    	std::cerr<<ii<<"  "<<task.node->name()<<std::endl;
+    	//std::cerr<<ii<<"  "<<task.node->name()<<std::endl;
     	if(nn==0)
     		task();
     	else{

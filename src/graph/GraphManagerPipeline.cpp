@@ -29,6 +29,9 @@
 
 
 #include "arm_compute/graph/GraphManagerPipeline.h"
+#include "arm_compute/graph/nodes/SenderNode.h"
+#include "arm_compute/graph/nodes/ReceiverNode.h"
+
 
 
 
@@ -41,7 +44,8 @@ GraphManagerPipeline::GraphManagerPipeline()
 {
 	set_num_graphs(1);
 	pipeline_ready.store(false);
-	measure_when_full=false;
+	measure_when_full=true;
+	//parallel=false;
 }
 
 
@@ -58,6 +62,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     //std::cerr<<"befor pass 1 graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
 
+
     pm.run_type(graph, IGraphMutator::MutationType::IR);
     //std::cerr<<"0\n";
     // Force target to all graph construct
@@ -73,7 +78,11 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     }
 #if My_print > -1
     //Ehsan
-    //std::cout<<"*********force target is: "<<target<<std::endl;
+    /*if(target==arm_compute::graph::Target::NPU){
+    	std::cerr<<"graph "<<graph.id()<<" target is npu\n";
+    	//target=arm_compute::graph::Target::NEON;
+    }*/
+    std::cerr<<"Target is: "<<forced_target<<std::endl;
 #endif
     force_target_to_graph(graph, forced_target);
 
@@ -104,7 +113,51 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 
     //std::cerr<<"befor pass 2 graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
+    /*int gid=4;
+    int nodid=8;
+    if(graph.id()==gid){
+    	//int gid=4;
+		//int nodid=0;
+		//gid=0;
+		//nodid=42;
+		Graph& gg=graph;
+		auto nn=gg.node(nodid);
+		std::cerr<<"name:"<<nn->name()<<std::endl;
+		int in_nn=nn->num_inputs();
+		std::cerr<<"num inputs:"<<in_nn<<std::endl;
+		int inedges=nn->input_edges().size();
+		for(int i=0;i<inedges;i++){
+			std::cerr<<i<<" "<<nn->input_edge(i)->producer()->name()<<std::endl;
+			std::cerr<<nn->input(i)->desc().shape<<", id: "<<nn->input(i)->id()<<std::endl;
+		}
+		int out_nn=nn->num_outputs();
+		std::cerr<<"num outputs:"<<out_nn<<std::endl;
+		//int outedges=nn->output_edges().size();
+		std::cerr<<nn->output(0)->desc().shape<<", id: "<<nn->output(0)->id()<<std::endl;
+		std::string test;
+		//std::cin>>test;
+    }*/
     pm.run_type(graph, IGraphMutator::MutationType::Backend);
+    /*if(graph.id()==gid){
+
+		//gid=0;
+		//nodid=42;
+		Graph& gg=graph;
+		auto nn=gg.node(nodid);
+		std::cerr<<"name:"<<nn->name()<<std::endl;
+		int in_nn=nn->num_inputs();
+		std::cerr<<"num inputs:"<<in_nn<<std::endl;
+		int inedges=nn->input_edges().size();
+		for(int i=0;i<inedges;i++){
+			std::cerr<<nn->input(i)->desc().shape<<", id: "<<nn->input(i)->id()<<std::endl;
+		}
+		int out_nn=nn->num_outputs();
+		std::cerr<<"num outputs:"<<out_nn<<std::endl;
+		//int outedges=nn->output_edges().size();
+		std::cerr<<nn->output(0)->desc().shape<<", id: "<<nn->output(0)->id()<<std::endl;
+		std::string test;
+		std::cin>>test;
+	}*/
 
     // Perform topological sort
     std::vector<NodeID> topological_sorted_nodes = dfs(graph);
@@ -185,7 +238,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 #endif
     //std::cerr<<"5\n";
     // Setup tensor memory (Allocate all tensors or setup transition manager)
-    std::cerr<<"Big cores: "<<ctx.config().big_cores<<" Small cores: "<<ctx.config().little_cores<<std::endl;
+    //std::cerr<<"Big cores: "<<ctx.config().big_cores<<" Small cores: "<<ctx.config().little_cores<<std::endl;
     //std::cerr<<ctx.config().use_transition_memory_manager<<std::endl;
     if(ctx.config().use_transition_memory_manager)
     {
@@ -634,6 +687,16 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
     int n=10;
     for(int k=0; k<n;k++)
     {
+    	if(!parallel)
+    	{
+			std::unique_lock<std::mutex> lck(_mtx);
+			if(graph.id()==0){
+				std::cerr<<"\n\n\n\n\n\n\nfirst graph is ready to run? "<<ready<<"\n\n\n\n\n";
+				condVar_serial.wait(lck,[this] {return ready;});
+				std::cerr<<"\n\n\n\n\n\n\nfirst graph start processing\n\n\n\n\n";
+				ready=false;
+			}
+    	}
 
     	if(k==cc){
     		reset_timing(graph.id());
@@ -642,6 +705,7 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
     			std::cerr<<"non parallel or start with empty pipeline so just first stage synchronized\n";
     		}
     	}
+
     	// Call input accessors
 		auto tstart=std::chrono::high_resolution_clock::now();
 		//stream<<"graph_id:"<<graph.id()<<std::endl;
@@ -742,6 +806,14 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 		stream.str(std::string());
         detail::call_all_output_node_accessors(it->second);
         tfinish=std::chrono::high_resolution_clock::now();
+        if(!parallel)
+        {
+			std::unique_lock<std::mutex> lck(_mtx);
+			if(graph.id()==num_graphs-1){
+				ready=true;
+				condVar_serial.notify_all();
+			}
+		}
         x3=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 
         stream<<"Graph"<<graph.id()<<"   Input: "<<x1*1000<<"   Task: "<<x2*1000<<"   Out: "<<x3*1000<<"   Proc: "<<(x2+x3)*1000<<std::endl;

@@ -28,6 +28,9 @@
 #include <condition_variable>
 #include <thread>
 
+#include <queue>
+#include "arm_compute/runtime/Tensor.h"
+
 
 
 namespace arm_compute
@@ -44,60 +47,45 @@ public:
      * @param[in] id   Tensor ID
      * @param[in] desc Tensor information
      */
-	TensorPipelineReceiver(){
-		receiver_ready=false;
-		data_sent=false;
-	}
+	TensorPipelineReceiver();
 	double send_data(Tensor* _tensor);
+	double send_data(double* _npu_output);
 	void wait_for_receiver();
 	void signal_receiver();
 	bool receive_data();
 
-	bool get_receiver_ready(){
-		return receiver_ready;
-	}
+	bool get_receiver_ready();
 	void set_receiver_ready();
-	bool get_data_sent(){
-		return data_sent;
-	}
-	void set_tensor(Tensor* t){
-		tensor=t;
-	}
-	Tensor* get_tensor(){
-		return tensor;
-	}
+	bool get_data_sent();
+	void set_tensor(Tensor* t);
+	Tensor* get_tensor();
 
-	void set_name(std::string _name){
-		name=std::string(_name);
-	}
+	void set_name(std::string _name);
 
-	void reset_timing(){
-		t_sender_wait=0;
-		t_receiver_wait=0;
-		t_transmition=0;
-	}
-	double get_transmition_time(){
-		return t_transmition;
-	}
-	double get_sender_wait_time(){
-		return t_sender_wait;
-	}
-	double get_receiver_wait_time(){
-		return t_receiver_wait;
-	}
-	int get_graph_id(){
-		return graph_id;
-	}
-	void set_graph_id(int g_id){
-		graph_id=g_id;
-	}
+	void reset_timing();
+	double get_transmition_time();
+	double get_sender_wait_time();
+	double get_receiver_wait_time();
+	int get_graph_id();
+	void set_graph_id(int g_id);
 
 private:
 	Tensor* tensor = nullptr;
+	std::queue<std::unique_ptr<arm_compute::graph::Tensor>> buffer;
+	std::queue<double*> NPU_buffer;
 	std::mutex mutex_;
 	std::condition_variable condVar;
-	bool receiver_ready=new bool(false);
-	bool data_sent=new bool (false);
+	bool* receiver_ready=new bool(false);
+	bool* data_sent=new bool (false);
+
+	//For NPU
+	bool  is_npu = false;
+	unsigned int	Input_size=0;
+	bool	_Transpose=true;
+
+
+	//std::atomic<bool> receiver_ready;
+	//std::atomic<bool> data_sent;
 	std::string		name;
 	int				graph_id;
 	double	t_sender_wait;
@@ -116,29 +104,15 @@ public:
      * @param[in] id   Tensor ID
      * @param[in] desc Tensor information
      */
-	void add_receiver(TensorPipelineReceiver* d){
-		receivers.emplace_back(d);
-	}
-	std::vector<TensorPipelineReceiver*> get_dest(){
-		return receivers;
-	}
+	void add_receiver(TensorPipelineReceiver* d);
+	std::vector<TensorPipelineReceiver*> get_dest();
 	bool send_data();
 
-	void set_tensor(Tensor* t){
-		tensor=t;
-	}
-	Tensor* get_tensor(){
-		return tensor;
-	}
-	void set_name(std::string _name){
-		name=std::string(_name);
-	}
-	int get_graph_id(){
-		return graph_id;
-	}
-	void set_graph_id(int g_id){
-		graph_id=g_id;
-	}
+	void set_tensor(Tensor* t);
+	Tensor* get_tensor();
+	void set_name(std::string _name);
+	int get_graph_id();
+	void set_graph_id(int g_id);
 
 private:
 	Tensor* tensor = nullptr;
@@ -146,6 +120,7 @@ private:
 	std::vector<TensorPipelineReceiver*> receivers;
 	std::string name;
 	int graph_id;
+	bool is_npu = false;
 };
 
 
@@ -155,6 +130,7 @@ public:
 		return true;
 	}
 	virtual ~TensorPipelineNPU() {}
+
 
 };
 

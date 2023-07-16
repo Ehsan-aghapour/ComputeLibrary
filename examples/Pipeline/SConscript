@@ -28,6 +28,12 @@ Import('install_bin')
 #examples_env = env.Clone()
 Import('examples_env')
 pipeline_examples_env=examples_env.Clone()
+pipeline_examples_env.Append(LIBPATH='build/')
+
+
+#NPU_LIBS=['rknn_api','log','stdc++','dl']
+#NPU_LINKFLAGS=['-Wl','-rpath','build/','-static-libstdc++']
+#pipeline_examples_env.Append(LIBS=NPU_LIBS,LIBPATH='build/',LINKFLAGS=NPU_LINKFLAGS)
 
 #examples_env.Append(CPPPATH = ["#"])
 
@@ -91,7 +97,7 @@ for file in Glob("./graph_*.cpp"):
     prog = None
 
     if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
-        prog = pipeline_examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBPATH=['libs/'], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=pipeline_examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags, CPPPATH=pipeline_examples_env["CPPPATH"])
+        prog = pipeline_examples_env.Program(example, ["{}.cpp".format(example), utils,graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=pipeline_examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags, CPPPATH=pipeline_examples_env["CPPPATH"])
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
     else:
