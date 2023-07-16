@@ -1,5 +1,5 @@
 The link for Demo Video:
-https://drive.google.com/file/d/1S2TK0CKmF6aQ64sEd-XPdriSgAs9fM5B/view?usp=sharing
+https://drive.google.com/file/d/1aogrloqdXvyLwd_TPfvzyiypv9dsnt1I/view?usp=sharing
 
 # ARMCL-CO-UP (Deep Edge Resource Optimizer)
 ***ARMCL-CO-UP*** is an integrated, efficient CPU-GPU-NPU CNN inference design specifically developed for ARM-based Heterogeneous Multi-Processor System-on-Chips (HMPSoCs), along with any additional accelerator. It is designed to optimize the cooperative utilization of edge processors, delivering exceptional performance and energy efficiency. 
