@@ -1885,9 +1885,11 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
 template <typename NPUFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_npu_function(NPUNode &node)
 {
+	std::cerr<<"validate node\n";
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Create function
+    std::cerr<<"creating a NPU function for node: "<<node.name()<<std::endl;
     static int id=0;
     auto func = std::make_unique<NPUFunction>(id++);
 

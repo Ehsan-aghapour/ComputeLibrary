@@ -76,6 +76,8 @@ void PassManager::run_type(Graph &g, IGraphMutator::MutationType type)
     {
         if(pass && (pass->type() == type))
         {
+        	//std::string ss;
+        	//std::cin>>ss;
             ARM_COMPUTE_LOG_GRAPH_INFO("Running mutating pass : " << pass->name() << std::endl);
             pass->mutate(g);
         }

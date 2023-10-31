@@ -52,6 +52,7 @@ namespace graph
 namespace detail
 {
 
+//std::mutex 								_mtx_backend = {};
 ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, const std::vector<NodeID> &node_order)
 {
     ExecutionWorkload workload;
@@ -63,68 +64,74 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 
     // Create tasks
     int task_number=0;
-    for(auto &node_id : node_order)
+    ////std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     {
-        auto node = g.node(node_id);
-        //Ehsan
+    	//std::lock_guard<std::mutex> lock(_mtx_backend);
+		for(auto &node_id : node_order)
+		{
+			auto node = g.node(node_id);
+			//Ehsan
 
-        /*std::cout<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<" num inputs: "<<node->num_inputs()<<std::endl<<std::flush;
-        for(int k=0; k < node->num_inputs(); k++){
-        	INode *cc=node->input_edge(k)->producer();
-        	std::cout<<"\ninput "<<k<<" node_name: "<<cc->name()<<" ID: "<<cc->id()<<std::endl<<std::flush;
-        	TensorShape shape=node->input(k)->desc().shape;
-        	std::cout<<shape<<std::endl;
-            //for(int i=0;i<shape.num_dimensions();i++) std::cout<<shape[i]<<'\t'<<std::flush;
-            //std::cout<<"Padding: "<<_padding.left<<_padding.right<<_padding.top<<_padding.bottom<<std::endl;
-        }*/
+			std::cerr<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<" num inputs: "<<node->num_inputs()<<std::endl<<std::flush;
+			for(int k=0; k < node->num_inputs(); k++){
+				INode *cc=node->input_edge(k)->producer();
+				std::cerr<<"\ninput "<<k<<" node_name: "<<cc->name()<<" ID: "<<cc->id()<<std::endl<<std::flush;
+				TensorShape shape=node->input(k)->desc().shape;
+				std::cout<<shape<<std::endl;
+				//for(int i=0;i<shape.num_dimensions();i++) std::cout<<shape[i]<<'\t'<<std::flush;
+				//std::cerr<<"Padding: "<<_padding.left<<_padding.right<<_padding.top<<_padding.bottom<<std::endl;
+			}
 
-        /*
-         ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
-                               << " Target: " << CLTargetInfo::TargetType
-                               << " Data Type: " << input0->info()->data_type()
-                               << " Input0 shape: " << input0->info()->tensor_shape()
-                               << " Input1 shape: " << input1->info()->tensor_shape()
-                               << " Input2 shape: " << input2->info()->tensor_shape()
-                               << " Output0 shape: " << output0->info()->tensor_shape()
-                               << " Output1 shape: " << output1->info()->tensor_shape()
-                               << " Output2 shape: " << output2->info()->tensor_shape()
-                               << " Output3 shape: " << output3->info()->tensor_shape()
-                               << " DetectionPostProcessLayer info: " << detect_info
-                               << std::endl);
-         */
+			/*
+			 ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+								   << node.name()
+								   << " Type: " << node.type()
+								   << " Target: " << CLTargetInfo::TargetType
+								   << " Data Type: " << input0->info()->data_type()
+								   << " Input0 shape: " << input0->info()->tensor_shape()
+								   << " Input1 shape: " << input1->info()->tensor_shape()
+								   << " Input2 shape: " << input2->info()->tensor_shape()
+								   << " Output0 shape: " << output0->info()->tensor_shape()
+								   << " Output1 shape: " << output1->info()->tensor_shape()
+								   << " Output2 shape: " << output2->info()->tensor_shape()
+								   << " Output3 shape: " << output3->info()->tensor_shape()
+								   << " DetectionPostProcessLayer info: " << detect_info
+								   << std::endl);
+			 */
 
-        //std::cerr<<"node name: "<<node->name()<<std::endl;
-        if(node != nullptr)
-        {
-        	//std::cerr<<"node is not null\n";
-            Target                     assigned_target = node->assigned_target();
-            backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
-            std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
-            //std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
-            if(func != nullptr || is_utility_node(node))
-            {
-            	std::cerr<<"Task "<<task_number++<<": "<<node->name()<<"\n";
-                workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
-            }
-        }
+			std::cerr<<"node name: "<<node->name()<<std::endl;
+			if(node != nullptr)
+			{
+				std::cerr<<"node is not null\n";
+				Target                     assigned_target = node->assigned_target();
+
+				backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
+				std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
+				std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
+				if(func != nullptr || is_utility_node(node))
+				{
+					std::cerr<<"Graph ("<<g.id()<<") "<<"Task "<<task_number++<<": "<<node->name()<<"\n";
+					workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
+				}
+			}
+		}
+		//End mutex of backend
     }
-
+    ////std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     // Add inputs and outputs
     for(auto &node : g.nodes())
     {
         if(node != nullptr && node->type() == NodeType::Input)
         {
         	//Ehsan
-        	//std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+        	std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
 
             workload.inputs.push_back(node->output(0));
         }
         if(node != nullptr && node->type() == NodeType::Receiver)
 		{
 			//Ehsan
-			//std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+			std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
         	ReceiverNode* rec=dynamic_cast<ReceiverNode*>(node.get());
         	rec->get_receiver_tensor()->set_name(rec->common_node_params().name);
         	rec->get_receiver_tensor()->set_tensor(rec->output(0));
@@ -148,7 +155,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
         {
             workload.outputs.push_back(node->input(0));
             //Ehsan
-            //std::cout<<"\noutput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+            std::cout<<"\noutput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
 
             continue;
         }
@@ -156,7 +163,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
     std::stringstream stream;
     stream<<"Graph "<<g.id()<<" input size: "<<workload.inputs.size()<<" receiver size: "<<workload.receivers.size()<<
     		" tasks size: "<<workload.tasks.size()<<" senders size: "<<workload.senders.size()<<" output size: "<<
-			workload.outputs.size()<<std::endl;
+			workload.outputs.size()<<"\n\n";
     std::cerr<<stream.str();
     stream.str(std::string());
     return workload;
@@ -274,8 +281,7 @@ void call_all_tasks_pipeline(ExecutionWorkload &workload,int nn)
     for(auto &task : workload.tasks)
     {
     	ii++;
-    	std::cerr<<ii<<"  "<<task.node->name()<<std::endl;
-
+    	std::cerr<<"Graph ("<<workload.graph->id()<<") "<<ii<<"  "<<task.node->name()<<std::endl;
     	if(nn==0 && ii<workload.tasks.size()){
     		task();
     	}

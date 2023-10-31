@@ -118,9 +118,10 @@ std::unique_ptr<arm_compute::IFunction> NPUDeviceBackend::configure_node(INode &
     ARM_COMPUTE_ERROR_ON(node.assigned_target() != Target::NEON);
 
     // Configure node
-    //std::cerr<<"NPU backend configurte node\n";
+    std::cerr<<"NPU backend configurte node\n";
     auto func = NPUFunctionFactory::create(&node, ctx);
-    func->prepare();
+    if(func!=nullptr)
+    	func->prepare();
     return std::move(func);
 }
 

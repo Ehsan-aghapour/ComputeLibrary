@@ -125,9 +125,14 @@ public:
     // Inherited methods overridden
     void run() override;
 
+    void reset_timing(){
+    	input_time=run_time=output_time=num_run=0;
+    }
+
     void prepare() override;
 protected:
     int									id;
+    std::string							_name;
     std::vector<arm_compute::ITensor *> inputs;
     std::vector<arm_compute::ITensor *> outputs;
     typename SelectDataStructure<NPUType>::DataType NPU_Data;
@@ -136,6 +141,10 @@ protected:
 	bool                  		_bgr;
 	unsigned int				Input_size=0;
 	bool						Pass=false;
+	double						input_time=0;
+	double						run_time=0;
+	double						output_time=0;
+	int							num_run=0;
 
 
 private:

@@ -67,12 +67,13 @@ void validate_all_nodes(Graph &g)
 void configure_all_tensors(Graph &g)
 {
     auto &tensors = g.tensors();
-
+    //std::cerr<<"graph "<<g.id()<<std::endl;
     for(auto &tensor : tensors)
     {
         if(tensor && tensor->handle() == nullptr)
         {
             Target                         target  = tensor->desc().target;
+            //std::cerr<<"target: "<<target<<std::endl;
             backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
             std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
             ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
@@ -108,6 +109,7 @@ void allocate_all_output_tensors(INode &node)
 {
     for(unsigned int i = 0; i < node.num_outputs(); ++i)
     {
+    	//std::cerr<<"allocate output tensor\n";
         Tensor *tensor = node.output(i);
         if(tensor != nullptr && !tensor->bound_edges().empty())
         {

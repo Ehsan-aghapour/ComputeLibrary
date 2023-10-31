@@ -193,7 +193,7 @@ public:
     virtual StreamHints &hints()
     {
     	std::string s;
-		//s="calling hints in IstreamPipeline is "+ std::to_string((int)(_hints.target_hint)) +"\n";
+		s="__calling hints in IstreamPipeline is "+ std::to_string((int)(_hints.target_hint)) +"\n";
 		std::cerr<<s;
         return _hints;
     }
@@ -235,6 +235,8 @@ public:
     	return start_layer.size()-1;
     	//return -1;
     }
+
+    bool is_next_layer(std::string name);
 
 protected:
     inline static int 			current_layer={0};

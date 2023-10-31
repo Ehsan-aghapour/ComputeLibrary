@@ -1,0 +1,173 @@
+#!/bin/bash
+
+#set -x
+
+# NNNNNNNNNNNNNNNNNNNNNNNNNNNN
+# BBBBBBBBBBBBBBBBBBBBBBBBBBBB
+# GGGGGGGGGGGGGGGGGGGGGGGGGGGG
+# BBBBBBBBBBBBBBLLGGGNNNNNNNNN
+
+# NNNNNNNNNNNNNNNBGGGGGGGLLLLL
+# first max then L=1
+
+
+#./Run_CO-UP model=Mobile --order=NNNNNNNNNNNNNNNBGGGGGGGLLLLL --n=60 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+# with maximum freqs
+# then little freq to 1 index
+
+# Declare an associative array to store options and values
+declare -A options
+
+# Loop through command-line arguments
+for arg in "$@"; do
+  # Check if the argument is in the form "option=value"
+  if [[ "$arg" == *=* ]]; then
+    # Extract option and value using parameter expansion
+    option="${arg%%=*}"
+    value="${arg#*=}"
+    
+    # Store the option and value in the associative array
+    options["$option"]="$value"
+  fi
+done
+
+# Print the contents of the options array
+#for key in "${!options[@]}"; do
+#  echo "Option: $key, Value: ${options[$key]}"
+#done
+
+adb shell 'echo userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
+adb shell 'echo userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
+adb shell 'echo 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
+adb shell 'echo 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
+
+adb shell 'echo userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
+#adb shell 'cat /sys/class/devfreq/ff9a0000.gpu/governor'
+adb shell 'echo 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
+
+current_dir=$(pwd)
+p="/data/data/com.termux/files/home/ARMCL-RockPi"
+#p="/data/local/tmp/ARM-CO-UP/"
+laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
+#_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
+
+_dt1="$p/assets/${S}/alexnet/"
+_dt2="$p/assets/${S}/googlenet/"
+_dt3="$p/assets/${S}/mobilenet/"
+_dt4="$p/assets/${S}/resnet50/"
+_dt5="$p/assets/${S}/squeezenet/"
+_dt6="$p/assets/${S}/yolov3/"
+
+_img1="$p/assets/${S}/ppm_images_227/"
+_img2="$p/assets/${S}/ppm_images_224/"
+_img3="$p/assets/${S}/ppm_images_608/"
+
+
+_lbl="$p/assets/${S}/labels.txt"
+_lbl_detection="$p/assets/${S}/coco.names"
+
+
+lbl=""
+img=""
+dt=""
+
+remaining_options=()
+for key in "${!options[@]}"; do
+  if [[ $key != "model" && $key != "push" && $key != "compile" ]]
+  then
+  	#echo "rem Option: $key, Value: ${options[$key]}"
+  	remaining_options+=("$key=${options[$key]}")
+  fi
+done
+
+if [ "$1" == "-h" ]
+then
+   echo "pushtest [1-binarygraph] [2-board push dir] [3-target] [4-image?] [5-data?] [6-labels?] [7-n] [8-save?] [9-annotate?] [10-partition_point] [11-partition_point2] [12-order] [13-layer_timing] [14-Big_threads] [15-little_threads] [16-Graph] [17-GPU_host] [18-NPU_host]" ;
+   echo "data: 1-alexnet 2-googlenet 3-mobilenet 4-resnet50 5-squeezenet";
+   exit; 
+fi
+
+v="${options[--order]}"
+start=`expr index "$v" N`
+count=$(awk -FN '{print NF-1}' <<<"$v")
+end=$((start+count-1))
+#echo $start
+#echo $end
+caching="no"
+if (( $count>0 )); then
+	if [[ `adb shell ls $p/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null`  && $caching == "yes" ]]; then 
+		echo "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+	else
+		#if [ ! -f /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn ]; then
+		if [[ ! -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn || $caching == "no" ]]; then
+			#/home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/a.out ${16} $start $end
+			/home/ehsan/UvA/Sub_Model/a.out ${options[model]} $start $end
+			sleep 2
+		fi
+		#adb -s DKORWVI0P0 push /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
+		#adb -s DKORWVI0P0 push /home/ehsan/UvA/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
+		adb  push /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn $p/graphs/${options[model]}_${start}_${end}.rknn
+		sleep 5
+	fi
+fi
+
+
+case "${options[model]}" in
+    "Alex" | "alex")
+		lbl=$_lbl
+		img=$_img1
+		dt=$_dt1
+		graph="graph_alexnet_n_pipe_npu"
+        ;;
+    "Google" | "google")
+		lbl=$_lbl
+		img=$_img2
+		dt=$_dt2
+		graph="graph_google_n_pipe_npu"
+        ;;
+    "Mobile" | "mobile")
+		lbl=$_lbl
+		img=$_img2
+		dt=$_dt3
+		graph="graph_mobilenet_n_pipe_npu"
+        ;;
+	"Res50" | "res50")
+		lbl=$_lbl
+		img=$_img2
+		dt=$_dt4
+		graph="graph_resnet50_n_pipe_npu"
+        ;;
+	"Squeeze" | "squeeze")
+		lbl=$_lbl
+		img=$_img2
+		dt=$_dt5
+		graph="graph_squeezenet_n_pipe_npu"
+        ;;
+	"Yolo" | "yolo")
+		lbl=$_lbl
+		img=$_img3
+		dt=$_dt6
+		graph="graph_yolov3net_n_pipe_npu"
+        ;;
+    *)
+        echo "Unknown fruit."
+        ;;
+esac
+
+
+if [ "${options[compile]}" == "1" ]
+then 
+	cd ${laptop_dir}
+	./b64.sh 23
+	cd ${current_dir}
+	adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
+fi
+
+if [ "${options[push]}" == "1" ]
+then 
+	adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/ 
+fi
+
+adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
+
+

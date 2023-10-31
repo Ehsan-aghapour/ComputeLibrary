@@ -57,6 +57,7 @@ Status NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITens
 
 void NEBatchNormalizationLayer::run()
 {
+	//std::cerr<<"run bn\n";
     NEScheduler::get().schedule(_norm_kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

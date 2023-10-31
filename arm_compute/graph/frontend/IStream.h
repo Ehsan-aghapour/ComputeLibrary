@@ -73,9 +73,9 @@ public:
      */
     StreamHints &hints()
     {
-    	std::string s;
+    	//std::string s;
     	//s="calling hints in Istream is "+ std::to_string((int)(_hints.target_hint)) +"\n";
-    	std::cerr<<s;
+    	//std::cerr<<s;
         return _hints;
     }
     /** Forwards tail of stream to a given nid
@@ -86,7 +86,8 @@ public:
     {
         _tail_node = (nid != NullTensorID) ? nid : _tail_node;
     }
-    virtual NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&){};
+    virtual NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&, std::string){};
+    //virtual NodeID next_layer_2(std::vector<std::pair<NodeID,int>>, NodeID&, int&){};
     //virtual NodeID* get_tail_p(){};
 	virtual int get_tail_graph_id(){return 0;};
 	//virtual int* get_graph_id_p(){};
@@ -95,7 +96,8 @@ public:
 	//virtual NodeID maped_node(NodeID tail, int graph, int target_graph){};
 
 protected:
-    StreamHints _hints     = {};              /**< Execution and algorithmic hints */
+    inline static StreamHints _hints     = {};              /**< Execution and algorithmic hints */
+    //StreamHints _hints     = {};              /**< Execution and algorithmic hints */
     NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
 
 };

@@ -36,7 +36,7 @@ class SenderNode final : public INode
 {
 public:
     /** Default Constructor */
-	SenderNode();
+	SenderNode(NodeParams params);
 
     // Inherited overridden methods:
     NodeType         type() const override;

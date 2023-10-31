@@ -281,9 +281,11 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
 {
     if(!_already_loaded)
     {
-    	iterator=(iterator+1)%(image_list.size());
+    	//iterator=(iterator+1)%(image_list.size());
+    	iterator=(iterator)%(image_list.size());
     	std::cerr<<"iterator:"<<iterator<<std::endl;
     	_filename=image_list[iterator];
+    	iterator++;
     	std::cerr<<"reading image: "<<_filename<<std::endl;
 
         auto image_loader = utils::ImageLoaderFactory::create(_filename);

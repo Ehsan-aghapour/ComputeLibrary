@@ -32,10 +32,11 @@ namespace arm_compute
 {
 namespace graph
 {
-SenderNode::SenderNode()
+SenderNode::SenderNode(NodeParams params)
 {
     _input_edges.resize(1, EmptyEdgeID);
     sender_tensor=new TensorPipelineSender();
+    sender_tensor->set_is_npu(params.target==arm_compute::graph::Target::NPU);
 }
 
 bool SenderNode::forward_descriptors()

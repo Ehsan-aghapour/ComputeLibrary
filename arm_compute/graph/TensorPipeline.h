@@ -63,11 +63,23 @@ public:
 	void set_name(std::string _name);
 
 	void reset_timing();
+	/*{
+		t_sender_write=0;
+		t_sender_transfer=0;
+		t_receiver_read=0;
+		t_receiver_wait=0;
+		num_run=0;
+	}*/
 	double get_transmition_time();
-	double get_sender_wait_time();
+	double get_sender_write_time();
 	double get_receiver_wait_time();
+	double get_receiver_read_time();
+
 	int get_graph_id();
 	void set_graph_id(int g_id);
+	void set_is_npu(bool _is_npu){
+		is_npu=_is_npu;
+	}
 
 private:
 	Tensor* tensor = nullptr;
@@ -84,13 +96,19 @@ private:
 	bool	_Transpose=true;
 
 
+
 	//std::atomic<bool> receiver_ready;
 	//std::atomic<bool> data_sent;
 	std::string		name;
 	int				graph_id;
-	double	t_sender_wait;
+	/*double	t_sender_wait;
 	double	t_receiver_wait;
-	double	t_transmition;
+	double	t_transmition;*/
+	double	t_sender_write=0;
+	double	t_sender_transfer=0;
+	double	t_receiver_read=0;
+	double	t_receiver_wait=0;
+	int		num_run=0;
 };
 
 
@@ -113,7 +131,15 @@ public:
 	void set_name(std::string _name);
 	int get_graph_id();
 	void set_graph_id(int g_id);
-
+	void set_is_npu(bool _is_npu){
+		is_npu=_is_npu;
+	}
+	double get_sending_time(){
+		return sending_time;
+	}
+	void reset_timing(){
+		sending_time=num_run=0;
+	}
 private:
 	Tensor* tensor = nullptr;
 	//vector of receivers instead of one receiver
@@ -121,6 +147,8 @@ private:
 	std::string name;
 	int graph_id;
 	bool is_npu = false;
+	double	sending_time=0;
+	int		num_run=0;
 };
 
 

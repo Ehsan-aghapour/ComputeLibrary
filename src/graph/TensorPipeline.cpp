@@ -115,6 +115,11 @@ TensorPipelineReceiver::TensorPipelineReceiver()
 	//data_sent.store(false);
 	*receiver_ready=false;
 	*data_sent=false;
+	t_sender_write=0;
+	t_sender_transfer=0;
+	t_receiver_read=0;
+	t_receiver_wait=0;
+	num_run=0;
 }
 bool TensorPipelineReceiver::get_receiver_ready(){
 	//return receiver_ready.load();
@@ -136,18 +141,23 @@ void TensorPipelineReceiver::set_name(std::string _name){
 }
 
 void TensorPipelineReceiver::reset_timing(){
-	t_sender_wait=0;
+	t_sender_write=0;
+	t_sender_transfer=0;
+	t_receiver_read=0;
 	t_receiver_wait=0;
-	t_transmition=0;
+	num_run=0;
 }
 double TensorPipelineReceiver::get_transmition_time(){
-	return t_transmition;
-}
-double TensorPipelineReceiver::get_sender_wait_time(){
-	return t_sender_wait;
+	return t_sender_transfer;
 }
 double TensorPipelineReceiver::get_receiver_wait_time(){
 	return t_receiver_wait;
+}
+double TensorPipelineReceiver::get_receiver_read_time(){
+	return t_receiver_read;
+}
+double TensorPipelineReceiver::get_sender_write_time(){
+	return t_sender_write;
 }
 int TensorPipelineReceiver::get_graph_id(){
 	return graph_id;
@@ -217,26 +227,29 @@ double TensorPipelineReceiver::send_data(Tensor* _tensor){
 
 double TensorPipelineReceiver::send_data(Tensor* _tensor){
 		{
+
 			std::string s;
+			double duration_write=0;
+			double duration_transfer=0;
+			num_run++;
 			auto tstart=std::chrono::high_resolution_clock::now();
-			auto tend1=std::chrono::high_resolution_clock::now();
-			/*if(graph_id==2 or graph_id==5){
-				std::cerr<<"sending data to "<<graph_id<<std::endl;
-				std::string sss;
-				std::cin>>sss;
-			}*/
 			std::unique_lock<std::mutex> lck(mutex_);
 
 			/******************** If is receiver of a NPU ************************/
 			if(is_npu){
+				std::cerr<<"sending data to an NPU receiver\n";
 				if(!get_receiver_ready() || !NPU_buffer.empty()){
-					//add to queue
+					//add to queue (maybe tensor.map required)
 					const auto   output_net  = reinterpret_cast<double *>(_tensor->handle()->tensor().buffer() + _tensor->handle()->tensor().info()->offset_first_element_in_bytes());
 					NPU_buffer.emplace(output_net);
-					std::cerr<<"Sending to NPU_Receiver of graph:" + std::to_string(graph_id) +name + " is not ready, it has been put in buffer\n";
+					auto tend=std::chrono::high_resolution_clock::now();
+					duration_write=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+					t_sender_write+=duration_write;
+					std::cerr<<name<<" Frame "<<num_run<<" sender write time: "<<duration_write<<std::endl;
+					std::cerr<<"Sending to NPU_Receiver of graph:" + std::to_string(graph_id) +"_"+name + " is not ready, it has been put in buffer\n";
 				}
 				else{
-
+					/*
 					s="Sending to NPU_Receiver of graph:" + std::to_string(graph_id) + name+" transferring data directly\n";
 					std::cerr<<s;
 					*receiver_ready=false;
@@ -246,7 +259,31 @@ double TensorPipelineReceiver::send_data(Tensor* _tensor){
 
 
 					*data_sent=true;
+					condVar.notify_all();*/
+
+					tensor->handle()->map(true);
+
+					*receiver_ready=false;
+					//Transfer data
+					const auto   output_net  = reinterpret_cast<double *>(_tensor->handle()->tensor().buffer() + _tensor->handle()->tensor().info()->offset_first_element_in_bytes());
+					std::cerr<<"graph:" + std::to_string(graph_id) +"_"+name+" _tensor desc: "<<_tensor->desc().shape<<std::endl;
+					std::cerr<<"graph:" + std::to_string(graph_id) +"_"+name+" tensor desc: "<<tensor->desc().shape<<std::endl;
+					std::cerr<<"\n\n\n\n\n\n\n\nsender tensor:  "<<output_net[0]<<","<<output_net[1]<<","<<output_net[2]<<std::endl;
+					tensor->handle()->tensor().copy_from(_tensor->handle()->tensor());
+					const auto   output_net2  = reinterpret_cast<double *>(tensor->handle()->tensor().buffer() + tensor->handle()->tensor().info()->offset_first_element_in_bytes());
+					std::cerr<<"receiver tensor: "<<output_net2[0]<<","<<output_net2[1]<<","<<output_net2[2]<<"\n\n\n\n\n\n"<<std::endl;
+					tensor->handle()->unmap();
+
+					*data_sent=true;
 					condVar.notify_all();
+					auto tend=std::chrono::high_resolution_clock::now();
+					duration_transfer=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+					t_sender_transfer+=duration_transfer;
+					std::cerr<<name<<" Frame "<<num_run<<" sender transfer time: "<<duration_transfer<<std::endl;
+					s="graph:" + std::to_string(graph_id) +name+" done\n";
+					std::cerr<<s;
+
+
 
 				}
 			}
@@ -259,11 +296,15 @@ double TensorPipelineReceiver::send_data(Tensor* _tensor){
 					t2->handle()->tensor().copy_from(_tensor->handle()->tensor());
 					t2->handle()->unmap();
 					buffer.emplace(std::move(t2));
+					auto tend=std::chrono::high_resolution_clock::now();
+					duration_write=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+					t_sender_write+=duration_write;
+					std::cerr<<name<<" Frame "<<num_run<<" sender write time: "<<duration_write<<std::endl;
 					std::cerr<<"Sending to rec of  graph:" + std::to_string(graph_id) +name + " is not ready, it has been put in buffer\n";
 				}
 				else{
 
-					s="Sending to rec of graph:" + std::to_string(graph_id) + name+" transferring data directly\n";
+					s="Sending to rec of graph:" + std::to_string(graph_id) +"_"+ name+" transferring data directly\n";
 					std::cerr<<s;
 
 
@@ -279,34 +320,41 @@ double TensorPipelineReceiver::send_data(Tensor* _tensor){
 					*receiver_ready=false;
 					//Transfer data
 					const auto   output_net  = reinterpret_cast<double *>(_tensor->handle()->tensor().buffer() + _tensor->handle()->tensor().info()->offset_first_element_in_bytes());
-					//std::cerr<<"graph:" + std::to_string(graph_id) +name+" _tensor desc: "<<_tensor->desc().shape<<std::endl;
-					//std::cerr<<"graph:" + std::to_string(graph_id) +name+" tensor desc: "<<tensor->desc().shape<<std::endl;
-					//std::cerr<<"\n\n\n\n\n\n\n\nsender tensor:  "<<output_net[0]<<","<<output_net[1]<<","<<output_net[2]<<std::endl;
+					std::cerr<<"graph:" + std::to_string(graph_id) +"_"+name+" _tensor desc: "<<_tensor->desc().shape<<std::endl;
+					std::cerr<<"graph:" + std::to_string(graph_id) +"_"+name+" tensor desc: "<<tensor->desc().shape<<std::endl;
+					std::cerr<<"\n\n\n\n\n\n\n\nsender tensor:  "<<output_net[0]<<","<<output_net[1]<<","<<output_net[2]<<std::endl;
 					tensor->handle()->tensor().copy_from(_tensor->handle()->tensor());
 					const auto   output_net2  = reinterpret_cast<double *>(tensor->handle()->tensor().buffer() + tensor->handle()->tensor().info()->offset_first_element_in_bytes());
-					//std::cerr<<"receiver tensor: "<<output_net2[0]<<","<<output_net2[1]<<","<<output_net2[2]<<"\n\n\n\n\n\n"<<std::endl;
+					std::cerr<<"receiver tensor: "<<output_net2[0]<<","<<output_net2[1]<<","<<output_net2[2]<<"\n\n\n\n\n\n"<<std::endl;
+
 					tensor->handle()->unmap();
 
 					//t2->handle()->unmap();
 					//data_sent.store(true);
 					*data_sent=true;
 					condVar.notify_all();
+					auto tend=std::chrono::high_resolution_clock::now();
+					duration_transfer=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+					t_sender_transfer+=duration_transfer;
+					std::cerr<<name<<" Frame "<<num_run<<" sender transfer time: "<<duration_transfer<<std::endl;
 					//s="graph:" + std::to_string(graph_id) +name+" done\n";
 					//std::cerr<<s;
 				}
 			}
 
 			lck.unlock();
-			auto tend2=std::chrono::high_resolution_clock::now();
+			/*auto tend2=std::chrono::high_resolution_clock::now();
 			t_sender_wait+=std::chrono::duration_cast<std::chrono::duration<double>>(tend1 - tstart).count();
 			double t=std::chrono::duration_cast<std::chrono::duration<double>>(tend2 - tend1).count();
 			t_transmition+=t;
-			return t;
+			return t;*/
+			return 0;
 		}
 }
 
 double TensorPipelineReceiver::send_data(double* _npu_output){
 		{
+			std::cerr<<"Sending data from npu sender with size "<<sizeof(_npu_output)<<std::endl;
 			std::string s;
 			auto tstart=std::chrono::high_resolution_clock::now();
 			auto tend1=std::chrono::high_resolution_clock::now();
@@ -338,7 +386,7 @@ double TensorPipelineReceiver::send_data(double* _npu_output){
 
 				}
 			}
-			/********************* If is not receiver of a NPU *******************/
+			/********************* If is not receiver of an NPU *******************/
 			else{
 				if(!get_receiver_ready() || !buffer.empty()){
 					//add to queue
@@ -394,10 +442,10 @@ double TensorPipelineReceiver::send_data(double* _npu_output){
 					}
 
 					auto tfinish=std::chrono::high_resolution_clock::now();
-#if NPU_Debug
+//#if NPU_Debug
 					double cost0 = std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 					std::cerr<<"Transfer time (transpose = "<<_Transpose<<"): "<<cost0<<std::endl;
-#endif
+//#endif
 					tensor->handle()->unmap();
 
 					//t2->handle()->unmap();
@@ -410,11 +458,12 @@ double TensorPipelineReceiver::send_data(double* _npu_output){
 			}
 
 			lck.unlock();
-			auto tend2=std::chrono::high_resolution_clock::now();
+			/*auto tend2=std::chrono::high_resolution_clock::now();
 			t_sender_wait+=std::chrono::duration_cast<std::chrono::duration<double>>(tend1 - tstart).count();
 			double t=std::chrono::duration_cast<std::chrono::duration<double>>(tend2 - tend1).count();
 			t_transmition+=t;
-			return t;
+			return t;*/
+			return 0;
 		}
 }
 void TensorPipelineReceiver::wait_for_receiver(){
@@ -468,24 +517,33 @@ bool TensorPipelineReceiver::receive_data(){
 		std::string s;
 		//s="graph:" + std::to_string(graph_id) +name+" setting ready for getting data\n";
 		std::cerr<<s;
+		//num_run++;
+		double duration_wait=0;
+		double duration_read=0;
 		auto tstart=std::chrono::high_resolution_clock::now();
+
+		//std::chrono::time_point<std::chrono::high_resolution_clock> tend;
 		std::unique_lock<std::mutex> lck(mutex_);
 		/******************** If is receiver of a NPU ************************/
 		if(is_npu){
 			if (NPU_buffer.empty() || get_data_sent()){
-				std::cerr<<"NPU receiver of graph:" + std::to_string(graph_id) +name + "nothing in buffer\n";
+				std::cerr<<"NPU receiver of graph:" + std::to_string(graph_id) +"_"+name + "nothing in buffer\n";
 				//receiver_ready.store(true);
 				//*receiver_ready=true;
 				//condVar.notify_all();
 				if(!get_data_sent()){
-					s="NPU receiver graph:" + std::to_string(graph_id) + name+" waiting for sender to send the data\n";
+					s="NPU receiver graph:" + std::to_string(graph_id) + "_"+name+" waiting for sender to send the data\n";
 					std::cerr<<s;
 				}
 				condVar.wait(lck, [this]{ return get_data_sent(); });
+				auto tend=std::chrono::high_resolution_clock::now();
+				duration_wait=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+				t_receiver_wait+=duration_wait;
+				std::cerr<<name<<" Frame "<<num_run<<" receiver wait time: "<<duration_wait<<std::endl;
 				//data_sent.store(false);
 				*data_sent=false;
 				//*receiver_ready=false;
-				s="NPU Receiver graph:" + std::to_string(graph_id) + name+"transfered, Receiver done\n";
+				s="NPU Receiver graph:" + std::to_string(graph_id) + "_"+name+"transfered, Receiver done\n";
 				std::cerr<<s;
 			}
 			else{
@@ -498,27 +556,34 @@ bool TensorPipelineReceiver::receive_data(){
 				buffer.pop();
 				tensor->handle()->unmap();*/
 				//Here Read from double* NPU_buffer into the inupt of the NPU
-
-				std::cerr<<"NPU Receiver graph:" + std::to_string(graph_id) +name + "read data from buffer\n";
+				auto tend=std::chrono::high_resolution_clock::now();
+				duration_read=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+				t_receiver_read+=duration_read;
+				std::cerr<<name<<" Frame "<<num_run<<" receiver read time: "<<duration_wait<<std::endl;
+				std::cerr<<"NPU Receiver graph:" + std::to_string(graph_id) +"_"+name + "read data from buffer\n";
 			}
 		}
 
 		/********************* If is not receiver of a NPU *******************/
 		else{
 			if (buffer.empty() || get_data_sent()){
-				std::cerr<<"graph:" + std::to_string(graph_id) +name + "nothing in buffer\n";
+				//std::cerr<<"graph:" + std::to_string(graph_id) +"_"+name + "nothing in buffer\n";
 				//receiver_ready.store(true);
 				//*receiver_ready=true;
 				//condVar.notify_all();
 				if(!get_data_sent()){
-					s="graph:" + std::to_string(graph_id) + name+" waiting for sender to send the data\n";
+					s="graph:" + std::to_string(graph_id) + "_"+name+" waiting for sender to send the data\n";
 					std::cerr<<s;
 				}
 				condVar.wait(lck, [this]{ return get_data_sent(); });
+				auto tend=std::chrono::high_resolution_clock::now();
+				duration_wait=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+				t_receiver_wait+=duration_wait;
+				std::cerr<<name<<" Frame "<<num_run<<" receiver wait time: "<<duration_wait<<std::endl;
 				//data_sent.store(false);
 				*data_sent=false;
 				//*receiver_ready=false;
-				s="graph:" + std::to_string(graph_id) + name+"transfered, Receiver done\n";
+				s="graph:" + std::to_string(graph_id) + "_"+name+"transfered, Receiver done\n";
 				std::cerr<<s;
 			}
 			else{
@@ -530,18 +595,24 @@ bool TensorPipelineReceiver::receive_data(){
 				buffer.front()->handle()->unmap();
 				buffer.pop();
 				tensor->handle()->unmap();
-				std::cerr<<"graph:" + std::to_string(graph_id) +name + "read data from buffer\n";
+				auto tend=std::chrono::high_resolution_clock::now();
+				duration_read=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());
+				t_receiver_read+=duration_read;
+				std::cerr<<name<<" Frame "<<num_run<<" receiver read time: "<<duration_wait<<std::endl;
+				std::cerr<<"graph:" + std::to_string(graph_id) +"_"+name + "read data from buffer\n";
 			}
 		}
 		lck.unlock();
-		auto tend=std::chrono::high_resolution_clock::now();
-		t_receiver_wait+=std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count();
+
+
+		//auto tend=std::chrono::high_resolution_clock::now();
+		//t_receiver_wait+=std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count();
 	}
 	return true;
 }
 
 void TensorPipelineReceiver::set_receiver_ready(){
-	auto s="graph:" + std::to_string(graph_id) + name+" set receiver ready\n";
+	auto s="graph:" + std::to_string(graph_id) + "_"+name+" set receiver ready\n";
 	std::cerr<<s;
 	//receiver_ready.store(true);
 	*receiver_ready=true;
@@ -576,23 +647,30 @@ void TensorPipelineSender::set_graph_id(int g_id){
 
 bool TensorPipelineSender::send_data(){
 		std::string s;
-
-		s="graph:" + std::to_string(graph_id) +name+ " before check dest_tensor\n";
-		std::cerr<<s;
+		//s="graph:" + std::to_string(graph_id) +"_"+name+ " before check dest_tensor\n";
+		//std::cerr<<s;
+		double duration_sender_sending=0;
+		auto start=std::chrono::high_resolution_clock::now();
 		tensor->handle()->map(true);
 		for(auto rec:receivers){
-			if(is_npu){
+			/*if(is_npu){
 				double* output=nullptr;
 				//output=get npu output
 				rec->send_data(output);
 			}
 			else{
 				rec->send_data(tensor);
-			}
+			}*/
+			rec->send_data(tensor);
 			//std::cerr<<"graph:" + std::to_string(graph_id) +name +" send to "+rec->name()+" done!"<<std::endl;
 		}
 		tensor->handle()->unmap();
-		s="graph:" + std::to_string(graph_id) +name+" after check dest_tensor\n";
+		auto end=std::chrono::high_resolution_clock::now();
+		num_run++;
+		duration_sender_sending=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count());
+		std::cerr<<name<<" Frame "<<num_run<<" sender whole sending time: "<<duration_sender_sending<<std::endl;
+		sending_time+=duration_sender_sending;
+		s="graph:" + std::to_string(graph_id) +"_"+name+" after check dest_tensor\n";
 		std::cerr<<s;
 		return true;
 

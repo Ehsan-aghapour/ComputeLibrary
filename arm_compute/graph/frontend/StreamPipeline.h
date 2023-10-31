@@ -155,7 +155,8 @@ public:
 	}*/
 
     void add_graph(int start, int end, char _PE, char _Host_PE);
-    NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&) override;
+    NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&, std::string) override;
+    //NodeID next_layer_2(std::vector<std::pair<NodeID,int>>, NodeID&, int&) override;
     void set_common_params(arm_compute::utils::CommonGraphParams);
     void prnt();
     void forward_tail(NodeID nid) override;

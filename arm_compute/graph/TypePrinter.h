@@ -200,6 +200,16 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::Dummy:
             os << "Dummy";
             break;
+        /******** Ehsan: Add support for printing node types of sender and receiver ****************/
+        case NodeType::Sender:
+			os << "Sender";
+			break;
+        case NodeType::Receiver:
+			os << "Receiver";
+			break;
+        case NodeType::NPU:
+			os << "NPU";
+			break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

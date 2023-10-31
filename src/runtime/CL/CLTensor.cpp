@@ -70,7 +70,7 @@ CLTensorAllocator *CLTensor::allocator()
 
 void CLTensor::map(bool blocking)
 {
-#if My_print > -1
+#if My_print > 0
 	//Ehsan: Observation: _ctx is null at setup and runtime several times called
 	std::cerr<<"contex is null? "<<(_ctx==nullptr)<<std::endl;
 #endif

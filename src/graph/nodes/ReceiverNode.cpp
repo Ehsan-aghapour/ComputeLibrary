@@ -36,6 +36,7 @@ ReceiverNode::ReceiverNode(TensorDescriptor desc)
 {
     _outputs.resize(1, NullTensorID);
     receiver_tensor=new TensorPipelineReceiver();
+    receiver_tensor->set_is_npu(desc.target==arm_compute::graph::Target::NPU);
 }
 
 bool ReceiverNode::forward_descriptors()

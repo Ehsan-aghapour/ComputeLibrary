@@ -1,0 +1,2649 @@
+Threads : 2
+Small Cores Threads : 4
+Target : Neon
+Data type : F32
+Data layout : NHWC
+Tuner enabled? : false
+Cache enabled? : false
+Tuner mode : Normal
+Tuner file : 
+MLGO file : 
+Fast math enabled? : false
+Data path : /data/data/com.termux/files/home/ARMCL-RockPi/assets//yolov3/
+Image file : /data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//
+Labels file : /data/data/com.termux/files/home/ARMCL-RockPi/assets//coco.names
+Partition point is : 0
+Second partition point is : 0
+Order is : BBB
+GPU host is: B
+NPU host is: B
+Number of totla cores is : 6
+Number of little cores is : 4
+Run network for 3 times.
+Layer timing: 0
+
+Adding Graph0 target 1 PE: B Host PE: B Layers: 0-2
+Threads : 2
+Small Cores Threads : 4
+Target : Neon
+Data type : F32
+Data layout : NHWC
+Tuner enabled? : false
+Cache enabled? : false
+Tuner mode : Normal
+Tuner file : 
+MLGO file : 
+Fast math enabled? : false
+Data path : /data/data/com.termux/files/home/ARMCL-RockPi/assets//yolov3/
+Image file : /data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//
+Labels file : /data/data/com.termux/files/home/ARMCL-RockPi/assets//coco.names
+Partition point is : 0
+Second partition point is : 0
+Order is : BBB
+GPU host is: B
+NPU host is: B
+Number of totla cores is : 6
+Number of little cores is : 4
+Run network for 3 times.
+Layer timing: 0
+
+__calling hints in IstreamPipeline is 0
+__calling hints in IstreamPipeline is 1
+****************************
+GraphUtils.cpp- reading images: /data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//
+/data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//apple.ppm
+/data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//dishes.ppm
+/data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//bus.ppm
+/data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//zebra.ppm
+/data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//bear.ppm
+*****************************
+
+
+
+
+
+
+------layer_name: 
+prev layer number: 0
+current layer number: 1
+input node id: 4294967295 graph: 0
+
+
+
+------layer_name: conv2d_1/Conv2D
+prev layer number: 1
+current layer number: 2
+input node id: 0 graph: 0
+
+
+
+------layer_name: conv2d_1/BatchNorm
+prev layer number: 2
+current layer number: 3
+input node id: 2 graph: 0
+
+
+
+------layer_name: conv2d_1/LeakyRelu
+prev layer number: 3
+Skipping layer: conv2d_1/LeakyRelu
+current layer number: 3
+input node id: 7 graph: 0
+
+
+
+------layer_name: conv2d_2/Conv2D
+prev layer number: 3
+current layer number: 4
+input node id: 8 graph: 0
+
+
+
+------layer_name: conv2d_2/BatchNorm
+prev layer number: 4
+current layer number: 5
+input node id: 10 graph: 0
+
+
+
+------layer_name: conv2d_2/LeakyRelu
+prev layer number: 5
+Skipping layer: conv2d_2/LeakyRelu
+current layer number: 5
+input node id: 15 graph: 0
+new sub stream with tail node: 16 and tail graph: 0
+new sub stream with tail node: 16 and tail graph: 0
+
+
+
+------layer_name: conv2d_3/Conv2D
+prev layer number: 5
+current layer number: 6
+input node id: 16 graph: 0
+
+
+
+------layer_name: conv2d_3/BatchNorm
+prev layer number: 6
+current layer number: 7
+input node id: 18 graph: 0
+
+
+
+------layer_name: conv2d_3/LeakyRelu
+prev layer number: 7
+Skipping layer: conv2d_3/LeakyRelu
+current layer number: 7
+input node id: 23 graph: 0
+
+
+
+------layer_name: conv2d_4/Conv2D
+prev layer number: 7
+current layer number: 8
+input node id: 24 graph: 0
+
+
+
+------layer_name: conv2d_4/BatchNorm
+prev layer number: 8
+current layer number: 9
+input node id: 26 graph: 0
+
+
+
+------layer_name: conv2d_4/LeakyRelu
+prev layer number: 9
+Skipping layer: conv2d_4/LeakyRelu
+current layer number: 9
+input node id: 31 graph: 0
+
+
+
+------layer_name: add_3_4
+prev layer number: 9
+current layer number: 10
+input node id: 32 graph: 0
+input node id: 16 graph: 0
+input node id: 16 graph: 0
+
+
+
+------layer_name: conv2d_5/Conv2D
+prev layer number: 10
+current layer number: 11
+input node id: 33 graph: 0
+
+
+
+------layer_name: conv2d_5/BatchNorm
+prev layer number: 11
+current layer number: 12
+input node id: 35 graph: 0
+
+
+
+------layer_name: conv2d_5/LeakyRelu
+prev layer number: 12
+Skipping layer: conv2d_5/LeakyRelu
+current layer number: 12
+input node id: 40 graph: 0
+new sub stream with tail node: 41 and tail graph: 0
+new sub stream with tail node: 41 and tail graph: 0
+
+
+
+------layer_name: conv2d_6/Conv2D
+prev layer number: 12
+current layer number: 13
+input node id: 41 graph: 0
+
+
+
+------layer_name: conv2d_6/BatchNorm
+prev layer number: 13
+current layer number: 14
+input node id: 43 graph: 0
+
+
+
+------layer_name: conv2d_6/LeakyRelu
+prev layer number: 14
+Skipping layer: conv2d_6/LeakyRelu
+current layer number: 14
+input node id: 48 graph: 0
+
+
+
+------layer_name: conv2d_7/Conv2D
+prev layer number: 14
+current layer number: 15
+input node id: 49 graph: 0
+
+
+
+------layer_name: conv2d_7/BatchNorm
+prev layer number: 15
+current layer number: 16
+input node id: 51 graph: 0
+
+
+
+------layer_name: conv2d_7/LeakyRelu
+prev layer number: 16
+Skipping layer: conv2d_7/LeakyRelu
+current layer number: 16
+input node id: 56 graph: 0
+
+
+
+------layer_name: add_6_7
+prev layer number: 16
+current layer number: 17
+input node id: 57 graph: 0
+input node id: 41 graph: 0
+input node id: 41 graph: 0
+new sub stream with tail node: 58 and tail graph: 0
+new sub stream with tail node: 58 and tail graph: 0
+
+
+
+------layer_name: conv2d_8/Conv2D
+prev layer number: 17
+current layer number: 18
+input node id: 58 graph: 0
+
+
+
+------layer_name: conv2d_8/BatchNorm
+prev layer number: 18
+current layer number: 19
+input node id: 60 graph: 0
+
+
+
+------layer_name: conv2d_8/LeakyRelu
+prev layer number: 19
+Skipping layer: conv2d_8/LeakyRelu
+current layer number: 19
+input node id: 65 graph: 0
+
+
+
+------layer_name: conv2d_9/Conv2D
+prev layer number: 19
+current layer number: 20
+input node id: 66 graph: 0
+
+
+
+------layer_name: conv2d_9/BatchNorm
+prev layer number: 20
+current layer number: 21
+input node id: 68 graph: 0
+
+
+
+------layer_name: conv2d_9/LeakyRelu
+prev layer number: 21
+Skipping layer: conv2d_9/LeakyRelu
+current layer number: 21
+input node id: 73 graph: 0
+
+
+
+------layer_name: add_8_9
+prev layer number: 21
+current layer number: 22
+input node id: 74 graph: 0
+input node id: 58 graph: 0
+input node id: 58 graph: 0
+
+
+
+------layer_name: conv2d_10/Conv2D
+prev layer number: 22
+current layer number: 23
+input node id: 75 graph: 0
+
+
+
+------layer_name: conv2d_10/BatchNorm
+prev layer number: 23
+current layer number: 24
+input node id: 77 graph: 0
+
+
+
+------layer_name: conv2d_10/LeakyRelu
+prev layer number: 24
+Skipping layer: conv2d_10/LeakyRelu
+current layer number: 24
+input node id: 82 graph: 0
+new sub stream with tail node: 83 and tail graph: 0
+new sub stream with tail node: 83 and tail graph: 0
+
+
+
+------layer_name: conv2d_11/Conv2D
+prev layer number: 24
+current layer number: 25
+input node id: 83 graph: 0
+
+
+
+------layer_name: conv2d_11/BatchNorm
+prev layer number: 25
+current layer number: 26
+input node id: 85 graph: 0
+
+
+
+------layer_name: conv2d_11/LeakyRelu
+prev layer number: 26
+Skipping layer: conv2d_11/LeakyRelu
+current layer number: 26
+input node id: 90 graph: 0
+
+
+
+------layer_name: conv2d_12/Conv2D
+prev layer number: 26
+current layer number: 27
+input node id: 91 graph: 0
+
+
+
+------layer_name: conv2d_12/BatchNorm
+prev layer number: 27
+current layer number: 28
+input node id: 93 graph: 0
+
+
+
+------layer_name: conv2d_12/LeakyRelu
+prev layer number: 28
+Skipping layer: conv2d_12/LeakyRelu
+current layer number: 28
+input node id: 98 graph: 0
+
+
+
+------layer_name: add_11_12
+prev layer number: 28
+current layer number: 29
+input node id: 99 graph: 0
+input node id: 83 graph: 0
+input node id: 83 graph: 0
+new sub stream with tail node: 100 and tail graph: 0
+new sub stream with tail node: 100 and tail graph: 0
+
+
+
+------layer_name: conv2d_13/Conv2D
+prev layer number: 29
+current layer number: 30
+input node id: 100 graph: 0
+
+
+
+------layer_name: conv2d_13/BatchNorm
+prev layer number: 30
+current layer number: 31
+input node id: 102 graph: 0
+
+
+
+------layer_name: conv2d_13/LeakyRelu
+prev layer number: 31
+Skipping layer: conv2d_13/LeakyRelu
+current layer number: 31
+input node id: 107 graph: 0
+
+
+
+------layer_name: conv2d_14/Conv2D
+prev layer number: 31
+current layer number: 32
+input node id: 108 graph: 0
+
+
+
+------layer_name: conv2d_14/BatchNorm
+prev layer number: 32
+current layer number: 33
+input node id: 110 graph: 0
+
+
+
+------layer_name: conv2d_14/LeakyRelu
+prev layer number: 33
+Skipping layer: conv2d_14/LeakyRelu
+current layer number: 33
+input node id: 115 graph: 0
+
+
+
+------layer_name: add_13_14
+prev layer number: 33
+current layer number: 34
+input node id: 116 graph: 0
+input node id: 100 graph: 0
+input node id: 100 graph: 0
+new sub stream with tail node: 117 and tail graph: 0
+new sub stream with tail node: 117 and tail graph: 0
+
+
+
+------layer_name: conv2d_15/Conv2D
+prev layer number: 34
+current layer number: 35
+input node id: 117 graph: 0
+
+
+
+------layer_name: conv2d_15/BatchNorm
+prev layer number: 35
+current layer number: 36
+input node id: 119 graph: 0
+
+
+
+------layer_name: conv2d_15/LeakyRelu
+prev layer number: 36
+Skipping layer: conv2d_15/LeakyRelu
+current layer number: 36
+input node id: 124 graph: 0
+
+
+
+------layer_name: conv2d_16/Conv2D
+prev layer number: 36
+current layer number: 37
+input node id: 125 graph: 0
+
+
+
+------layer_name: conv2d_16/BatchNorm
+prev layer number: 37
+current layer number: 38
+input node id: 127 graph: 0
+
+
+
+------layer_name: conv2d_16/LeakyRelu
+prev layer number: 38
+Skipping layer: conv2d_16/LeakyRelu
+current layer number: 38
+input node id: 132 graph: 0
+
+
+
+------layer_name: add_15_16
+prev layer number: 38
+current layer number: 39
+input node id: 133 graph: 0
+input node id: 117 graph: 0
+input node id: 117 graph: 0
+new sub stream with tail node: 134 and tail graph: 0
+new sub stream with tail node: 134 and tail graph: 0
+
+
+
+------layer_name: conv2d_17/Conv2D
+prev layer number: 39
+current layer number: 40
+input node id: 134 graph: 0
+
+
+
+------layer_name: conv2d_17/BatchNorm
+prev layer number: 40
+current layer number: 41
+input node id: 136 graph: 0
+
+
+
+------layer_name: conv2d_17/LeakyRelu
+prev layer number: 41
+Skipping layer: conv2d_17/LeakyRelu
+current layer number: 41
+input node id: 141 graph: 0
+
+
+
+------layer_name: conv2d_18/Conv2D
+prev layer number: 41
+current layer number: 42
+input node id: 142 graph: 0
+
+
+
+------layer_name: conv2d_18/BatchNorm
+prev layer number: 42
+current layer number: 43
+input node id: 144 graph: 0
+
+
+
+------layer_name: conv2d_18/LeakyRelu
+prev layer number: 43
+Skipping layer: conv2d_18/LeakyRelu
+current layer number: 43
+input node id: 149 graph: 0
+
+
+
+------layer_name: add_17_18
+prev layer number: 43
+current layer number: 44
+input node id: 150 graph: 0
+input node id: 134 graph: 0
+input node id: 134 graph: 0
+new sub stream with tail node: 151 and tail graph: 0
+new sub stream with tail node: 151 and tail graph: 0
+
+
+
+------layer_name: conv2d_19/Conv2D
+prev layer number: 44
+current layer number: 45
+input node id: 151 graph: 0
+
+
+
+------layer_name: conv2d_19/BatchNorm
+prev layer number: 45
+current layer number: 46
+input node id: 153 graph: 0
+
+
+
+------layer_name: conv2d_19/LeakyRelu
+prev layer number: 46
+Skipping layer: conv2d_19/LeakyRelu
+current layer number: 46
+input node id: 158 graph: 0
+
+
+
+------layer_name: conv2d_20/Conv2D
+prev layer number: 46
+current layer number: 47
+input node id: 159 graph: 0
+
+
+
+------layer_name: conv2d_20/BatchNorm
+prev layer number: 47
+current layer number: 48
+input node id: 161 graph: 0
+
+
+
+------layer_name: conv2d_20/LeakyRelu
+prev layer number: 48
+Skipping layer: conv2d_20/LeakyRelu
+current layer number: 48
+input node id: 166 graph: 0
+
+
+
+------layer_name: add_19_20
+prev layer number: 48
+current layer number: 49
+input node id: 167 graph: 0
+input node id: 151 graph: 0
+input node id: 151 graph: 0
+new sub stream with tail node: 168 and tail graph: 0
+new sub stream with tail node: 168 and tail graph: 0
+
+
+
+------layer_name: conv2d_21/Conv2D
+prev layer number: 49
+current layer number: 50
+input node id: 168 graph: 0
+
+
+
+------layer_name: conv2d_21/BatchNorm
+prev layer number: 50
+current layer number: 51
+input node id: 170 graph: 0
+
+
+
+------layer_name: conv2d_21/LeakyRelu
+prev layer number: 51
+Skipping layer: conv2d_21/LeakyRelu
+current layer number: 51
+input node id: 175 graph: 0
+
+
+
+------layer_name: conv2d_22/Conv2D
+prev layer number: 51
+current layer number: 52
+input node id: 176 graph: 0
+
+
+
+------layer_name: conv2d_22/BatchNorm
+prev layer number: 52
+current layer number: 53
+input node id: 178 graph: 0
+
+
+
+------layer_name: conv2d_22/LeakyRelu
+prev layer number: 53
+Skipping layer: conv2d_22/LeakyRelu
+current layer number: 53
+input node id: 183 graph: 0
+
+
+
+------layer_name: add_21_22
+prev layer number: 53
+current layer number: 54
+input node id: 184 graph: 0
+input node id: 168 graph: 0
+input node id: 168 graph: 0
+new sub stream with tail node: 185 and tail graph: 0
+new sub stream with tail node: 185 and tail graph: 0
+
+
+
+------layer_name: conv2d_23/Conv2D
+prev layer number: 54
+current layer number: 55
+input node id: 185 graph: 0
+
+
+
+------layer_name: conv2d_23/BatchNorm
+prev layer number: 55
+current layer number: 56
+input node id: 187 graph: 0
+
+
+
+------layer_name: conv2d_23/LeakyRelu
+prev layer number: 56
+Skipping layer: conv2d_23/LeakyRelu
+current layer number: 56
+input node id: 192 graph: 0
+
+
+
+------layer_name: conv2d_24/Conv2D
+prev layer number: 56
+current layer number: 57
+input node id: 193 graph: 0
+
+
+
+------layer_name: conv2d_24/BatchNorm
+prev layer number: 57
+current layer number: 58
+input node id: 195 graph: 0
+
+
+
+------layer_name: conv2d_24/LeakyRelu
+prev layer number: 58
+Skipping layer: conv2d_24/LeakyRelu
+current layer number: 58
+input node id: 200 graph: 0
+
+
+
+------layer_name: add_23_24
+prev layer number: 58
+current layer number: 59
+input node id: 201 graph: 0
+input node id: 185 graph: 0
+input node id: 185 graph: 0
+new sub stream with tail node: 202 and tail graph: 0
+new sub stream with tail node: 202 and tail graph: 0
+
+
+
+------layer_name: conv2d_25/Conv2D
+prev layer number: 59
+current layer number: 60
+input node id: 202 graph: 0
+
+
+
+------layer_name: conv2d_25/BatchNorm
+prev layer number: 60
+current layer number: 61
+input node id: 204 graph: 0
+
+
+
+------layer_name: conv2d_25/LeakyRelu
+prev layer number: 61
+Skipping layer: conv2d_25/LeakyRelu
+current layer number: 61
+input node id: 209 graph: 0
+
+
+
+------layer_name: conv2d_26/Conv2D
+prev layer number: 61
+current layer number: 62
+input node id: 210 graph: 0
+
+
+
+------layer_name: conv2d_26/BatchNorm
+prev layer number: 62
+current layer number: 63
+input node id: 212 graph: 0
+
+
+
+------layer_name: conv2d_26/LeakyRelu
+prev layer number: 63
+Skipping layer: conv2d_26/LeakyRelu
+current layer number: 63
+input node id: 217 graph: 0
+
+
+
+------layer_name: add_25_26
+prev layer number: 63
+current layer number: 64
+input node id: 218 graph: 0
+input node id: 202 graph: 0
+input node id: 202 graph: 0
+new sub stream with tail node: 219 and tail graph: 0
+
+
+
+------layer_name: conv2d_27/Conv2D
+prev layer number: 64
+current layer number: 65
+input node id: 219 graph: 0
+
+
+
+------layer_name: conv2d_27/BatchNorm
+prev layer number: 65
+current layer number: 66
+input node id: 221 graph: 0
+
+
+
+------layer_name: conv2d_27/LeakyRelu
+prev layer number: 66
+Skipping layer: conv2d_27/LeakyRelu
+current layer number: 66
+input node id: 226 graph: 0
+new sub stream with tail node: 227 and tail graph: 0
+new sub stream with tail node: 227 and tail graph: 0
+
+
+
+------layer_name: conv2d_28/Conv2D
+prev layer number: 66
+current layer number: 67
+input node id: 227 graph: 0
+
+
+
+------layer_name: conv2d_28/BatchNorm
+prev layer number: 67
+current layer number: 68
+input node id: 229 graph: 0
+
+
+
+------layer_name: conv2d_28/LeakyRelu
+prev layer number: 68
+Skipping layer: conv2d_28/LeakyRelu
+current layer number: 68
+input node id: 234 graph: 0
+
+
+
+------layer_name: conv2d_29/Conv2D
+prev layer number: 68
+current layer number: 69
+input node id: 235 graph: 0
+
+
+
+------layer_name: conv2d_29/BatchNorm
+prev layer number: 69
+current layer number: 70
+input node id: 237 graph: 0
+
+
+
+------layer_name: conv2d_29/LeakyRelu
+prev layer number: 70
+Skipping layer: conv2d_29/LeakyRelu
+current layer number: 70
+input node id: 242 graph: 0
+
+
+
+------layer_name: add_28_29
+prev layer number: 70
+current layer number: 71
+input node id: 243 graph: 0
+input node id: 227 graph: 0
+input node id: 227 graph: 0
+new sub stream with tail node: 244 and tail graph: 0
+new sub stream with tail node: 244 and tail graph: 0
+
+
+
+------layer_name: conv2d_30/Conv2D
+prev layer number: 71
+current layer number: 72
+input node id: 244 graph: 0
+
+
+
+------layer_name: conv2d_30/BatchNorm
+prev layer number: 72
+current layer number: 73
+input node id: 246 graph: 0
+
+
+
+------layer_name: conv2d_30/LeakyRelu
+prev layer number: 73
+Skipping layer: conv2d_30/LeakyRelu
+current layer number: 73
+input node id: 251 graph: 0
+
+
+
+------layer_name: conv2d_31/Conv2D
+prev layer number: 73
+current layer number: 74
+input node id: 252 graph: 0
+
+
+
+------layer_name: conv2d_31/BatchNorm
+prev layer number: 74
+current layer number: 75
+input node id: 254 graph: 0
+
+
+
+------layer_name: conv2d_31/LeakyRelu
+prev layer number: 75
+Skipping layer: conv2d_31/LeakyRelu
+current layer number: 75
+input node id: 259 graph: 0
+
+
+
+------layer_name: add_30_31
+prev layer number: 75
+current layer number: 76
+input node id: 260 graph: 0
+input node id: 244 graph: 0
+input node id: 244 graph: 0
+new sub stream with tail node: 261 and tail graph: 0
+new sub stream with tail node: 261 and tail graph: 0
+
+
+
+------layer_name: conv2d_32/Conv2D
+prev layer number: 76
+current layer number: 77
+input node id: 261 graph: 0
+
+
+
+------layer_name: conv2d_32/BatchNorm
+prev layer number: 77
+current layer number: 78
+input node id: 263 graph: 0
+
+
+
+------layer_name: conv2d_32/LeakyRelu
+prev layer number: 78
+Skipping layer: conv2d_32/LeakyRelu
+current layer number: 78
+input node id: 268 graph: 0
+
+
+
+------layer_name: conv2d_33/Conv2D
+prev layer number: 78
+current layer number: 79
+input node id: 269 graph: 0
+
+
+
+------layer_name: conv2d_33/BatchNorm
+prev layer number: 79
+current layer number: 80
+input node id: 271 graph: 0
+
+
+
+------layer_name: conv2d_33/LeakyRelu
+prev layer number: 80
+Skipping layer: conv2d_33/LeakyRelu
+current layer number: 80
+input node id: 276 graph: 0
+
+
+
+------layer_name: add_32_33
+prev layer number: 80
+current layer number: 81
+input node id: 277 graph: 0
+input node id: 261 graph: 0
+input node id: 261 graph: 0
+new sub stream with tail node: 278 and tail graph: 0
+new sub stream with tail node: 278 and tail graph: 0
+
+
+
+------layer_name: conv2d_34/Conv2D
+prev layer number: 81
+current layer number: 82
+input node id: 278 graph: 0
+
+
+
+------layer_name: conv2d_34/BatchNorm
+prev layer number: 82
+current layer number: 83
+input node id: 280 graph: 0
+
+
+
+------layer_name: conv2d_34/LeakyRelu
+prev layer number: 83
+Skipping layer: conv2d_34/LeakyRelu
+current layer number: 83
+input node id: 285 graph: 0
+
+
+
+------layer_name: conv2d_35/Conv2D
+prev layer number: 83
+current layer number: 84
+input node id: 286 graph: 0
+
+
+
+------layer_name: conv2d_35/BatchNorm
+prev layer number: 84
+current layer number: 85
+input node id: 288 graph: 0
+
+
+
+------layer_name: conv2d_35/LeakyRelu
+prev layer number: 85
+Skipping layer: conv2d_35/LeakyRelu
+current layer number: 85
+input node id: 293 graph: 0
+
+
+
+------layer_name: add_34_35
+prev layer number: 85
+current layer number: 86
+input node id: 294 graph: 0
+input node id: 278 graph: 0
+input node id: 278 graph: 0
+new sub stream with tail node: 295 and tail graph: 0
+new sub stream with tail node: 295 and tail graph: 0
+
+
+
+------layer_name: conv2d_36/Conv2D
+prev layer number: 86
+current layer number: 87
+input node id: 295 graph: 0
+
+
+
+------layer_name: conv2d_36/BatchNorm
+prev layer number: 87
+current layer number: 88
+input node id: 297 graph: 0
+
+
+
+------layer_name: conv2d_36/LeakyRelu
+prev layer number: 88
+Skipping layer: conv2d_36/LeakyRelu
+current layer number: 88
+input node id: 302 graph: 0
+
+
+
+------layer_name: conv2d_37/Conv2D
+prev layer number: 88
+current layer number: 89
+input node id: 303 graph: 0
+
+
+
+------layer_name: conv2d_37/BatchNorm
+prev layer number: 89
+current layer number: 90
+input node id: 305 graph: 0
+
+
+
+------layer_name: conv2d_37/LeakyRelu
+prev layer number: 90
+Skipping layer: conv2d_37/LeakyRelu
+current layer number: 90
+input node id: 310 graph: 0
+
+
+
+------layer_name: add_36_37
+prev layer number: 90
+current layer number: 91
+input node id: 311 graph: 0
+input node id: 295 graph: 0
+input node id: 295 graph: 0
+new sub stream with tail node: 312 and tail graph: 0
+new sub stream with tail node: 312 and tail graph: 0
+
+
+
+------layer_name: conv2d_38/Conv2D
+prev layer number: 91
+current layer number: 92
+input node id: 312 graph: 0
+
+
+
+------layer_name: conv2d_38/BatchNorm
+prev layer number: 92
+current layer number: 93
+input node id: 314 graph: 0
+
+
+
+------layer_name: conv2d_38/LeakyRelu
+prev layer number: 93
+Skipping layer: conv2d_38/LeakyRelu
+current layer number: 93
+input node id: 319 graph: 0
+
+
+
+------layer_name: conv2d_39/Conv2D
+prev layer number: 93
+current layer number: 94
+input node id: 320 graph: 0
+
+
+
+------layer_name: conv2d_39/BatchNorm
+prev layer number: 94
+current layer number: 95
+input node id: 322 graph: 0
+
+
+
+------layer_name: conv2d_39/LeakyRelu
+prev layer number: 95
+Skipping layer: conv2d_39/LeakyRelu
+current layer number: 95
+input node id: 327 graph: 0
+
+
+
+------layer_name: add_38_39
+prev layer number: 95
+current layer number: 96
+input node id: 328 graph: 0
+input node id: 312 graph: 0
+input node id: 312 graph: 0
+new sub stream with tail node: 329 and tail graph: 0
+new sub stream with tail node: 329 and tail graph: 0
+
+
+
+------layer_name: conv2d_40/Conv2D
+prev layer number: 96
+current layer number: 97
+input node id: 329 graph: 0
+
+
+
+------layer_name: conv2d_40/BatchNorm
+prev layer number: 97
+current layer number: 98
+input node id: 331 graph: 0
+
+
+
+------layer_name: conv2d_40/LeakyRelu
+prev layer number: 98
+Skipping layer: conv2d_40/LeakyRelu
+current layer number: 98
+input node id: 336 graph: 0
+
+
+
+------layer_name: conv2d_41/Conv2D
+prev layer number: 98
+current layer number: 99
+input node id: 337 graph: 0
+
+
+
+------layer_name: conv2d_41/BatchNorm
+prev layer number: 99
+current layer number: 100
+input node id: 339 graph: 0
+
+
+
+------layer_name: conv2d_41/LeakyRelu
+prev layer number: 100
+Skipping layer: conv2d_41/LeakyRelu
+current layer number: 100
+input node id: 344 graph: 0
+
+
+
+------layer_name: add_40_41
+prev layer number: 100
+current layer number: 101
+input node id: 345 graph: 0
+input node id: 329 graph: 0
+input node id: 329 graph: 0
+new sub stream with tail node: 346 and tail graph: 0
+new sub stream with tail node: 346 and tail graph: 0
+
+
+
+------layer_name: conv2d_42/Conv2D
+prev layer number: 101
+current layer number: 102
+input node id: 346 graph: 0
+
+
+
+------layer_name: conv2d_42/BatchNorm
+prev layer number: 102
+current layer number: 103
+input node id: 348 graph: 0
+
+
+
+------layer_name: conv2d_42/LeakyRelu
+prev layer number: 103
+Skipping layer: conv2d_42/LeakyRelu
+current layer number: 103
+input node id: 353 graph: 0
+
+
+
+------layer_name: conv2d_43/Conv2D
+prev layer number: 103
+current layer number: 104
+input node id: 354 graph: 0
+
+
+
+------layer_name: conv2d_43/BatchNorm
+prev layer number: 104
+current layer number: 105
+input node id: 356 graph: 0
+
+
+
+------layer_name: conv2d_43/LeakyRelu
+prev layer number: 105
+Skipping layer: conv2d_43/LeakyRelu
+current layer number: 105
+input node id: 361 graph: 0
+
+
+
+------layer_name: add_42_43
+prev layer number: 105
+current layer number: 106
+input node id: 362 graph: 0
+input node id: 346 graph: 0
+input node id: 346 graph: 0
+new sub stream with tail node: 363 and tail graph: 0
+
+
+
+------layer_name: conv2d_44/Conv2D
+prev layer number: 106
+current layer number: 107
+input node id: 363 graph: 0
+
+
+
+------layer_name: conv2d_44/BatchNorm
+prev layer number: 107
+current layer number: 108
+input node id: 365 graph: 0
+
+
+
+------layer_name: conv2d_44/LeakyRelu
+prev layer number: 108
+Skipping layer: conv2d_44/LeakyRelu
+current layer number: 108
+input node id: 370 graph: 0
+new sub stream with tail node: 371 and tail graph: 0
+new sub stream with tail node: 371 and tail graph: 0
+
+
+
+------layer_name: conv2d_45/Conv2D
+prev layer number: 108
+current layer number: 109
+input node id: 371 graph: 0
+
+
+
+------layer_name: conv2d_45/BatchNorm
+prev layer number: 109
+current layer number: 110
+input node id: 373 graph: 0
+
+
+
+------layer_name: conv2d_45/LeakyRelu
+prev layer number: 110
+Skipping layer: conv2d_45/LeakyRelu
+current layer number: 110
+input node id: 378 graph: 0
+
+
+
+------layer_name: conv2d_46/Conv2D
+prev layer number: 110
+current layer number: 111
+input node id: 379 graph: 0
+
+
+
+------layer_name: conv2d_46/BatchNorm
+prev layer number: 111
+current layer number: 112
+input node id: 381 graph: 0
+
+
+
+------layer_name: conv2d_46/LeakyRelu
+prev layer number: 112
+Skipping layer: conv2d_46/LeakyRelu
+current layer number: 112
+input node id: 386 graph: 0
+
+
+
+------layer_name: add_45_46
+prev layer number: 112
+current layer number: 113
+input node id: 387 graph: 0
+input node id: 371 graph: 0
+input node id: 371 graph: 0
+new sub stream with tail node: 388 and tail graph: 0
+new sub stream with tail node: 388 and tail graph: 0
+
+
+
+------layer_name: conv2d_47/Conv2D
+prev layer number: 113
+current layer number: 114
+input node id: 388 graph: 0
+
+
+
+------layer_name: conv2d_47/BatchNorm
+prev layer number: 114
+current layer number: 115
+input node id: 390 graph: 0
+
+
+
+------layer_name: conv2d_47/LeakyRelu
+prev layer number: 115
+Skipping layer: conv2d_47/LeakyRelu
+current layer number: 115
+input node id: 395 graph: 0
+
+
+
+------layer_name: conv2d_48/Conv2D
+prev layer number: 115
+current layer number: 116
+input node id: 396 graph: 0
+
+
+
+------layer_name: conv2d_48/BatchNorm
+prev layer number: 116
+current layer number: 117
+input node id: 398 graph: 0
+
+
+
+------layer_name: conv2d_48/LeakyRelu
+prev layer number: 117
+Skipping layer: conv2d_48/LeakyRelu
+current layer number: 117
+input node id: 403 graph: 0
+
+
+
+------layer_name: add_47_48
+prev layer number: 117
+current layer number: 118
+input node id: 404 graph: 0
+input node id: 388 graph: 0
+input node id: 388 graph: 0
+new sub stream with tail node: 405 and tail graph: 0
+new sub stream with tail node: 405 and tail graph: 0
+
+
+
+------layer_name: conv2d_49/Conv2D
+prev layer number: 118
+current layer number: 119
+input node id: 405 graph: 0
+
+
+
+------layer_name: conv2d_49/BatchNorm
+prev layer number: 119
+current layer number: 120
+input node id: 407 graph: 0
+
+
+
+------layer_name: conv2d_49/LeakyRelu
+prev layer number: 120
+Skipping layer: conv2d_49/LeakyRelu
+current layer number: 120
+input node id: 412 graph: 0
+
+
+
+------layer_name: conv2d_50/Conv2D
+prev layer number: 120
+current layer number: 121
+input node id: 413 graph: 0
+
+
+
+------layer_name: conv2d_50/BatchNorm
+prev layer number: 121
+current layer number: 122
+input node id: 415 graph: 0
+
+
+
+------layer_name: conv2d_50/LeakyRelu
+prev layer number: 122
+Skipping layer: conv2d_50/LeakyRelu
+current layer number: 122
+input node id: 420 graph: 0
+
+
+
+------layer_name: add_49_50
+prev layer number: 122
+current layer number: 123
+input node id: 421 graph: 0
+input node id: 405 graph: 0
+input node id: 405 graph: 0
+new sub stream with tail node: 422 and tail graph: 0
+new sub stream with tail node: 422 and tail graph: 0
+
+
+
+------layer_name: conv2d_51/Conv2D
+prev layer number: 123
+current layer number: 124
+input node id: 422 graph: 0
+
+
+
+------layer_name: conv2d_51/BatchNorm
+prev layer number: 124
+current layer number: 125
+input node id: 424 graph: 0
+
+
+
+------layer_name: conv2d_51/LeakyRelu
+prev layer number: 125
+Skipping layer: conv2d_51/LeakyRelu
+current layer number: 125
+input node id: 429 graph: 0
+
+
+
+------layer_name: conv2d_52/Conv2D
+prev layer number: 125
+current layer number: 126
+input node id: 430 graph: 0
+
+
+
+------layer_name: conv2d_52/BatchNorm
+prev layer number: 126
+current layer number: 127
+input node id: 432 graph: 0
+
+
+
+------layer_name: conv2d_52/LeakyRelu
+prev layer number: 127
+Skipping layer: conv2d_52/LeakyRelu
+current layer number: 127
+input node id: 437 graph: 0
+
+
+
+------layer_name: add_51_52
+prev layer number: 127
+current layer number: 128
+input node id: 438 graph: 0
+input node id: 422 graph: 0
+input node id: 422 graph: 0
+
+
+
+------layer_name: conv2d_53
+prev layer number: 128
+current layer number: 129
+input node id: 439 graph: 0
+
+
+
+------layer_name: conv2d_53/BatchNorm
+prev layer number: 129
+current layer number: 130
+input node id: 441 graph: 0
+
+
+
+------layer_name: conv2d_53/LeakyRelu
+prev layer number: 130
+Skipping layer: conv2d_53/LeakyRelu
+current layer number: 130
+input node id: 446 graph: 0
+
+
+
+------layer_name: conv2d_54
+prev layer number: 130
+current layer number: 131
+input node id: 447 graph: 0
+
+
+
+------layer_name: conv2d_54/BatchNorm
+prev layer number: 131
+current layer number: 132
+input node id: 449 graph: 0
+
+
+
+------layer_name: conv2d_54/LeakyRelu
+prev layer number: 132
+Skipping layer: conv2d_54/LeakyRelu
+current layer number: 132
+input node id: 454 graph: 0
+
+
+
+------layer_name: conv2d_55
+prev layer number: 132
+current layer number: 133
+input node id: 455 graph: 0
+
+
+
+------layer_name: conv2d_55/BatchNorm
+prev layer number: 133
+current layer number: 134
+input node id: 457 graph: 0
+
+
+
+------layer_name: conv2d_55/LeakyRelu
+prev layer number: 134
+Skipping layer: conv2d_55/LeakyRelu
+current layer number: 134
+input node id: 462 graph: 0
+
+
+
+------layer_name: conv2d_56
+prev layer number: 134
+current layer number: 135
+input node id: 463 graph: 0
+
+
+
+------layer_name: conv2d_56/BatchNorm
+prev layer number: 135
+current layer number: 136
+input node id: 465 graph: 0
+
+
+
+------layer_name: conv2d_56/LeakyRelu
+prev layer number: 136
+Skipping layer: conv2d_56/LeakyRelu
+current layer number: 136
+input node id: 470 graph: 0
+
+
+
+------layer_name: conv2d_57
+prev layer number: 136
+current layer number: 137
+input node id: 471 graph: 0
+
+
+
+------layer_name: conv2d_57/BatchNorm
+prev layer number: 137
+current layer number: 138
+input node id: 473 graph: 0
+
+
+
+------layer_name: conv2d_57/LeakyRelu
+prev layer number: 138
+Skipping layer: conv2d_57/LeakyRelu
+current layer number: 138
+input node id: 478 graph: 0
+new sub stream with tail node: 479 and tail graph: 0
+
+
+
+------layer_name: conv2d_58
+prev layer number: 138
+current layer number: 139
+input node id: 479 graph: 0
+
+
+
+------layer_name: conv2d_58/BatchNorm
+prev layer number: 139
+current layer number: 140
+input node id: 481 graph: 0
+
+
+
+------layer_name: conv2d_58/LeakyRelu
+prev layer number: 140
+Skipping layer: conv2d_58/LeakyRelu
+current layer number: 140
+input node id: 486 graph: 0
+
+
+
+------layer_name: conv2d_59
+prev layer number: 140
+current layer number: 141
+input node id: 487 graph: 0
+
+
+
+------layer_name: conv2d_59/Linear
+prev layer number: 141
+current layer number: 142
+input node id: 490 graph: 0
+
+
+
+------layer_name: Yolo1
+prev layer number: 142
+current layer number: 143
+input node id: 491 graph: 0
+output accessor reading label file /data/data/com.termux/files/home/ARMCL-RockPi/assets//coco.names
+
+
+
+------layer_name: 
+prev layer number: 143
+current layer number: 144
+input node id: 497 graph: 0
+
+
+
+------layer_name: conv2d_60
+prev layer number: 144
+current layer number: 145
+input node id: 479 graph: 0
+
+
+
+------layer_name: conv2d_59/BatchNorm
+prev layer number: 145
+current layer number: 146
+input node id: 500 graph: 0
+
+
+
+------layer_name: conv2d_60/LeakyRelu
+prev layer number: 146
+Skipping layer: conv2d_60/LeakyRelu
+current layer number: 146
+input node id: 505 graph: 0
+
+
+
+------layer_name: Upsample_60
+prev layer number: 146
+current layer number: 147
+input node id: 506 graph: 0
+
+
+
+------layer_name: Route1
+prev layer number: 147
+current layer number: 148
+input node id: 507 graph: 0
+input node id: 363 graph: 0
+input node id: 507 graph: 0
+
+
+
+------layer_name: conv2d_61
+prev layer number: 148
+current layer number: 149
+input node id: 508 graph: 0
+
+
+
+------layer_name: conv2d_60/BatchNorm
+prev layer number: 149
+current layer number: 150
+input node id: 510 graph: 0
+
+
+
+------layer_name: conv2d_61/LeakyRelu
+prev layer number: 150
+Skipping layer: conv2d_61/LeakyRelu
+current layer number: 150
+input node id: 515 graph: 0
+
+
+
+------layer_name: conv2d_62
+prev layer number: 150
+current layer number: 151
+input node id: 516 graph: 0
+
+
+
+------layer_name: conv2d_61/BatchNorm
+prev layer number: 151
+current layer number: 152
+input node id: 518 graph: 0
+
+
+
+------layer_name: conv2d_62/LeakyRelu
+prev layer number: 152
+Skipping layer: conv2d_62/LeakyRelu
+current layer number: 152
+input node id: 523 graph: 0
+
+
+
+------layer_name: conv2d_63
+prev layer number: 152
+current layer number: 153
+input node id: 524 graph: 0
+
+
+
+------layer_name: conv2d_62/BatchNorm
+prev layer number: 153
+current layer number: 154
+input node id: 526 graph: 0
+
+
+
+------layer_name: conv2d_63/LeakyRelu
+prev layer number: 154
+Skipping layer: conv2d_63/LeakyRelu
+current layer number: 154
+input node id: 531 graph: 0
+
+
+
+------layer_name: conv2d_64
+prev layer number: 154
+current layer number: 155
+input node id: 532 graph: 0
+
+
+
+------layer_name: conv2d_63/BatchNorm
+prev layer number: 155
+current layer number: 156
+input node id: 534 graph: 0
+
+
+
+------layer_name: conv2d_64/LeakyRelu
+prev layer number: 156
+Skipping layer: conv2d_64/LeakyRelu
+current layer number: 156
+input node id: 539 graph: 0
+
+
+
+------layer_name: conv2d_65
+prev layer number: 156
+current layer number: 157
+input node id: 540 graph: 0
+
+
+
+------layer_name: conv2d_65/BatchNorm
+prev layer number: 157
+current layer number: 158
+input node id: 542 graph: 0
+
+
+
+------layer_name: conv2d_65/LeakyRelu
+prev layer number: 158
+Skipping layer: conv2d_65/LeakyRelu
+current layer number: 158
+input node id: 547 graph: 0
+
+
+
+------layer_name: conv2d_66
+prev layer number: 158
+current layer number: 159
+input node id: 548 graph: 0
+
+
+
+------layer_name: conv2d_65/BatchNorm
+prev layer number: 159
+current layer number: 160
+input node id: 550 graph: 0
+
+
+
+------layer_name: conv2d_66/LeakyRelu
+prev layer number: 160
+Skipping layer: conv2d_66/LeakyRelu
+current layer number: 160
+input node id: 555 graph: 0
+
+
+
+------layer_name: conv2d_67
+prev layer number: 160
+current layer number: 161
+input node id: 556 graph: 0
+
+
+
+------layer_name: conv2d_67/Linear
+prev layer number: 161
+current layer number: 162
+input node id: 559 graph: 0
+
+
+
+------layer_name: Yolo2
+prev layer number: 162
+current layer number: 163
+input node id: 560 graph: 0
+output accessor reading label file /data/data/com.termux/files/home/ARMCL-RockPi/assets//coco.names
+
+
+
+------layer_name: 
+prev layer number: 163
+current layer number: 164
+input node id: 566 graph: 0
+
+
+
+------layer_name: conv2d_68
+prev layer number: 164
+current layer number: 165
+input node id: 548 graph: 0
+
+
+
+------layer_name: conv2d_66/BatchNorm
+prev layer number: 165
+current layer number: 166
+input node id: 569 graph: 0
+
+
+
+------layer_name: conv2d_68/LeakyRelu
+prev layer number: 166
+Skipping layer: conv2d_68/LeakyRelu
+current layer number: 166
+input node id: 574 graph: 0
+
+
+
+------layer_name: Upsample_68
+prev layer number: 166
+current layer number: 167
+input node id: 575 graph: 0
+
+
+
+------layer_name: Route2
+prev layer number: 167
+current layer number: 168
+input node id: 576 graph: 0
+input node id: 219 graph: 0
+input node id: 576 graph: 0
+
+
+
+------layer_name: conv2d_69
+prev layer number: 168
+current layer number: 169
+input node id: 577 graph: 0
+
+
+
+------layer_name: conv2d_67/BatchNorm
+prev layer number: 169
+current layer number: 170
+input node id: 579 graph: 0
+
+
+
+------layer_name: conv2d_69/LeakyRelu
+prev layer number: 170
+Skipping layer: conv2d_69/LeakyRelu
+current layer number: 170
+input node id: 584 graph: 0
+
+
+
+------layer_name: conv2d_70
+prev layer number: 170
+current layer number: 171
+input node id: 585 graph: 0
+
+
+
+------layer_name: conv2d_68/BatchNorm
+prev layer number: 171
+current layer number: 172
+input node id: 587 graph: 0
+
+
+
+------layer_name: conv2d_70/LeakyRelu
+prev layer number: 172
+Skipping layer: conv2d_70/LeakyRelu
+current layer number: 172
+input node id: 592 graph: 0
+
+
+
+------layer_name: conv2d_71
+prev layer number: 172
+current layer number: 173
+input node id: 593 graph: 0
+
+
+
+------layer_name: conv2d_69/BatchNorm
+prev layer number: 173
+current layer number: 174
+input node id: 595 graph: 0
+
+
+
+------layer_name: conv2d_71/LeakyRelu
+prev layer number: 174
+Skipping layer: conv2d_71/LeakyRelu
+current layer number: 174
+input node id: 600 graph: 0
+
+
+
+------layer_name: conv2d_72
+prev layer number: 174
+current layer number: 175
+input node id: 601 graph: 0
+
+
+
+------layer_name: conv2d_70/BatchNorm
+prev layer number: 175
+current layer number: 176
+input node id: 603 graph: 0
+
+
+
+------layer_name: conv2d_72/LeakyRelu
+prev layer number: 176
+Skipping layer: conv2d_72/LeakyRelu
+current layer number: 176
+input node id: 608 graph: 0
+
+
+
+------layer_name: conv2d_73
+prev layer number: 176
+current layer number: 177
+input node id: 609 graph: 0
+
+
+
+------layer_name: conv2d_71/BatchNorm
+prev layer number: 177
+current layer number: 178
+input node id: 611 graph: 0
+
+
+
+------layer_name: conv2d_73/LeakyRelu
+prev layer number: 178
+Skipping layer: conv2d_73/LeakyRelu
+current layer number: 178
+input node id: 616 graph: 0
+
+
+
+------layer_name: conv2d_74
+prev layer number: 178
+current layer number: 179
+input node id: 617 graph: 0
+
+
+
+------layer_name: conv2d_72/BatchNorm
+prev layer number: 179
+current layer number: 180
+input node id: 619 graph: 0
+
+
+
+------layer_name: conv2d_74/LeakyRelu
+prev layer number: 180
+Skipping layer: conv2d_74/LeakyRelu
+current layer number: 180
+input node id: 624 graph: 0
+
+
+
+------layer_name: conv2d_75
+prev layer number: 180
+current layer number: 181
+input node id: 625 graph: 0
+
+
+
+------layer_name: conv2d_75/Linear
+prev layer number: 181
+current layer number: 182
+input node id: 628 graph: 0
+
+
+
+------layer_name: Yolo3
+prev layer number: 182
+current layer number: 183
+input node id: 629 graph: 0
+output accessor reading label file /data/data/com.termux/files/home/ARMCL-RockPi/assets//coco.names
+
+
+
+------layer_name: 
+prev layer number: 183
+current layer number: 184
+input node id: 635 graph: 0
+working on NPU Graphs
+Finalizing all graph
+Graph 0 setting affinity to B
+Starting finalizing graph 0 target 1
+graph id: 0
+Target is: Neon
+Graph (0) Task 0: conv2d_1/Conv2D
+Graph (0) Task 1: conv2d_1/BatchNorm
+Graph (0) Task 2: conv2d_1/LeakyRelu
+Graph (0) Task 3: conv2d_2/Conv2D
+Graph (0) Task 4: conv2d_2/BatchNorm
+Graph (0) Task 5: conv2d_2/LeakyRelu
+Graph (0) Task 6: conv2d_3/Conv2D
+Graph (0) Task 7: conv2d_3/BatchNorm
+Graph (0) Task 8: conv2d_3/LeakyRelu
+Graph (0) Task 9: conv2d_4/Conv2D
+Graph (0) Task 10: conv2d_4/BatchNorm
+Graph (0) Task 11: conv2d_4/LeakyRelu
+Graph (0) Task 12: add_3_4
+Graph (0) Task 13: conv2d_5/Conv2D
+Graph (0) Task 14: conv2d_5/BatchNorm
+Graph (0) Task 15: conv2d_5/LeakyRelu
+Graph (0) Task 16: conv2d_6/Conv2D
+Graph (0) Task 17: conv2d_6/BatchNorm
+Graph (0) Task 18: conv2d_6/LeakyRelu
+Graph (0) Task 19: conv2d_7/Conv2D
+Graph (0) Task 20: conv2d_7/BatchNorm
+Graph (0) Task 21: conv2d_7/LeakyRelu
+Graph (0) Task 22: add_6_7
+Graph (0) Task 23: conv2d_8/Conv2D
+Graph (0) Task 24: conv2d_8/BatchNorm
+Graph (0) Task 25: conv2d_8/LeakyRelu
+Graph (0) Task 26: conv2d_9/Conv2D
+Graph (0) Task 27: conv2d_9/BatchNorm
+Graph (0) Task 28: conv2d_9/LeakyRelu
+Graph (0) Task 29: add_8_9
+Graph (0) Task 30: conv2d_10/Conv2D
+Graph (0) Task 31: conv2d_10/BatchNorm
+Graph (0) Task 32: conv2d_10/LeakyRelu
+Graph (0) Task 33: conv2d_11/Conv2D
+Graph (0) Task 34: conv2d_11/BatchNorm
+Graph (0) Task 35: conv2d_11/LeakyRelu
+Graph (0) Task 36: conv2d_12/Conv2D
+Graph (0) Task 37: conv2d_12/BatchNorm
+Graph (0) Task 38: conv2d_12/LeakyRelu
+Graph (0) Task 39: add_11_12
+Graph (0) Task 40: conv2d_13/Conv2D
+Graph (0) Task 41: conv2d_13/BatchNorm
+Graph (0) Task 42: conv2d_13/LeakyRelu
+Graph (0) Task 43: conv2d_14/Conv2D
+Graph (0) Task 44: conv2d_14/BatchNorm
+Graph (0) Task 45: conv2d_14/LeakyRelu
+Graph (0) Task 46: add_13_14
+Graph (0) Task 47: conv2d_15/Conv2D
+Graph (0) Task 48: conv2d_15/BatchNorm
+Graph (0) Task 49: conv2d_15/LeakyRelu
+Graph (0) Task 50: conv2d_16/Conv2D
+Graph (0) Task 51: conv2d_16/BatchNorm
+Graph (0) Task 52: conv2d_16/LeakyRelu
+Graph (0) Task 53: add_15_16
+Graph (0) Task 54: conv2d_17/Conv2D
+Graph (0) Task 55: conv2d_17/BatchNorm
+Graph (0) Task 56: conv2d_17/LeakyRelu
+Graph (0) Task 57: conv2d_18/Conv2D
+Graph (0) Task 58: conv2d_18/BatchNorm
+Graph (0) Task 59: conv2d_18/LeakyRelu
+Graph (0) Task 60: add_17_18
+Graph (0) Task 61: conv2d_19/Conv2D
+Graph (0) Task 62: conv2d_19/BatchNorm
+Graph (0) Task 63: conv2d_19/LeakyRelu
+Graph (0) Task 64: conv2d_20/Conv2D
+Graph (0) Task 65: conv2d_20/BatchNorm
+Graph (0) Task 66: conv2d_20/LeakyRelu
+Graph (0) Task 67: add_19_20
+Graph (0) Task 68: conv2d_21/Conv2D
+Graph (0) Task 69: conv2d_21/BatchNorm
+Graph (0) Task 70: conv2d_21/LeakyRelu
+Graph (0) Task 71: conv2d_22/Conv2D
+Graph (0) Task 72: conv2d_22/BatchNorm
+Graph (0) Task 73: conv2d_22/LeakyRelu
+Graph (0) Task 74: add_21_22
+Graph (0) Task 75: conv2d_23/Conv2D
+Graph (0) Task 76: conv2d_23/BatchNorm
+Graph (0) Task 77: conv2d_23/LeakyRelu
+Graph (0) Task 78: conv2d_24/Conv2D
+Graph (0) Task 79: conv2d_24/BatchNorm
+Graph (0) Task 80: conv2d_24/LeakyRelu
+Graph (0) Task 81: add_23_24
+Graph (0) Task 82: conv2d_25/Conv2D
+Graph (0) Task 83: conv2d_25/BatchNorm
+Graph (0) Task 84: conv2d_25/LeakyRelu
+Graph (0) Task 85: conv2d_26/Conv2D
+Graph (0) Task 86: conv2d_26/BatchNorm
+Graph (0) Task 87: conv2d_26/LeakyRelu
+Graph (0) Task 88: add_25_26
+Graph (0) Task 89: conv2d_27/Conv2D
+Graph (0) Task 90: conv2d_27/BatchNorm
+Graph (0) Task 91: conv2d_27/LeakyRelu
+Graph (0) Task 92: conv2d_28/Conv2D
+Graph (0) Task 93: conv2d_28/BatchNorm
+Graph (0) Task 94: conv2d_28/LeakyRelu
+Graph (0) Task 95: conv2d_29/Conv2D
+Graph (0) Task 96: conv2d_29/BatchNorm
+Graph (0) Task 97: conv2d_29/LeakyRelu
+Graph (0) Task 98: add_28_29
+Graph (0) Task 99: conv2d_30/Conv2D
+Graph (0) Task 100: conv2d_30/BatchNorm
+Graph (0) Task 101: conv2d_30/LeakyRelu
+Graph (0) Task 102: conv2d_31/Conv2D
+Graph (0) Task 103: conv2d_31/BatchNorm
+Graph (0) Task 104: conv2d_31/LeakyRelu
+Graph (0) Task 105: add_30_31
+Graph (0) Task 106: conv2d_32/Conv2D
+Graph (0) Task 107: conv2d_32/BatchNorm
+Graph (0) Task 108: conv2d_32/LeakyRelu
+Graph (0) Task 109: conv2d_33/Conv2D
+Graph (0) Task 110: conv2d_33/BatchNorm
+Graph (0) Task 111: conv2d_33/LeakyRelu
+Graph (0) Task 112: add_32_33
+Graph (0) Task 113: conv2d_34/Conv2D
+Graph (0) Task 114: conv2d_34/BatchNorm
+Graph (0) Task 115: conv2d_34/LeakyRelu
+Graph (0) Task 116: conv2d_35/Conv2D
+Graph (0) Task 117: conv2d_35/BatchNorm
+Graph (0) Task 118: conv2d_35/LeakyRelu
+Graph (0) Task 119: add_34_35
+Graph (0) Task 120: conv2d_36/Conv2D
+Graph (0) Task 121: conv2d_36/BatchNorm
+Graph (0) Task 122: conv2d_36/LeakyRelu
+Graph (0) Task 123: conv2d_37/Conv2D
+Graph (0) Task 124: conv2d_37/BatchNorm
+Graph (0) Task 125: conv2d_37/LeakyRelu
+Graph (0) Task 126: add_36_37
+Graph (0) Task 127: conv2d_38/Conv2D
+Graph (0) Task 128: conv2d_38/BatchNorm
+Graph (0) Task 129: conv2d_38/LeakyRelu
+Graph (0) Task 130: conv2d_39/Conv2D
+Graph (0) Task 131: conv2d_39/BatchNorm
+Graph (0) Task 132: conv2d_39/LeakyRelu
+Graph (0) Task 133: add_38_39
+Graph (0) Task 134: conv2d_40/Conv2D
+Graph (0) Task 135: conv2d_40/BatchNorm
+Graph (0) Task 136: conv2d_40/LeakyRelu
+Graph (0) Task 137: conv2d_41/Conv2D
+Graph (0) Task 138: conv2d_41/BatchNorm
+Graph (0) Task 139: conv2d_41/LeakyRelu
+Graph (0) Task 140: add_40_41
+Graph (0) Task 141: conv2d_42/Conv2D
+Graph (0) Task 142: conv2d_42/BatchNorm
+Graph (0) Task 143: conv2d_42/LeakyRelu
+Graph (0) Task 144: conv2d_43/Conv2D
+Graph (0) Task 145: conv2d_43/BatchNorm
+Graph (0) Task 146: conv2d_43/LeakyRelu
+Graph (0) Task 147: add_42_43
+Graph (0) Task 148: conv2d_44/Conv2D
+Graph (0) Task 149: conv2d_44/BatchNorm
+Graph (0) Task 150: conv2d_44/LeakyRelu
+Graph (0) Task 151: conv2d_45/Conv2D
+Graph (0) Task 152: conv2d_45/BatchNorm
+Graph (0) Task 153: conv2d_45/LeakyRelu
+Graph (0) Task 154: conv2d_46/Conv2D
+Graph (0) Task 155: conv2d_46/BatchNorm
+Graph (0) Task 156: conv2d_46/LeakyRelu
+Graph (0) Task 157: add_45_46
+Graph (0) Task 158: conv2d_47/Conv2D
+Graph (0) Task 159: conv2d_47/BatchNorm
+Graph (0) Task 160: conv2d_47/LeakyRelu
+Graph (0) Task 161: conv2d_48/Conv2D
+Graph (0) Task 162: conv2d_48/BatchNorm
+Graph (0) Task 163: conv2d_48/LeakyRelu
+Graph (0) Task 164: add_47_48
+Graph (0) Task 165: conv2d_49/Conv2D
+Graph (0) Task 166: conv2d_49/BatchNorm
+Graph (0) Task 167: conv2d_49/LeakyRelu
+Graph (0) Task 168: conv2d_50/Conv2D
+Graph (0) Task 169: conv2d_50/BatchNorm
+Graph (0) Task 170: conv2d_50/LeakyRelu
+Graph (0) Task 171: add_49_50
+Graph (0) Task 172: conv2d_51/Conv2D
+Graph (0) Task 173: conv2d_51/BatchNorm
+Graph (0) Task 174: conv2d_51/LeakyRelu
+Graph (0) Task 175: conv2d_52/Conv2D
+Graph (0) Task 176: conv2d_52/BatchNorm
+Graph (0) Task 177: conv2d_52/LeakyRelu
+Graph (0) Task 178: add_51_52
+Graph (0) Task 179: conv2d_53
+Graph (0) Task 180: conv2d_53/BatchNorm
+Graph (0) Task 181: conv2d_53/LeakyRelu
+Graph (0) Task 182: conv2d_54
+Graph (0) Task 183: conv2d_54/BatchNorm
+Graph (0) Task 184: conv2d_54/LeakyRelu
+Graph (0) Task 185: conv2d_55
+Graph (0) Task 186: conv2d_55/BatchNorm
+Graph (0) Task 187: conv2d_55/LeakyRelu
+Graph (0) Task 188: conv2d_56
+Graph (0) Task 189: conv2d_56/BatchNorm
+Graph (0) Task 190: conv2d_56/LeakyRelu
+Graph (0) Task 191: conv2d_57
+Graph (0) Task 192: conv2d_57/BatchNorm
+Graph (0) Task 193: conv2d_57/LeakyRelu
+Graph (0) Task 194: conv2d_58
+Graph (0) Task 195: conv2d_58/BatchNorm
+Graph (0) Task 196: conv2d_58/LeakyRelu
+Graph (0) Task 197: conv2d_59
+Graph (0) Task 198: conv2d_59/Linear
+Graph (0) Task 199: Yolo1
+Graph (0) Task 200: Yolo1
+Graph (0) Task 201: Yolo1
+Graph (0) Task 202: Yolo1
+Graph (0) Task 203: Yolo1
+Graph (0) Task 204: Yolo1
+Graph (0) Task 205: conv2d_60
+Graph (0) Task 206: conv2d_59/BatchNorm
+Graph (0) Task 207: conv2d_60/LeakyRelu
+Graph (0) Task 208: Upsample_60
+Graph (0) Task 209: Route1
+Graph (0) Task 210: conv2d_61
+Graph (0) Task 211: conv2d_60/BatchNorm
+Graph (0) Task 212: conv2d_61/LeakyRelu
+Graph (0) Task 213: conv2d_62
+Graph (0) Task 214: conv2d_61/BatchNorm
+Graph (0) Task 215: conv2d_62/LeakyRelu
+Graph (0) Task 216: conv2d_63
+Graph (0) Task 217: conv2d_62/BatchNorm
+Graph (0) Task 218: conv2d_63/LeakyRelu
+Graph (0) Task 219: conv2d_64
+Graph (0) Task 220: conv2d_63/BatchNorm
+Graph (0) Task 221: conv2d_64/LeakyRelu
+Graph (0) Task 222: conv2d_65
+Graph (0) Task 223: conv2d_65/BatchNorm
+Graph (0) Task 224: conv2d_65/LeakyRelu
+Graph (0) Task 225: conv2d_66
+Graph (0) Task 226: conv2d_65/BatchNorm
+Graph (0) Task 227: conv2d_66/LeakyRelu
+Graph (0) Task 228: conv2d_67
+Graph (0) Task 229: conv2d_67/Linear
+Graph (0) Task 230: Yolo2
+Graph (0) Task 231: Yolo2
+Graph (0) Task 232: Yolo2
+Graph (0) Task 233: Yolo2
+Graph (0) Task 234: Yolo2
+Graph (0) Task 235: Yolo2
+Graph (0) Task 236: conv2d_68
+Graph (0) Task 237: conv2d_66/BatchNorm
+Graph (0) Task 238: conv2d_68/LeakyRelu
+Graph (0) Task 239: Upsample_68
+Graph (0) Task 240: Route2
+Graph (0) Task 241: conv2d_69
+Graph (0) Task 242: conv2d_67/BatchNorm
+Graph (0) Task 243: conv2d_69/LeakyRelu
+Graph (0) Task 244: conv2d_70
+Graph (0) Task 245: conv2d_68/BatchNorm
+Graph (0) Task 246: conv2d_70/LeakyRelu
+Graph (0) Task 247: conv2d_71
+Graph (0) Task 248: conv2d_69/BatchNorm
+Graph (0) Task 249: conv2d_71/LeakyRelu
+Graph (0) Task 250: conv2d_72
+Graph (0) Task 251: conv2d_70/BatchNorm
+Graph (0) Task 252: conv2d_72/LeakyRelu
+Graph (0) Task 253: conv2d_73
+Graph (0) Task 254: conv2d_71/BatchNorm
+Graph (0) Task 255: conv2d_73/LeakyRelu
+Graph (0) Task 256: conv2d_74
+Graph (0) Task 257: conv2d_72/BatchNorm
+Graph (0) Task 258: conv2d_74/LeakyRelu
+Graph (0) Task 259: conv2d_75
+Graph (0) Task 260: conv2d_75/Linear
+Graph (0) Task 261: Yolo3
+Graph (0) Task 262: Yolo3
+Graph (0) Task 263: Yolo3
+Graph (0) Task 264: Yolo3
+Graph (0) Task 265: Yolo3
+Graph (0) Task 266: Yolo3
+Graph 0 input size: 1 receiver size: 0 tasks size: 267 senders size: 0 output size: 3
+
+Finish finalizing graph 0
+
+
+
+setup finished
+
+
+
+
+*********************************************
+start running graphs
+*************************************************
+
+
+Graph 0 setting affinity to B
+runing graph 0
+start of warmup and execute graph 0 in graph manager
+graph_id:0 calling inputs
+iterator:0
+reading image: /data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//apple.ppm
+inputs called
+graph_id:0 calling receivers
+receivers called
+
+
+
+
+
+
+
+first graph start processing
+
+
+
+
+graph_id:0 Calling all tasks
+--size of tasks: 267
+Graph (0) 1  conv2d_1/Conv2D
+Graph (0) 2  conv2d_1/BatchNorm
+Graph (0) 3  conv2d_1/LeakyRelu
+Graph (0) 4  conv2d_2/Conv2D
+Graph (0) 5  conv2d_2/BatchNorm
+Graph (0) 6  conv2d_2/LeakyRelu
+Graph (0) 7  conv2d_3/Conv2D
+Graph (0) 8  conv2d_3/BatchNorm
+Graph (0) 9  conv2d_3/LeakyRelu
+Graph (0) 10  conv2d_4/Conv2D
+Graph (0) 11  conv2d_4/BatchNorm
+Graph (0) 12  conv2d_4/LeakyRelu
+Graph (0) 13  add_3_4
+Graph (0) 14  conv2d_5/Conv2D
+Graph (0) 15  conv2d_5/BatchNorm
+Graph (0) 16  conv2d_5/LeakyRelu
+Graph (0) 17  conv2d_6/Conv2D
+Graph (0) 18  conv2d_6/BatchNorm
+Graph (0) 19  conv2d_6/LeakyRelu
+Graph (0) 20  conv2d_7/Conv2D
+Graph (0) 21  conv2d_7/BatchNorm
+Graph (0) 22  conv2d_7/LeakyRelu
+Graph (0) 23  add_6_7
+Graph (0) 24  conv2d_8/Conv2D
+Graph (0) 25  conv2d_8/BatchNorm
+Graph (0) 26  conv2d_8/LeakyRelu
+Graph (0) 27  conv2d_9/Conv2D
+Graph (0) 28  conv2d_9/BatchNorm
+Graph (0) 29  conv2d_9/LeakyRelu
+Graph (0) 30  add_8_9
+Graph (0) 31  conv2d_10/Conv2D
+Graph (0) 32  conv2d_10/BatchNorm
+Graph (0) 33  conv2d_10/LeakyRelu
+Graph (0) 34  conv2d_11/Conv2D
+Graph (0) 35  conv2d_11/BatchNorm
+Graph (0) 36  conv2d_11/LeakyRelu
+Graph (0) 37  conv2d_12/Conv2D
+Graph (0) 38  conv2d_12/BatchNorm
+Graph (0) 39  conv2d_12/LeakyRelu
+Graph (0) 40  add_11_12
+Graph (0) 41  conv2d_13/Conv2D
+Graph (0) 42  conv2d_13/BatchNorm
+Graph (0) 43  conv2d_13/LeakyRelu
+Graph (0) 44  conv2d_14/Conv2D
+Graph (0) 45  conv2d_14/BatchNorm
+Graph (0) 46  conv2d_14/LeakyRelu
+Graph (0) 47  add_13_14
+Graph (0) 48  conv2d_15/Conv2D
+Graph (0) 49  conv2d_15/BatchNorm
+Graph (0) 50  conv2d_15/LeakyRelu
+Graph (0) 51  conv2d_16/Conv2D
+Graph (0) 52  conv2d_16/BatchNorm
+Graph (0) 53  conv2d_16/LeakyRelu
+Graph (0) 54  add_15_16
+Graph (0) 55  conv2d_17/Conv2D
+Graph (0) 56  conv2d_17/BatchNorm
+Graph (0) 57  conv2d_17/LeakyRelu
+Graph (0) 58  conv2d_18/Conv2D
+Graph (0) 59  conv2d_18/BatchNorm
+Graph (0) 60  conv2d_18/LeakyRelu
+Graph (0) 61  add_17_18
+Graph (0) 62  conv2d_19/Conv2D
+Graph (0) 63  conv2d_19/BatchNorm
+Graph (0) 64  conv2d_19/LeakyRelu
+Graph (0) 65  conv2d_20/Conv2D
+Graph (0) 66  conv2d_20/BatchNorm
+Graph (0) 67  conv2d_20/LeakyRelu
+Graph (0) 68  add_19_20
+Graph (0) 69  conv2d_21/Conv2D
+Graph (0) 70  conv2d_21/BatchNorm
+Graph (0) 71  conv2d_21/LeakyRelu
+Graph (0) 72  conv2d_22/Conv2D
+Graph (0) 73  conv2d_22/BatchNorm
+Graph (0) 74  conv2d_22/LeakyRelu
+Graph (0) 75  add_21_22
+Graph (0) 76  conv2d_23/Conv2D
+Graph (0) 77  conv2d_23/BatchNorm
+Graph (0) 78  conv2d_23/LeakyRelu
+Graph (0) 79  conv2d_24/Conv2D
+Graph (0) 80  conv2d_24/BatchNorm
+Graph (0) 81  conv2d_24/LeakyRelu
+Graph (0) 82  add_23_24
+Graph (0) 83  conv2d_25/Conv2D
+Graph (0) 84  conv2d_25/BatchNorm
+Graph (0) 85  conv2d_25/LeakyRelu
+Graph (0) 86  conv2d_26/Conv2D
+Graph (0) 87  conv2d_26/BatchNorm
+Graph (0) 88  conv2d_26/LeakyRelu
+Graph (0) 89  add_25_26
+Graph (0) 90  conv2d_27/Conv2D
+Graph (0) 91  conv2d_27/BatchNorm
+Graph (0) 92  conv2d_27/LeakyRelu
+Graph (0) 93  conv2d_28/Conv2D
+Graph (0) 94  conv2d_28/BatchNorm
+Graph (0) 95  conv2d_28/LeakyRelu
+Graph (0) 96  conv2d_29/Conv2D
+Graph (0) 97  conv2d_29/BatchNorm
+Graph (0) 98  conv2d_29/LeakyRelu
+Graph (0) 99  add_28_29
+Graph (0) 100  conv2d_30/Conv2D
+Graph (0) 101  conv2d_30/BatchNorm
+Graph (0) 102  conv2d_30/LeakyRelu
+Graph (0) 103  conv2d_31/Conv2D
+Graph (0) 104  conv2d_31/BatchNorm
+Graph (0) 105  conv2d_31/LeakyRelu
+Graph (0) 106  add_30_31
+Graph (0) 107  conv2d_32/Conv2D
+Graph (0) 108  conv2d_32/BatchNorm
+Graph (0) 109  conv2d_32/LeakyRelu
+Graph (0) 110  conv2d_33/Conv2D
+Graph (0) 111  conv2d_33/BatchNorm
+Graph (0) 112  conv2d_33/LeakyRelu
+Graph (0) 113  add_32_33
+Graph (0) 114  conv2d_34/Conv2D
+Graph (0) 115  conv2d_34/BatchNorm
+Graph (0) 116  conv2d_34/LeakyRelu
+Graph (0) 117  conv2d_35/Conv2D
+Graph (0) 118  conv2d_35/BatchNorm
+Graph (0) 119  conv2d_35/LeakyRelu
+Graph (0) 120  add_34_35
+Graph (0) 121  conv2d_36/Conv2D
+Graph (0) 122  conv2d_36/BatchNorm
+Graph (0) 123  conv2d_36/LeakyRelu
+Graph (0) 124  conv2d_37/Conv2D
+Graph (0) 125  conv2d_37/BatchNorm
+Graph (0) 126  conv2d_37/LeakyRelu
+Graph (0) 127  add_36_37
+Graph (0) 128  conv2d_38/Conv2D
+Graph (0) 129  conv2d_38/BatchNorm
+Graph (0) 130  conv2d_38/LeakyRelu
+Graph (0) 131  conv2d_39/Conv2D
+Graph (0) 132  conv2d_39/BatchNorm
+Graph (0) 133  conv2d_39/LeakyRelu
+Graph (0) 134  add_38_39
+Graph (0) 135  conv2d_40/Conv2D
+Graph (0) 136  conv2d_40/BatchNorm
+Graph (0) 137  conv2d_40/LeakyRelu
+Graph (0) 138  conv2d_41/Conv2D
+Graph (0) 139  conv2d_41/BatchNorm
+Graph (0) 140  conv2d_41/LeakyRelu
+Graph (0) 141  add_40_41
+Graph (0) 142  conv2d_42/Conv2D
+Graph (0) 143  conv2d_42/BatchNorm
+Graph (0) 144  conv2d_42/LeakyRelu
+Graph (0) 145  conv2d_43/Conv2D
+Graph (0) 146  conv2d_43/BatchNorm
+Graph (0) 147  conv2d_43/LeakyRelu
+Graph (0) 148  add_42_43
+Graph (0) 149  conv2d_44/Conv2D
+Graph (0) 150  conv2d_44/BatchNorm
+Graph (0) 151  conv2d_44/LeakyRelu
+Graph (0) 152  conv2d_45/Conv2D
+Graph (0) 153  conv2d_45/BatchNorm
+Graph (0) 154  conv2d_45/LeakyRelu
+Graph (0) 155  conv2d_46/Conv2D
+Graph (0) 156  conv2d_46/BatchNorm
+Graph (0) 157  conv2d_46/LeakyRelu
+Graph (0) 158  add_45_46
+Graph (0) 159  conv2d_47/Conv2D
+Graph (0) 160  conv2d_47/BatchNorm
+Graph (0) 161  conv2d_47/LeakyRelu
+Graph (0) 162  conv2d_48/Conv2D
+Graph (0) 163  conv2d_48/BatchNorm
+Graph (0) 164  conv2d_48/LeakyRelu
+Graph (0) 165  add_47_48
+Graph (0) 166  conv2d_49/Conv2D
+Graph (0) 167  conv2d_49/BatchNorm
+Graph (0) 168  conv2d_49/LeakyRelu
+Graph (0) 169  conv2d_50/Conv2D
+Graph (0) 170  conv2d_50/BatchNorm
+Graph (0) 171  conv2d_50/LeakyRelu
+Graph (0) 172  add_49_50
+Graph (0) 173  conv2d_51/Conv2D
+Graph (0) 174  conv2d_51/BatchNorm
+Graph (0) 175  conv2d_51/LeakyRelu
+Graph (0) 176  conv2d_52/Conv2D
+Graph (0) 177  conv2d_52/BatchNorm
+Graph (0) 178  conv2d_52/LeakyRelu
+Graph (0) 179  add_51_52
+Graph (0) 180  conv2d_53
+Graph (0) 181  conv2d_53/BatchNorm
+Graph (0) 182  conv2d_53/LeakyRelu
+Graph (0) 183  conv2d_54
+Graph (0) 184  conv2d_54/BatchNorm
+Graph (0) 185  conv2d_54/LeakyRelu
+Graph (0) 186  conv2d_55
+Graph (0) 187  conv2d_55/BatchNorm
+Graph (0) 188  conv2d_55/LeakyRelu
+Graph (0) 189  conv2d_56
+Graph (0) 190  conv2d_56/BatchNorm
+Graph (0) 191  conv2d_56/LeakyRelu
+Graph (0) 192  conv2d_57
+Graph (0) 193  conv2d_57/BatchNorm
+Graph (0) 194  conv2d_57/LeakyRelu
+Graph (0) 195  conv2d_58
+Graph (0) 196  conv2d_58/BatchNorm
+Graph (0) 197  conv2d_58/LeakyRelu
+Graph (0) 198  conv2d_59
+Graph (0) 199  conv2d_59/Linear
+Graph (0) 200  Yolo1
+Graph (0) 201  Yolo1
+Graph (0) 202  Yolo1
+Graph (0) 203  Yolo1
+Graph (0) 204  Yolo1
+Graph (0) 205  Yolo1
+Graph (0) 206  conv2d_60
+Graph (0) 207  conv2d_59/BatchNorm
+Graph (0) 208  conv2d_60/LeakyRelu
+Graph (0) 209  Upsample_60
+Graph (0) 210  Route1
+Graph (0) 211  conv2d_61
+Graph (0) 212  conv2d_60/BatchNorm
+Graph (0) 213  conv2d_61/LeakyRelu
+Graph (0) 214  conv2d_62
+Graph (0) 215  conv2d_61/BatchNorm
+Graph (0) 216  conv2d_62/LeakyRelu
+Graph (0) 217  conv2d_63
+Graph (0) 218  conv2d_62/BatchNorm
+Graph (0) 219  conv2d_63/LeakyRelu
+Graph (0) 220  conv2d_64
+Graph (0) 221  conv2d_63/BatchNorm
+Graph (0) 222  conv2d_64/LeakyRelu
+Graph (0) 223  conv2d_65
+Graph (0) 224  conv2d_65/BatchNorm
+Graph (0) 225  conv2d_65/LeakyRelu
+Graph (0) 226  conv2d_66
+Graph (0) 227  conv2d_65/BatchNorm
+Graph (0) 228  conv2d_66/LeakyRelu
+Graph (0) 229  conv2d_67
+Graph (0) 230  conv2d_67/Linear
+Graph (0) 231  Yolo2
+Graph (0) 232  Yolo2
+Graph (0) 233  Yolo2
+Graph (0) 234  Yolo2
+Graph (0) 235  Yolo2
+Graph (0) 236  Yolo2
+Graph (0) 237  conv2d_68
+Graph (0) 238  conv2d_66/BatchNorm
+Graph (0) 239  conv2d_68/LeakyRelu
+Graph (0) 240  Upsample_68
+Graph (0) 241  Route2
+Graph (0) 242  conv2d_69
+Graph (0) 243  conv2d_67/BatchNorm
+Graph (0) 244  conv2d_69/LeakyRelu
+Graph (0) 245  conv2d_70
+Graph (0) 246  conv2d_68/BatchNorm
+Graph (0) 247  conv2d_70/LeakyRelu
+Graph (0) 248  conv2d_71
+Graph (0) 249  conv2d_69/BatchNorm
+Graph (0) 250  conv2d_71/LeakyRelu
+Graph (0) 251  conv2d_72
+Graph (0) 252  conv2d_70/BatchNorm
+Graph (0) 253  conv2d_72/LeakyRelu
+Graph (0) 254  conv2d_73
+Graph (0) 255  conv2d_71/BatchNorm
+Graph (0) 256  conv2d_73/LeakyRelu
+Graph (0) 257  conv2d_74
+Graph (0) 258  conv2d_72/BatchNorm
+Graph (0) 259  conv2d_74/LeakyRelu
+Graph (0) 260  conv2d_75
+Graph (0) 261  conv2d_75/Linear
+Graph (0) 262  Yolo3
+Graph (0) 263  Yolo3
+Graph (0) 264  Yolo3
+Graph (0) 265  Yolo3
+Graph (0) 266  Yolo3
+Graph (0) 267  Yolo3
+start running task with blockin and ending: 00
+task finished
+---------- Top 5 predictions ----------
+
+0.8934 - [id = 50], broccoli
+0.6169 - [id = 132], aeroplane
+graph_id:0 Calling all senders
+senders called
+graph_id:0 calling outputs
+0.5730 - [id = 51], carrot
+0.4582 - [id = 12], parking meter
+0.4326 - [id = 115], 
+---------- Top 5 predictions ----------
+
+0.7106 - [id = 125], 
+0.6949 - [id = 245], 
+0.6836 - [id = 88], 
+0.6770 - [id = 71], sink
+0.6327 - [id = 120], 
+---------- Top 5 predictions ----------
+
+1.7339 - [id = 3], motorbike
+0.9684 - [id = 118], 
+0.9566 - [id = 28], suitcase
+0.9466 - [id = 110], 
+0.9452 - [id = 85], �\���?�x��?�x�?�x
+Graph0   Input: 0.0385   Task: 16001.5   Out: 0.283792   Proc: 16001.8
+non parallel or start with empty pipeline so just first stage synchronized
+graph_id:0 calling inputs
+iterator:1
+reading image: /data/data/com.termux/files/home/ARMCL-RockPi/assets//ppm_images_608//dishes.ppm
+inputs called
+graph_id:0 calling receivers
+receivers called
+
+
+
+
+
+
+
+first graph start processing

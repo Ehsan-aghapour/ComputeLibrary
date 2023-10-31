@@ -161,7 +161,7 @@ NodeID GraphBuilder::add_sender_node(Graph &g, NodeParams params, NodeIdxPair in
 	std::cerr<<s;
     check_nodeidx_pair(input, g);
 
-    NodeID nid = g.add_node<SenderNode>();
+    NodeID nid = g.add_node<SenderNode>(params);
     g.add_connection(input.node_id, input.index, nid, 0);
     //Set tensor in TensorPipelineSender object inside the sender_node class
     //g.node(nid)->forward_descriptors();
@@ -330,6 +330,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
 
     // Get input tensor descriptor
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+    //std::cerr<<"desc target in conv layer: "<<input_tensor_desc.target<<std::endl;
     //std::cerr<<"adding conv layer in graph builder1.1\n";
     const DataLayout       input_data_layout = input_tensor_desc.layout;
     //std::cerr<<"adding conv layer in graph builder2\n";

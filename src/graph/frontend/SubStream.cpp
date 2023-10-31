@@ -36,7 +36,7 @@ SubStream::SubStream(IStream &s)
     : _s(s)
 {
     _hints     = s.hints();
-    //std::cerr<<"new sub stream with tail node: "<<s.tail_node()<<" and tail graph: "<<s.get_tail_graph_id()<<std::endl;
+    std::cerr<<"new sub stream with tail node: "<<s.tail_node()<<" and tail graph: "<<s.get_tail_graph_id()<<std::endl;
     _tail_node = s.tail_node();
     tail_graph_id=s.get_tail_graph_id();
     //tail_graph_id=IStreamPipeline::_target_graph;
@@ -92,13 +92,15 @@ SubStream & SubStream::operator<<(ILayer &layer)
 	//std::cerr<<"(substream) "<<" << operator, layer: "<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
 	layer.add_input_node(_tail_node,tail_graph_id);
 
-	std::string formatPattern = ".*_g\\d*|.*relu.*";
+	/*std::string formatPattern = ".*_g\\d*|.*relu.*";
 	std::regex pattern(formatPattern, std::regex_constants::icase);
 	if (regex_search(layer.name(), pattern)) {
 		std::cerr << "Skipping layer: "<<layer.name() << std::endl;
 	} else {
 		_s.next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id);
-	}
+	}*/
+	_s.next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id, layer.name());
+
 
 
 
@@ -111,17 +113,7 @@ SubStream & SubStream::operator<<(ILayer &&layer)
 	//IStreamPipeline::_target_graph=target_graph(current_layer);
 	//std::cerr<<"(substream) "<<" << operator, layer: "<<current_layer<<" : "<<layer.name()<<" On graph: "<<tail_graph_id<<"("<<IStreamPipeline::_target_graph<<") tail_node: "<<tail_node()<<" with "<< graph().nodes().size()<<" nodes\n";
 	layer.add_input_node(_tail_node,tail_graph_id);
-
-	std::string formatPattern = ".*_g\\d*|.*relu.*";
-	std::regex pattern(formatPattern, std::regex_constants::icase);
-	if (regex_search(layer.name(), pattern)) {
-		std::cerr << "Skipping layer: "<<layer.name() << std::endl;
-	} else {
-		_s.next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id);
-	}
-
-
-
+	_s.next_layer(layer.get_input_nodes(), _tail_node, tail_graph_id, layer.name());
 	add_layer(layer);
 	//std::cerr<<"*******************************\n";
     return *this;

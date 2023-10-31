@@ -1,6 +1,13 @@
 #!/bin/bash
 
+#./Run_CO-UP model=Alex --order=BBBBBBBB push=1 compile=1
+#./Run_CO-UP model=Mobile --order=NNNNNNNNNNNNNNNBGGGGGGGLLLLL --n=60 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+#./Run_CO-UP model=Yolo --order=BBBBBBBGGGGGBBBBBLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBLLLLLLLLLLLLLLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+# when just conv:
+#./Run_CO-UP model=Yolo --order=BBBGGBBLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+
 #set -x
+
 
 # Declare an associative array to store options and values
 declare -A options
@@ -34,8 +41,10 @@ adb shell 'echo 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
 
 current_dir=$(pwd)
 p="/data/data/com.termux/files/home/ARMCL-RockPi"
+#p="/data/local/tmp/ARM-CO-UP"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
-_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
+laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
+#_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
 
 _dt1="$p/assets/${S}/alexnet/"
 _dt2="$p/assets/${S}/googlenet/"
@@ -74,28 +83,72 @@ then
 fi
 
 v="${options[--order]}"
-start=`expr index "$v" N`
-count=$(awk -FN '{print NF-1}' <<<"$v")
-end=$((start+count-1))
-#echo $start
-#echo $end
-caching=false
-if (( $count>0 )); then
-	if [[ `adb shell ls $_path/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null`  && caching ]]; then 
-		echo "file $_path/graphs/${options[model]}_${start}_${end}.rknn exist on board";
-	else
-		#if [ ! -f /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn ]; then
-		if [[ ! -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn || ! $caching ]]; then
-			#/home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/a.out ${16} $start $end
-			/home/ehsan/UvA/Sub_Model/a.out ${options[model]} $start $end
-			sleep 2
+caching="YES"
+
+if ((0)); then
+	start=`expr index "$v" N`
+	start=$((start-1))
+	count=$(awk -FN '{print NF-1}' <<<"$v")
+	
+	end=$((start+count-1))
+	#echo $start
+	#echo $end
+	
+	echo "Checking file: /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn"
+	echo "File exists: $( [ -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ] && echo yes || echo no )"
+	echo "Caching value: $caching"
+	if (( $count>0 )); then
+		if [[ `adb shell ls $p/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null` ]] && [[ $caching == "YES" ]]; then 
+			echo "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+		else
+			#if [ ! -f /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn ]; then
+			if [[ ! -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ]] || [[ $caching == "NO" ]]; then
+				#/home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/a.out ${16} $start $end
+				/home/ehsan/UvA/Sub_Model/CO-UP.out ${options[model]} $start $end
+				sleep 2
+			fi
+			#adb -s DKORWVI0P0 push /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
+			#adb -s DKORWVI0P0 push /home/ehsan/UvA/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
+			adb  push /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn $p/graphs/${options[model]}_${start}_${end}.rknn
+			sleep 5
 		fi
-		#adb -s DKORWVI0P0 push /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn $_path/graphs/${16}_${start}_${end}.rknn
-		#adb -s DKORWVI0P0 push /home/ehsan/UvA/Sub_Model/${16}/${16}_${start}_${end}.rknn $_path/graphs/${16}_${start}_${end}.rknn
-		adb  push /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn $_path/graphs/${options[model]}_${start}_${end}.rknn
-		sleep 5
 	fi
+
 fi
+
+
+pos=0
+while [[ $pos -lt ${#v} ]]; do
+    # Find the start of an N substring
+    if [[ ${v:$pos:1} == "N" ]]; then
+        start=$pos
+
+        # Find the end of this N substring
+        while [[ ${v:$pos:1} == "N" && $pos -lt ${#v} ]]; do
+            pos=$((pos+1))
+        done
+        end=$((pos-1))
+        echo "start=$start, end=$end"
+		
+			if [[ `adb shell ls $p/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null` ]] && [[ $caching == "YES" ]]; then 
+				echo "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+			else
+				#if [ ! -f /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn ]; then
+				if [[ ! -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ]] || [[ $caching == "NO" ]]; then
+					#/home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/a.out ${16} $start $end
+					/home/ehsan/UvA/Sub_Model/CO-UP.out ${options[model]} $start $end
+					sleep 2
+				fi
+				#adb -s DKORWVI0P0 push /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
+				#adb -s DKORWVI0P0 push /home/ehsan/UvA/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
+				adb  push /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn $p/graphs/${options[model]}_${start}_${end}.rknn
+				sleep 5
+			fi
+    else
+        pos=$((pos+1))
+    fi
+done
+
 
 
 case "${options[model]}" in
@@ -103,37 +156,38 @@ case "${options[model]}" in
 		lbl=$_lbl
 		img=$_img1
 		dt=$_dt1
-		graph="graph_alexnet_n_pipe_npu"
+		graph="graph_alexnet_pipeline"
         ;;
     "Google" | "google")
 		lbl=$_lbl
 		img=$_img2
 		dt=$_dt2
-		graph="graph_google_n_pipe_npu"
+		graph="graph_googlenet_pipeline"
         ;;
     "Mobile" | "mobile")
 		lbl=$_lbl
 		img=$_img2
 		dt=$_dt3
-		graph="graph_mobilenet_n_pipe_npu"
+		graph="graph_mobilenet_pipeline"
         ;;
 	"Res50" | "res50")
 		lbl=$_lbl
 		img=$_img2
 		dt=$_dt4
-		graph="graph_resnet50_n_pipe_npu"
+		graph="graph_resnet50_pipeline"
         ;;
 	"Squeeze" | "squeeze")
 		lbl=$_lbl
 		img=$_img2
 		dt=$_dt5
-		graph="graph_squeezenet_n_pipe_npu"
+		graph="graph_squeezenet_pipeline"
         ;;
 	"Yolo" | "yolo")
-		lbl=$_lbl
+		lbl=$_lbl_detection
 		img=$_img3
 		dt=$_dt6
-		graph="graph_yolov3net_n_pipe_npu"
+		graph="graph_yolov3_pipeline"
+		
         ;;
     *)
         echo "Unknown fruit."
@@ -146,11 +200,15 @@ if [ "${options[compile]}" == "1" ]
 		cd ${laptop_dir}
 		./b64.sh 23
 		cd ${current_dir}
-		adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
+		#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
+		adb push ${laptop_dir}/build/examples/Pipeline/${graph} $p/test_graph/
+		
 	fi
 
 	if [ "${options[push]}" == "1" ]
 	then 
-		adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/ 
+		#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/ 
+		adb push ${laptop_dir}/build/examples/Pipeline/${graph} $p/test_graph/
+		
 	fi
 	adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"

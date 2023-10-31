@@ -45,7 +45,7 @@ GraphManagerPipeline::GraphManagerPipeline()
 	set_num_graphs(1);
 	pipeline_ready.store(false);
 	measure_when_full=true;
-	//parallel=false;
+	parallel=false;
 }
 
 
@@ -53,6 +53,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 {
     // Check if graph has been registered
 	std::cerr<<"graph id: "<<graph.id()<<std::endl;
+	//std::this_thread::sleep_for(std::chrono::milliseconds(1000*graph.id()));
     if(_workloads.find(graph.id()) != std::end(_workloads))
     {
         ARM_COMPUTE_ERROR("Graph is already registered!");
@@ -90,15 +91,23 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     // Setup backend context
     // TODO (COMPMID-2014) : Setup all backends needed by the graph
 
-    setup_requested_backend_context(ctx, forced_target);
-    // Configure all tensors
-    /*Ehsan:
-     * set TensforHandle for all tensors which TensorInfo of TensorAllocator for each TensorHandle is set based on information of each tensor such as shape,datatype,
-     * quantinfo and ...
-     * strides in bytes for all dimensions also is set in tensorInfo
-     */
-    //std::cerr<<"2\n";
-    detail::configure_all_tensors(graph);
+
+
+    {
+    	//Placed in critical region for parallel setup
+    	std::lock_guard<std::mutex> lock(_mtx);
+		setup_requested_backend_context(ctx, forced_target);
+    }
+	// Configure all tensors
+	/*Ehsan:
+	 * set TensforHandle for all tensors which TensorInfo of TensorAllocator for each TensorHandle is set based on information of each tensor such as shape,datatype,
+	 * quantinfo and ...
+	 * strides in bytes for all dimensions also is set in tensorInfo
+	 */
+	//std::cerr<<"graph "<<graph.id()<<" 2\n";
+
+
+	detail::configure_all_tensors(graph);
     /*if(graph.id()==2){
     	std::cerr<<"node name  -- > "<<graph.node(0)->name()<<std::endl;
     	std::cerr<<"node name  -- > "<<graph.node(1)->name()<<std::endl;
@@ -108,7 +117,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     	std::cerr<<"rec output id: "<<graph.node(0)->output_id(0)<<std::endl;
     	std::cerr<<"sender input id: "<<graph.node(11)->input_id(0)<<std::endl;
     }*/
-    //std::cerr<<"3\n";
+    std::cerr<<"graph "<<graph.id()<<" 3\n";
     // Apply backend mutating passes
 
     //std::cerr<<"befor pass 2 graph "<<graph.id()<<std::endl;
@@ -137,6 +146,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 		std::string test;
 		//std::cin>>test;
     }*/
+    /* if you enable this(pm.run_type) it leads to segmentation fault at workload.cpp execute_task function in line: task.task->run();*/
     pm.run_type(graph, IGraphMutator::MutationType::Backend);
     /*if(graph.id()==gid){
 
@@ -165,7 +175,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     //std::cerr<<"size of topological sorted nodes: "<<topological_sorted_nodes.size()<<std::endl;
     // Validate all nodes
     detail::validate_all_nodes(graph);
-    //std::cerr<<"4\n";
+    std::cerr<<"graph "<<graph.id()<<" 4\n";
     // Configure all nodes
     auto workload = detail::configure_all_nodes_pipeline(graph, ctx, topological_sorted_nodes);
     ARM_COMPUTE_ERROR_ON_MSG(workload.tasks.empty(), "Could not configure all nodes!");
@@ -174,9 +184,10 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     std::cout<<"\nGraphManager, outputs size:"<<workload.outputs.size()<<std::endl;
 #endif
     // Allocate const tensors and call accessors
-    //std::cerr<<"5\n";
-
+    std::cerr<<"graph "<<graph.id()<<" 5\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     detail::allocate_const_tensors_pipeline(graph);
+    std::cerr<<"graph "<<graph.id()<<" 5_1\n";
     detail::call_all_const_node_accessors(graph);
     //std::cerr<<"prepare:\n";
     // Prepare graph
@@ -202,7 +213,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     int ii=0;
     //std::set<int> blocking_set1 {1, 2, 3, 4};
     //std::set<int> *blocking_set=&blocking_set1;
-    //std::cerr<<"6\n";
+    std::cerr<<"graph "<<graph.id()<<" 6\n";
     if(blocking_set!=NULL){
 		for(auto &task : workload.tasks)
 		{
@@ -229,7 +240,7 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     if(target==arm_compute::graph::Target ::CL){
     	workload.tasks[workload.tasks.size()-1].block=1;
     }
-    //std::cerr<<"7\n";
+    std::cerr<<"graph "<<graph.id()<<" 7\n";
     //std::cerr<<"4"<<std::endl;
 #if My_print > 0
     //Ehsan
@@ -254,17 +265,17 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     	//std::cerr<<"else\n";
         detail::allocate_all_tensors(graph);
     }
-    //std::cerr<<"8\n";
+    std::cerr<<"graph "<<graph.id()<<" 8\n";
     // Finalize Graph context
     ctx.finalize();
-    //std::cerr<<"9\n";
+    std::cerr<<"graph "<<graph.id()<<" 9\n";
     // Register graph
     std::lock_guard<std::mutex> lock(_mtx);
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id() << std::endl);
     //std::cerr<<"after pass graph "<<graph.id()<<std::endl;
     //print_times(graph,1);
-    //std::cerr<<"10\n";
+    std::cerr<<"graph "<<graph.id()<<" 10\n";
 }
 void GraphManagerPipeline::reset_timing(int graph_id){
 	input_time[graph_id]=0;
@@ -591,7 +602,7 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 		print_times(graph,1);
 	}*/
 	std::stringstream stream;
-	stream<<"start of execute graph "<<graph.id()<<" in graph manager\n";
+	stream<<"start of warmup and execute graph "<<graph.id()<<" in graph manager\n";
 	//stream<<"number of workloads: "<<_workloads.size()<<std::endl;
 	std::cerr<<stream.str();
 	stream.str(std::string());
@@ -684,19 +695,24 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 
 
     int cc=warmup_n+(num_graphs-1)-graph.id();
-    int n=10;
+    if(!parallel){
+    	cc=warmup_n;
+    }
+    int n=3;
     for(int k=0; k<n;k++)
     {
-    	if(!parallel)
+
+    	/*I moved it to after loading input
+    	 * if(!parallel)
     	{
 			std::unique_lock<std::mutex> lck(_mtx);
-			if(graph.id()==0){
+			if(graph.id()==0 ){
 				std::cerr<<"\n\n\n\n\n\n\nfirst graph is ready to run? "<<ready<<"\n\n\n\n\n";
 				condVar_serial.wait(lck,[this] {return ready;});
 				std::cerr<<"\n\n\n\n\n\n\nfirst graph start processing\n\n\n\n\n";
 				ready=false;
 			}
-    	}
+    	}*/
 
     	if(k==cc){
     		reset_timing(graph.id());
@@ -715,7 +731,7 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 		stream.str(std::string());
         detail::call_all_input_node_accessors(it->second);
 
-        std::cerr<<"input called\n";
+        std::cerr<<"inputs called\n";
         auto tfinish=std::chrono::high_resolution_clock::now();
         double x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
         //std::cerr<<"size of input_time: "<<input_time.size()<<std::endl;
@@ -736,6 +752,19 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 		x1=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 		input_time[graph.id()] +=x1;
 
+
+
+		//If not pipeline (switch mode)
+		if(!parallel)
+		{
+			std::unique_lock<std::mutex> lck(_mtx);
+			if(graph.id()==0 ){
+				//std::cerr<<"\n\n\n\n\n\n\nfirst graph is ready to run? "<<ready<<"\n\n\n\n\n";
+				condVar_serial.wait(lck,[this] {return ready;});
+				std::cerr<<"\n\n\n\n\n\n\nfirst graph start processing\n\n\n\n\n";
+				ready=false;
+			}
+		}
 		/*
 		 * All stages process the (cc=n_warmup+num_stages-graph_id(stage_id) ) frames and load input and wait
 		 * the last stage which reach to this state(which is first stage, set pipeline_ready to true and notify all stages to start with
@@ -755,7 +784,8 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 				std::cerr<<"graph(stage) "<<graph.id()<<" num_stages: "<<num_graphs<<std::endl;
 				if(c==num_graphs){
 					//start power measurement
-					std::cerr<<"stage "<<graph.id()<<" arrived later than all stages and will set ready to true after 2 seconds\n";
+					std::cerr<<"stage "<<graph.id()<<" arrived later than all stages for frame "<<k<<"and will set ready to true after 2 seconds\n";
+					std::cerr<<"\n\n\n**************\n start running (tasks) all partitions together after warm up\n************\n\n\n";
 					std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 					pipeline_ready.store(true);
 					condVar.notify_all();
@@ -769,6 +799,13 @@ void GraphManagerPipeline::warmup_and_execute_graph(Graph &graph, int nn)
 				//start power measurement
 				//std::cerr<<"non parallel or start with empty pipeline so just first stage synchronized\n";
 			//}
+			//If switch mode (not pipeline)
+			else{
+				if(graph.id()==0){
+				std::cerr<<"\n\n\n*****************************\n start running (tasks) first partition for frame "<<k<<" after warm up\n**********************************\n\n\n";
+				}
+			}
+
 		}
 
 

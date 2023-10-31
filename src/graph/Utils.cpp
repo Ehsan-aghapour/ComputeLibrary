@@ -62,7 +62,7 @@ Target get_default_target()
 	}
     ARM_COMPUTE_ERROR("No backend exists!");
 }
-
+/*
 void force_target_to_graph(Graph &g, Target target)
 {
     auto &nodes = g.nodes();
@@ -89,6 +89,31 @@ void force_target_to_graph(Graph &g, Target target)
         }
     }
 }
+*/
+
+void force_target_to_graph(Graph &g, Target target)
+{
+    auto &nodes = g.nodes();
+    for(auto &node : nodes)
+    {
+        if(node)
+        {
+            node->set_assigned_target(target);
+        }
+    }
+
+    auto &tensors = g.tensors();
+    for(auto &tensor : tensors)
+    {
+        if(tensor)
+        {
+        	if(target==Target::NPU){
+        		target=Target::NEON;
+        	}
+            tensor->desc().target = target;
+        }
+    }
+}
 
 PassManager create_default_pass_manager(Target target, const GraphConfig &cfg)
 {
@@ -101,9 +126,9 @@ PassManager create_default_pass_manager(Target target, const GraphConfig &cfg)
     {
         pm.append(std::make_unique<SyntheticDataTypeMutator>(), !is_target_gc);
     }
-    pm.append(std::make_unique<NodeFusionMutator>(), !is_target_gc);
+    //pm.append(std::make_unique<NodeFusionMutator>(), !is_target_gc);
     pm.append(std::make_unique<GroupedConvolutionMutator>());
-    pm.append(std::make_unique<InPlaceOperationMutator>(), !is_target_gc);
+    //pm.append(std::make_unique<InPlaceOperationMutator>(), !is_target_gc);
 
     // Passes that mutate backend information
     pm.append(std::make_unique<DepthConcatSubTensorMutator>(), !is_target_gc);

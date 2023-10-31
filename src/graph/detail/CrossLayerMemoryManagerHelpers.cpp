@@ -67,6 +67,7 @@ struct TaskHandles
 IMemoryGroup *get_memory_group_from_handle(GraphContext &ctx, ITensorHandle *handle)
 {
     ARM_COMPUTE_ERROR_ON(handle == nullptr);
+    //std::cerr<<"handle target: "<<handle->target()<<std::endl;
     return ctx.memory_management_ctx(handle->target())->cross_group.get();
 }
 
@@ -83,9 +84,15 @@ std::set<ITensorHandle *> get_const_handles(const Graph &g)
     std::set<ITensorHandle *> const_tensors;
 
     auto &nodes = g.nodes();
+    //std::cerr<<"\n\nchecking const tensors...\n";
     for(auto &node : nodes)
     {
         // If its a const node:
+    	/*if(node != nullptr){
+    		std::cerr<<"node: "<<node->name()<<" with type: "<<node->type()<<std::endl;
+    	}
+    	else
+    		std::cerr<<"node is null\n";*/
         if(node != nullptr && const_node_types.find(node->type()) != std::end(const_node_types))
         {
             // TODO (geopin01) : Create IO iterator wrappers
@@ -95,6 +102,7 @@ std::set<ITensorHandle *> get_const_handles(const Graph &g)
                 if(node->input(i) != nullptr)
                 {
                     const_tensors.insert(node->input(i)->handle()->parent_handle());
+                    //std::cerr<<node->name()<<"-input-"<<i<<std::endl;
                 }
             }
             for(unsigned int i = 0; i < node->num_outputs(); ++i)
@@ -102,6 +110,7 @@ std::set<ITensorHandle *> get_const_handles(const Graph &g)
                 if(node->output(i) != nullptr)
                 {
                     const_tensors.insert(node->output(i)->handle()->parent_handle());
+                    //std::cerr<<node->name()<<"-output-"<<i<<std::endl;
                 }
             }
         }
@@ -126,15 +135,18 @@ TaskHandles get_transition_handles(GraphContext                    &ctx,
     INode &node = *task.node;
 
     TaskHandles transition_handles;
+    //std::cerr<<"task name: "<<task.node->name()<<std::endl;
 
     // Add input handles
     for(unsigned int i = 0; i < node.input_edges().size(); ++i)
     {
+    	//std::cerr<<"input "<<i<<std::endl;
         Edge *input_edge = node.input_edge(i);
         // If this input is the output of another node
         if(input_edge != nullptr && input_edge->tensor() != nullptr && const_tensors.find(input_edge->tensor()->handle()->parent_handle()) == std::end(const_tensors))
         {
             // Then add it to the list of transition buffers
+        	//std::cerr<<"input transition handle\n";
             ITensorHandle *tensor_handle = input_edge->tensor()->handle()->parent_handle();
             IMemoryGroup *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
             transition_handles.input_handles.emplace_back(std::make_pair(tensor_handle, mm_group));
@@ -144,13 +156,19 @@ TaskHandles get_transition_handles(GraphContext                    &ctx,
     // Add output handles
     for(unsigned int i = 0; i < node.num_outputs(); ++i)
     {
+    	//std::cerr<<"output "<<i<<std::endl;
         Tensor *output_tensor = node.output(i);
         // If this output is used as an input for another node
         if(output_tensor != nullptr && const_tensors.find(output_tensor->handle()->parent_handle()) == std::end(const_tensors))
         {
+        	//std::cerr<<"output transition handle\n";
             ITensorHandle *tensor_handle = output_tensor->handle()->parent_handle();
+            //std::cerr<<"t0\n";
             IMemoryGroup *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
+            //std::cerr<<"t1\n";
+
             transition_handles.output_handles.emplace_back(std::make_pair(tensor_handle, mm_group));
+            //std::cerr<<"t2\n";
         }
     }
 
@@ -237,20 +255,22 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
 {
     // Get const tensors (un-managed)
     std::set<ITensorHandle *> const_tensors = get_const_handles(g);
-
+    //std::cerr<<"after const\n";
     std::vector<TaskHandles> tasks_handles;
     TargetHandleCounter      target_handle_count;
-
+    //std::cerr<<"bef\n";
     // Count handles
     for(auto &task : workload.tasks)
     {
+    	//std::cerr<<task.node->name()<<std::endl;
         // Populates IO handles
         tasks_handles.push_back(get_transition_handles(ctx, task, const_tensors));
-
+        //std::cerr<<"aaaa\n";
         // Count handles
         count_input_handles_per_target(tasks_handles.back(), target_handle_count);
+        //std::cerr<<"bbbbb\n";
     }
-
+    //std::cerr<<"dfdfdf\n";
     // Setup memory managers
     for(auto &hc : target_handle_count)
     {

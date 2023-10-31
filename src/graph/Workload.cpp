@@ -63,9 +63,12 @@ void execute_task(ExecutionTask &task)
 {
     if(task.task)
     {
-    	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
+    	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id()<<std::endl;
     	//auto start=std::chrono::high_resolution_clock::now();
+    	//std::cerr<<(task.task==nullptr)<<std::endl;
+    	//std::cerr<<"nonono\n";
         task.task->run();
+        //std::cerr<<"after run\n";
         //arm_compute::CLScheduler::get().queue().finish();
         //auto finish=std::chrono::high_resolution_clock::now();
         //tt[task.node->name()]+=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());

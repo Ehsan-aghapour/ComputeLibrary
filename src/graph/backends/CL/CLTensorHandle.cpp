@@ -63,7 +63,7 @@ void CLTensorHandle::manage(IMemoryGroup *mg)
 void CLTensorHandle::map(bool blocking)
 {
     //_tensor.map(blocking);
-	std::cerr<<"mapping of cltensorhandle\n";
+	//std::cerr<<"mapping of cltensorhandle\n";
     _tensor2->map(blocking);
 }
 
