@@ -25,6 +25,8 @@
 #define ARM_COMPUTE_GRAPH_ISTREAM_PIPELINE_H
 
 #include "arm_compute/graph/frontend/IStream.h"
+#include <unordered_set>
+
 #include <regex>
 
 namespace arm_compute
@@ -193,8 +195,8 @@ public:
     virtual StreamHints &hints()
     {
     	std::string s;
-		s="__calling hints in IstreamPipeline is "+ std::to_string((int)(_hints.target_hint)) +"\n";
-		std::cerr<<s;
+		//s="__calling hints in IstreamPipeline is "+ std::to_string((int)(_hints.target_hint)) +"\n";
+		//std::cerr<<s;
         return _hints;
     }
     /** Forwards tail of stream to a given nid
@@ -236,7 +238,11 @@ public:
     	//return -1;
     }
 
-    bool is_next_layer(std::string name);
+    static bool is_next_layer(std::string name);
+    static bool is_end_layer(std::string name);
+
+    inline static std::string						graph_name;
+    //inline static std::unordered_set<std::string> ending_tasks;
 
 protected:
     inline static int 			current_layer={0};
@@ -246,6 +252,9 @@ protected:
     inline static NodeMap				node_map;
     inline static std::vector<int>	start_layer;
     inline static std::vector<int>	end_layer;
+
+
+
     //StreamHints _hints     = {};              /**< Execution and algorithmic hints */
     //NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
 };

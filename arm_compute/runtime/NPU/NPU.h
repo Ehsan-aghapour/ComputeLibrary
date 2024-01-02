@@ -47,11 +47,11 @@ struct SelectDataStructure {
 
 /*********RockPi ***************/
 struct RockPiData{
+	rknn_context*				_NPU_Context=NULL;
 	std::vector<rknn_input>		inputs;
 	std::vector<rknn_output> 	outputs;
-	rknn_context*				_NPU_Context=NULL;
-	rknn_tensor_attr 			input_attr;
-	rknn_tensor_attr 			output_attr;
+	std::vector<rknn_tensor_attr> 			input_attr;
+	std::vector<rknn_tensor_attr> 			output_attr;
 	rknn_tensor_format 			fmt=RKNN_TENSOR_NHWC;
 	rknn_tensor_type 			type=RKNN_TENSOR_FLOAT32;
 };
@@ -75,9 +75,21 @@ struct SelectDataStructure<NPUTypes::temp> {
 };
 /**********************************************/
 
+class NPUBase : public IFunction {
+public:
+    virtual ~NPUBase() {}
+    virtual void reset_timing() = 0; // if this is a common function
+    virtual double get_input_time()=0;
+    virtual double get_run_time()=0;
+    virtual double get_prof_run_time() =0;
+    virtual double get_output_time()=0;
+    virtual void set_preallocated_outputs()=0;
+    virtual int destroy()=0;
+    // ... other common functions ...
+};
 
 template <NPUTypes NPUType>
-class NPU : public IFunction
+class NPU : public NPUBase
 {
 public:
     /** Constructor
@@ -126,10 +138,19 @@ public:
     void run() override;
 
     void reset_timing(){
-    	input_time=run_time=output_time=num_run=0;
+    	//std::cerr<<"NPU reset is calllling\n\n\n\n";
+    	input_time=run_time=prof_run_time=output_time=num_run=0;
     }
 
+    double get_input_time() {return input_time;};
+    double get_run_time() {return run_time;};
+    double get_prof_run_time() {double result = static_cast<float>(prof_run_time) / 1000.0f; return result;};
+    double get_output_time() {return output_time;};
+
+    void set_preallocated_outputs() override{};
+
     void prepare() override;
+    int destroy() override{return 0;};
 protected:
     int									id;
     std::string							_name;
@@ -143,8 +164,11 @@ protected:
 	bool						Pass=false;
 	double						input_time=0;
 	double						run_time=0;
+	long int					prof_run_time=0;
 	double						output_time=0;
 	int							num_run=0;
+	bool						preallocated_output=false;
+	bool						_Transpose=true;
 
 
 private:

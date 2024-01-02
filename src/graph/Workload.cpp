@@ -30,20 +30,114 @@
 //Ehsan
 #include "arm_compute/runtime/CL/CLScheduler.h"
 //std::map<std::string,double> task_times;
+#include "utils/Power/Power.h"
+#include "utils/DVFS/DVFS.h"
 
 
 namespace arm_compute
 {
 namespace graph
 {
+
+//DVFS ExecutionTask::dvfs;
+DVFS dvfs;
+void ExecutionTask::init(){
+	dvfs.init();
+}
+void ExecutionTask::finish(){
+	dvfs.finish();
+}
+
+void ExecutionTask::apply_freq(std::string _name){
+	if(governor){
+		//std::cerr<<"Layer: "<<node->name()<<" Applying freqs Little:"<<LittleFreq<<" big: "<<bigFreq<<" GPU:"<<GPUFreq<<std::endl;
+		dvfs.commit_freq(LittleFreq, bigFreq, GPUFreq);
+
+	}
+	/*else{
+		std::cerr<<"calling applyfreq for a node that is not ending\n";
+		std::string s;
+		std::cin>>s;
+	}*/
+}
+
+void ExecutionTask::switch_GPIO_starting(){
+	if(starting_gpio_switch){
+		//std::cerr<<"switch gpio to 0 by "<<node->name()<<std::endl;
+		if (-1 == GPIOWrite(POUT, 0))
+			std::cerr<<"Could not write 0 to GPIO\n";
+	}
+}
+void ExecutionTask::switch_GPIO_ending(){
+	//std::cerr<<"end\n";
+	if(ending_gpio_switch){
+		//std::cerr<<"switch gpio to 1 by "<<node->name()<<std::endl;
+		if (-1 == GPIOWrite(POUT, 1))
+			std::cerr<<"Could not write 1 to GPIO\n";
+	}
+}
+
+int ExecutionTask::get_max_l(){
+	return dvfs.get_max_l();
+}
+int ExecutionTask::get_max_b(){
+	return dvfs.get_max_b();
+}
+int ExecutionTask::get_max_g(){
+	return dvfs.get_max_g();
+}
+
 void ExecutionTask::operator()()
 {
-    TaskExecutor::get().execute_function(*this);
+	switch_GPIO_starting();
+	if(!profile_transfers){
+		TaskExecutor::get().execute_function(*this);
+		/*if(profile_layers){
+			TaskExecutor::get().execute_function(*this);
+			TaskExecutor::get().execute_function(*this);
+			TaskExecutor::get().execute_function(*this);
+		}*/
+	}
+	else{
+		std::this_thread::sleep_for(std::chrono::milliseconds(8));
+	}
+    apply_freq();
+    switch_GPIO_ending();
+    if(profile_layers){
+    	if(ending_gpio_switch){
+    		std::this_thread::sleep_for(std::chrono::milliseconds(8));
+    	}
+    }
+
 }
 
 void ExecutionTask::operator()(int nn)
 {
-    t+=TaskExecutor::get().execute_function2(*this,nn);
+	switch_GPIO_starting();
+	if(!profile_transfers){
+		t+=TaskExecutor::get().execute_function2(*this,nn);
+		/*if(profile_layers){
+
+			if(ending_gpio_switch){
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+				std::cerr<<"layer "<<node->name()<<std::endl;
+			}
+			//TaskExecutor::get().execute_function2(*this,nn);
+			//TaskExecutor::get().execute_function2(*this,nn);
+			//TaskExecutor::get().execute_function2(*this,nn);
+		}*/
+	}
+	else{
+		std::this_thread::sleep_for(std::chrono::milliseconds(8));
+	}
+    apply_freq();
+    switch_GPIO_ending();
+    if(profile_layers){
+    	if(ending_gpio_switch){
+    		std::this_thread::sleep_for(std::chrono::milliseconds(8));
+    	}
+    }
+
 }
 
 double ExecutionTask::time(int n){
@@ -101,7 +195,7 @@ double execute_task2(ExecutionTask &task, int nn)
     {
     	//std::cerr<<"Node name:"<<task.node->name()<<"\t id:"<<task.node->id();
     	//static int n=-1;
-    	std::cerr<<"start running task with blockin and ending: "<<task.block<<task.ending<<std::endl;
+    	//std::cerr<<"start running task with blockin and ending: "<<task.block<<task.ending<<std::endl;
     	auto start=std::chrono::high_resolution_clock::now();
         task.task->run();
         if(task.block){
@@ -109,7 +203,7 @@ double execute_task2(ExecutionTask &task, int nn)
         	//std::cerr<<"block\n";
         }
         auto finish=std::chrono::high_resolution_clock::now();
-        std::cerr<<"task finished\n";
+        //std::cerr<<"task finished\n";
         t=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());
         //task_times[task.node->name()]+=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(finish - start).count());
         //std::cerr<<"salam\n";

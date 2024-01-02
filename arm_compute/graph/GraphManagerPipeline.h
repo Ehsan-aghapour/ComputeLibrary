@@ -92,7 +92,8 @@ public:
     //if there is no buffer in between stages
     void warmup_and_execute_graph_no_buffer(Graph &graph, int nn);
     //If you want to buffer output of a stage if next stage is busy:
-    void warmup_and_execute_graph(Graph &graph, int nn);
+    void warmup_and_execute_graph_pipeline(Graph &graph, int nn);
+    void warmup_and_execute_graph_serial(Graph &graph, int nn);
     //void execute_graph(Graph &graph, bool annotate, int nn=0);
     //void execute_graph(Graph &graph, double &in, double &task, double &out, int nn=0);
     //void execute_graph(Graph &graph, double &in, double &task, double &out, bool annotate, int nn=0);
@@ -126,15 +127,21 @@ public:
     double get_output_time(int target){
     	return output_time[target];
     }
-    void print_times(Graph &graph, int n);
+
+    void print_times(int n);
+    void print_times(int graph_id, int n);
+    void print_times_details(int graph_id, int n);
     void reset(Graph &graph);
     void set_num_graphs(int n){
     	num_graphs=n;
     	input_time.resize(n);
+    	receive_time.resize(n);
     	task_time.resize(n);
+    	send_time.resize(n);
     	output_time.resize(n);
     	transmition_time.resize(n);
     }
+    void print_tasks();
     void reset_timing(int graph_id);
 
     void finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target, std::set<int> *blocking_set=nullptr, int blocking=0);
@@ -146,16 +153,32 @@ public:
     	return input_images;
     }
 
+    std::map<GraphID, ExecutionWorkload>& get_workloads(){
+    	return _workloads;
+    }
+
+    void set_freqs(std::string freqs, std::string _order, char GPU_Host, char NPU_Host);
+    void extract_governor_tasks(std::string);
+    void set_freq_map(std::string freqs, std::string _order, char GPU_Host, char NPU_Host);
+    void set_governor_freqs();
+    int destroy();
+
+    void set_GPIO_tasks(std::string power_profie_mode);
+
+
 private:
 
     std::map<GraphID, ExecutionWorkload> 	_workloads = {}; /**< Graph workloads */
 
     std::vector<double> 					input_time;
+    std::vector<double> 					receive_time;
     std::vector<double> 					task_time;
     std::vector<double> 					output_time;
+    std::vector<double> 					send_time;
     std::vector<double>						transmition_time;
+    double									latency_time=0;
     int 									num_graphs=1;
-    int										warmup_n=1;
+    int										warmup_n=3;
 	bool									parallel=true;
 	bool									measure_when_full=true&&parallel;
 	std::mutex 								_mtx = {};
@@ -165,6 +188,12 @@ private:
 	int										c=0;
 	std::atomic<bool>						pipeline_ready;
 	std::vector<std::string>				input_images;
+
+	std::vector<std::string>				governor_tasks;
+	std::map<std::string, std::array<int, 3>> governor_freqs;
+	//std::map<std::string, std::array<int, 3>> graphs_freqs;
+	//std::map<std::string, std::array<int, 3>> PEs_freqs;
+
 };
 } // namespace graph
 } // namespace arm_compute

@@ -123,6 +123,8 @@ struct CommonGraphParams
     int								 little_cores{4};
     int								 layer_time{0};
     std::string						 order{"B-L-G"};
+    std::string						 freqs{};
+    std::string						 power_profile_mode{"whole"};
     char							 gpu_host{'B'};
     char							 npu_host{'B'};
     int								 input_c{3};
@@ -130,6 +132,7 @@ struct CommonGraphParams
     int								 kernel_c{96};
     int								 kernel_s{11};
     int								 stride{2};
+    int								 print_tasks{0};
 };
 
 /** Formatted output of the CommonGraphParams type
@@ -189,6 +192,8 @@ public:
     SimpleOption<std::string>              *mlgo_file;        /**< File to load the MLGO heuristics from */
     //Ehsan
     SimpleOption<std::string>              *order;					  /**< Order of processors eg. B-L-G */
+    SimpleOption<std::string>			   *freqs;			/* freqs of each element */
+    SimpleOption<std::string>			   *power_profile_mode;			/* power_profile_mode */
     SimpleOption<char>                      *gpu_host;          /**< GPU host */
     SimpleOption<char>                      *npu_host;          /**< NPU host */
     SimpleOption<int>                      *partition_point;          /**< Partition point */
@@ -205,6 +210,8 @@ public:
     SimpleOption<int>					   *kernel_c;
     SimpleOption<int>					   *kernel_s;
     SimpleOption<int>					   *stride;
+    SimpleOption<int>					   *print_tasks;
+
 
 };
 

@@ -283,10 +283,10 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
     {
     	//iterator=(iterator+1)%(image_list.size());
     	iterator=(iterator)%(image_list.size());
-    	std::cerr<<"iterator:"<<iterator<<std::endl;
     	_filename=image_list[iterator];
+    	std::cerr<<"\n\n************\nPhoto_index:"<<iterator<<std::endl;
+    	std::cerr<<"Reading image: "<<_filename<<"\n*************\n\n\n";
     	iterator++;
-    	std::cerr<<"reading image: "<<_filename<<std::endl;
 
         auto image_loader = utils::ImageLoaderFactory::create(_filename);
         ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
@@ -638,6 +638,7 @@ template <typename T>
 void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
 {
     // Get the predicted class
+	//std::cerr<<"getting output"<<tensor.info()->tensor_shape()<<std::endl;
     std::vector<T>      classes_prob;
     std::vector<size_t> index;
 
@@ -664,8 +665,10 @@ void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
         _output_stream << std::fixed << std::setprecision(4)
                        << +classes_prob[index.at(i)]
                        << " - [id = " << index.at(i) << "]"
-                       << ", " << _labels[index.at(i)] << std::endl;
+                       //<< ", " << _labels[index.at(i)]
+						<< std::endl;
     }
+    //std::cerr<<"finish getting output"<<tensor.info()->tensor_shape()<<std::endl;
 }
 
 bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)

@@ -103,6 +103,7 @@ public:
     OutputLayer(ITensorAccessorUPtr accessor, unsigned int connection_idx = 0)
         : _accessor(std::move(accessor)), _connection_idx(connection_idx)
     {
+    	_name="output";
     }
 
     NodeID create_layer(IStream &s) override
@@ -365,6 +366,7 @@ public:
         for (unsigned int i=0;i<_sub_streams.size();i++){
 			input_nodes.push_back( std::make_pair(_sub_streams[i]->tail_node(), _sub_streams[i]->get_tail_graph_id()));
 		}
+        _name="concat";
     }
     NodeID create_layer(IStream &s) override
     {

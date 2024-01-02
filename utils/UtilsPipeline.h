@@ -40,6 +40,12 @@ namespace utils
 typedef std::vector<std::string> stringvec;
 void read_directory(const std::string& name, stringvec& v);
 
+// Helper function to convert a string to lowercase
+std::string toLowerCase(std::string str);
+// Function to remove "net" from the end of a string if it exists
+std::string removeNetFromEnd(std::string str);
+
+//std::unordered_set<std::string> get_end_task_names(std::string graph_name="alex");
 /** Abstract Example class.
  *
  * All examples have to inherit from this class.
@@ -49,9 +55,10 @@ class Example_Pipeline: public Example
 public:
 	Example_Pipeline(int _id, std::string _name)
 	//:	cmd_parser(), common_opts(cmd_parser), common_params(), graph(_id,std::move(_name))
-	: 	cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, _name)
+	: 	cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, _name), _name(_name)
 	{
-
+		graph::frontend::IStreamPipeline::graph_name=toLowerCase(_name);
+		//graph::frontend::IStreamPipeline::ending_tasks=get_end_task_names(graph::frontend::IStreamPipeline::graph_name);
 	}
 
 	void init(int _id, char _PE, int start, int end, char _host_PE)
@@ -102,6 +109,8 @@ public:
 		}
 		// Print parameter values
 		std::cout << common_params << std::endl;
+
+		graph.set_num_runs(common_params.n);
 
 		return 0;
 		//example_pipeline->common_opts=common_opts;
@@ -194,6 +203,56 @@ public:
     	graph.set_common_params(_common_params);
     }
 
+    void initialize_dvfs();
+    int get_max_l(){
+    	return arm_compute::graph::ExecutionTask::get_max_l();
+    }
+    int get_max_b(){
+    	return arm_compute::graph::ExecutionTask::get_max_b();
+    }
+    int get_max_g(){
+    	return arm_compute::graph::ExecutionTask::get_max_g();
+    }
+
+    void initialize_power_measurement();
+
+    std::string name(){
+    	return _name;
+    	//return graph.name();
+    }
+    CommonGraphParams get_common_params(){
+    	return common_params;
+    }
+
+    void do_teardown() override{
+    	graph.manager()->destroy();
+    }
+
+    /*std::vector<std::unique_ptr<arm_compute::graph::Graph>> get_graphs(){
+    	return graph.get_graphs();
+    }
+    std::map<arm_compute::graph::GraphID, arm_compute::graph::ExecutionWorkload>& get_workloads(){
+        	return graph.manager()->get_workloads();
+    }
+    void extract_ending_tasks(){
+    	auto &workloads=get_workloads();
+    	for (unsigned int id = 0; id < workloads.size(); ++id) {
+    		auto it = workloads.find(id);
+    		auto &workload = it->second;
+
+    	}
+    }*/
+    void set_freqs(std::string freqs){
+    	graph.manager()->set_freqs(freqs, common_params.order, common_params.gpu_host, common_params.npu_host);
+    }
+
+    void set_GPIOs(std::string power_profie_mode){
+    	graph.manager()->set_GPIO_tasks(power_profie_mode);
+    }
+    void print_tasks(){
+    	graph.manager()->print_tasks();
+    }
+
 	/*CommonGraphParams  				common_params;
 	CommonGraphOptions 				common_opts;
 	CommandLineParser  				cmd_parser;*/
@@ -209,6 +268,7 @@ protected:
 	int 							id;
 	char 							host_PE;
 	arm_compute::graph::Target		target;
+	std::string						_name;
 	//rknn_context 					ctx;
 	//
 };

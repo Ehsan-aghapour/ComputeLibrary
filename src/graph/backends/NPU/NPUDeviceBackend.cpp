@@ -84,7 +84,7 @@ void NPUDeviceBackend::release_backend_context(GraphContext &ctx)
 
 void NPUDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
-    std::cerr<<"NPU backend setup \n";
+    //std::cerr<<"NPU backend setup \n";
     return;
 }
 
@@ -118,7 +118,7 @@ std::unique_ptr<arm_compute::IFunction> NPUDeviceBackend::configure_node(INode &
     ARM_COMPUTE_ERROR_ON(node.assigned_target() != Target::NEON);
 
     // Configure node
-    std::cerr<<"NPU backend configurte node\n";
+    //std::cerr<<"NPU backend configurte node\n";
     auto func = NPUFunctionFactory::create(&node, ctx);
     if(func!=nullptr)
     	func->prepare();

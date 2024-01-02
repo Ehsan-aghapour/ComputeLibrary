@@ -25,6 +25,7 @@
 #include <sstream>
 #include "arm_compute/graph/nodes/SenderNode.h"
 #include "arm_compute/graph/nodes/ReceiverNode.h"
+#include "arm_compute/runtime/NPU/NPU.h"
 
 #define streamline 0
 #include<chrono>
@@ -37,6 +38,8 @@
 //#include "src/graph/GraphManager.cpp"
 
 #include "arm_compute/graph/detail/ExecutionHelpersPipeline.h"
+#include "arm_compute/graph/frontend/IStreamPipeline.h"
+#include "utils/main_layer_checker.h"
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
@@ -72,6 +75,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 			auto node = g.node(node_id);
 			//Ehsan
 
+			/*
 			std::cerr<<"\n*******************************\nnode name: "<<node->name()<<" ID: "<<node->id()<<" num inputs: "<<node->num_inputs()<<std::endl<<std::flush;
 			for(int k=0; k < node->num_inputs(); k++){
 				INode *cc=node->input_edge(k)->producer();
@@ -81,6 +85,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 				//for(int i=0;i<shape.num_dimensions();i++) std::cout<<shape[i]<<'\t'<<std::flush;
 				//std::cerr<<"Padding: "<<_padding.left<<_padding.right<<_padding.top<<_padding.bottom<<std::endl;
 			}
+			*/
 
 			/*
 			 ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -99,15 +104,15 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 								   << std::endl);
 			 */
 
-			std::cerr<<"node name: "<<node->name()<<std::endl;
+			//std::cerr<<"node name: "<<node->name()<<std::endl;
 			if(node != nullptr)
 			{
-				std::cerr<<"node is not null\n";
+				//std::cerr<<"node is not null\n";
 				Target                     assigned_target = node->assigned_target();
 
 				backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
 				std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
-				std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
+				//std::cerr<<"func is null? "<<(func == nullptr)<<std::endl;
 				if(func != nullptr || is_utility_node(node))
 				{
 					std::cerr<<"Graph ("<<g.id()<<") "<<"Task "<<task_number++<<": "<<node->name()<<"\n";
@@ -124,14 +129,14 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
         if(node != nullptr && node->type() == NodeType::Input)
         {
         	//Ehsan
-        	std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+        	//std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
 
             workload.inputs.push_back(node->output(0));
         }
         if(node != nullptr && node->type() == NodeType::Receiver)
 		{
 			//Ehsan
-			std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+			//std::cout<<"\ninput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
         	ReceiverNode* rec=dynamic_cast<ReceiverNode*>(node.get());
         	rec->get_receiver_tensor()->set_name(rec->common_node_params().name);
         	rec->get_receiver_tensor()->set_tensor(rec->output(0));
@@ -155,7 +160,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
         {
             workload.outputs.push_back(node->input(0));
             //Ehsan
-            std::cout<<"\noutput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
+            //std::cout<<"\noutput node name and ID: "<<node->name()<<'_'<<node->id()<<std::endl;
 
             continue;
         }
@@ -225,8 +230,170 @@ void reset_transmit_timings(ExecutionWorkload &workload)
     {
         receiver_tensor->reset_timing();
     });
+    std::for_each(std::begin(workload.senders), std::end(workload.senders), [&](TensorPipelineSender * sender_tensor)
+	{
+		sender_tensor->reset_timing();
+	});
     return;
 }
+
+void reset_NPU_timings(ExecutionWorkload &workload)
+{
+    std::for_each(std::begin(workload.tasks), std::end(workload.tasks), [&](ExecutionTask& task)
+    {
+        if(task.node!= nullptr && task.node->type() == NodeType::NPU){
+        	dynamic_cast<arm_compute::NPUBase*>(task.task.get())->reset_timing();
+
+        }
+    });
+    return;
+}
+
+void NPU_set_preallocated_outputs(ExecutionWorkload &workload){
+	std::for_each(std::begin(workload.tasks), std::end(workload.tasks), [&](ExecutionTask& task)
+	{
+		if(task.node!= nullptr && task.node->type() == NodeType::NPU){
+			dynamic_cast<arm_compute::NPUBase*>(task.task.get())->set_preallocated_outputs();
+		}
+	});
+}
+
+int NPU_destroy(ExecutionWorkload &workload){
+	int ret=0;
+	std::for_each(std::begin(workload.tasks), std::end(workload.tasks), [&](ExecutionTask& task)
+	{
+		if(task.node!= nullptr && task.node->type() == NodeType::NPU){
+			ret=ret | dynamic_cast<arm_compute::NPUBase*>(task.task.get())->destroy();
+		}
+	});
+	return ret;
+}
+
+
+/*void set_ending_tasks(ExecutionWorkload &workload, std::vector<std::string> *ending_tasks){
+	//std::vector<std::string> ending_tasks;
+	int n=workload.tasks.size();
+	workload.tasks[0].starting=true;
+	for(int i=0;i<n;i++){
+		if(i==n-1){
+			std::cerr<<"setting ending for layer: "<<workload.tasks[i].node->name()<<std::endl;
+			workload.tasks[i].ending=true;
+			if(ending_tasks!=nullptr)
+				ending_tasks->push_back(workload.tasks[i].node->name());
+		}
+		else{
+			if(arm_compute::graph::frontend::IStreamPipeline::is_next_layer(workload.tasks[i+1].node->name())){
+				std::cerr<<"setting ending for layer: "<<workload.tasks[i].node->name()<<std::endl;
+				workload.tasks[i+1].starting=true;
+				workload.tasks[i].ending=true;
+				if(ending_tasks!=nullptr)
+					ending_tasks->push_back(workload.tasks[i].node->name());
+			}
+		}
+	}
+	//return ending_tasks;
+	return;
+}*/
+
+/*
+void set_governor_tasks(ExecutionWorkload &workload, std::vector<std::string> *governor_tasks){
+	//std::vector<std::string> ending_tasks;
+	int n=workload.tasks.size();
+	for(int i=0;i<n;i++){
+		if(i==n-1){
+			workload.tasks[i].governor=true;
+			if(governor_tasks!=nullptr)
+				governor_tasks->push_back(workload.tasks[i].node->name());
+		}
+		else{
+			if(arm_compute::graph::frontend::IStreamPipeline::is_next_layer(workload.tasks[i+1].node->name())){
+				workload.tasks[i].governor=true;
+				if(governor_tasks!=nullptr)
+					governor_tasks->push_back(workload.tasks[i].node->name());
+			}
+		}
+	}
+	//return ending_tasks;
+	return;
+}*/
+
+
+void set_ending_tasks(ExecutionWorkload &workload, std::vector<std::string> *ending_tasks){
+	//std::vector<std::string> ending_tasks;
+	int n=workload.tasks.size();
+	workload.tasks[0].starting=true;
+	for(int i=0;i<n;i++){
+		//if(arm_compute::graph::frontend::IStreamPipeline::ending_tasks.count(workload.tasks[i].node->name())>0){
+		if( check_ending(workload.graph->name(), workload.tasks[i].node->name()) ){
+			//This is for skipping YOLO consecutive tasks (for a yolo layer, there is 6 consecutive tasks with same names)
+			//Notice that this is not a problem when creating graphs in IStreampipeline is_next function as there is just one yolo layer
+			if(i<n-1){
+				if(workload.tasks[i].node->name()==workload.tasks[i+1].node->name()){
+					continue;
+				}
+			}//
+
+			workload.tasks[i].ending=true;
+			std::cerr<<"setting ending for layer: "<<workload.tasks[i].node->name()<<std::endl;
+			if(ending_tasks!=nullptr)
+				ending_tasks->push_back(workload.tasks[i].node->name());
+			if(i<n-1){
+				workload.tasks[i+1].starting=true;
+			}
+		}
+
+	}
+	return;
+}
+
+//void set_governor_tasks(ExecutionWorkload &workload, std::vector<std::string> *governor_tasks){return;}
+
+void set_governor_tasks(ExecutionWorkload &workload, std::vector<std::string> *governor_tasks){
+	//std::vector<std::string> ending_tasks;
+	int n=workload.tasks.size();
+	for(int i=0;i<n;i++){
+		if(workload.tasks[i].ending){
+			workload.tasks[i].governor=true;
+			if(governor_tasks!=nullptr)
+				governor_tasks->push_back(workload.tasks[i].node->name());
+		}
+	}
+	return;
+}
+
+
+
+
+
+
+
+
+void print_NPU_times(ExecutionWorkload &workload, int num_run){
+	double input_time=0, run_time=0, prof_run_time=0, output_time=0;
+	std::string name="";
+	bool NPU_Node=false;
+	std::for_each(std::begin(workload.tasks), std::end(workload.tasks), [&](ExecutionTask& task)
+	{
+		if(task.node!= nullptr && task.node->type() == NodeType::NPU){
+			NPU_Node=true;
+			input_time=dynamic_cast<arm_compute::NPUBase*>(task.task.get())->get_input_time();
+			run_time=dynamic_cast<arm_compute::NPUBase*>(task.task.get())->get_run_time();
+			prof_run_time=dynamic_cast<arm_compute::NPUBase*>(task.task.get())->get_prof_run_time();
+			output_time=dynamic_cast<arm_compute::NPUBase*>(task.task.get())->get_output_time();
+			name=task.node->name();
+		}
+	});
+	if(NPU_Node){
+		std::cout<<"NPU "<<name
+				<<"\tAVG_input_time:"<<input_time/double(num_run)
+				<<"\tAVG_run_time:"<<run_time/double(num_run)
+				<<"\tAVG_prof_run_time:"<<prof_run_time/double(num_run)
+				<<"\tAVG_output_time:"<<output_time/double(num_run)
+				<<"\n";
+	}
+
+}
+
 
 
 
@@ -275,13 +442,13 @@ void call_all_tasks_pipeline(ExecutionWorkload &workload,int nn)
 #endif
     int ii=0;
     std::stringstream stream;
-	stream<<"--size of tasks: "<<workload.tasks.size()<<std::endl;
-	std::cerr<<stream.str();
-	stream.str(std::string());
+	//stream<<"--size of tasks: "<<workload.tasks.size()<<std::endl;
+	//std::cerr<<stream.str();
+	//stream.str(std::string());
     for(auto &task : workload.tasks)
     {
     	ii++;
-    	std::cerr<<"Graph ("<<workload.graph->id()<<") "<<ii<<"  "<<task.node->name()<<std::endl;
+    	//std::cerr<<"Graph ("<<workload.graph->id()<<") "<<ii<<"  "<<task.node->name()<<std::endl;
     	if(nn==0 && ii<workload.tasks.size()){
     		task();
     	}

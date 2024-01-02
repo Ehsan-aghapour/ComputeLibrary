@@ -71,6 +71,7 @@ cpu_set_t* StreamPipeline::set_cores(cpu_set_t *set,int _core, bool _one_master_
 	return set;
 }
 cpu_set_t* StreamPipeline::set_cores(cpu_set_t *set,char cluster){
+	//std::cerr<<"set to cluster "<<cluster<<std::endl;
 	CPU_ZERO(set);
 	if(cluster=='L'){
 		for(int i=0;i<common_params.little_cores;i++){
@@ -108,51 +109,7 @@ public:
 
 void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::set<int> *b, int blocking)
 {
-	/*int gid=3;
-	int nodid=16;
-	//gid=0;
-	//nodid=42;
-	Graph& gg=*(_gs[gid].get());
-	auto nn=gg.node(nodid);
-	std::cerr<<"name:"<<nn->name()<<std::endl;
-	int in_nn=nn->num_inputs();
-	std::cerr<<"num inputs:"<<in_nn<<std::endl;
-	int inedges=nn->input_edges().size();
-	for(int i=0;i<inedges;i++){
-		std::cerr<<nn->input(i)->desc().shape<<std::endl;
-	}
-	int out_nn=nn->num_outputs();
-	std::cerr<<"num outputs:"<<out_nn<<std::endl;
-	//int outedges=nn->output_edges().size();
-	std::cerr<<nn->output(0)->desc().shape<<std::endl;
-	std::string test;
-	//std::cin>>test;*/
 
-	/*int gid=4;
-	    int nodid=8;
-	    auto& graph=_gs[gid];
-	    if(graph->id()==gid){
-	    	//int gid=4;
-			//int nodid=0;
-			//gid=0;
-			//nodid=42;
-			//Graph& gg=graph;
-			auto nn=graph->node(nodid);
-			std::cerr<<"name:"<<nn->name()<<std::endl;
-			int in_nn=nn->num_inputs();
-			std::cerr<<"num inputs:"<<in_nn<<std::endl;
-			int inedges=nn->input_edges().size();
-			for(int i=0;i<inedges;i++){
-				std::cerr<<i<<" "<<nn->input_edge(i)->producer()->name()<<std::endl;
-				std::cerr<<nn->input(i)->desc().shape<<", id: "<<nn->input(i)->id()<<std::endl;
-			}
-			int out_nn=nn->num_outputs();
-			std::cerr<<"num outputs:"<<out_nn<<std::endl;
-			//int outedges=nn->output_edges().size();
-			std::cerr<<nn->output(0)->desc().shape<<", id: "<<nn->output(0)->id()<<std::endl;
-			std::string test;
-			std::cin>>test;
-	    }*/
 	std::vector<int> indicesToRemove;
 	for(auto k=0;k<_gs.size();k++){
 		if(_gs[k]->nodes().size()==0){
@@ -161,7 +118,7 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 	}
 	num_graphs=num_graphs-indicesToRemove.size();
 	_manager.set_num_graphs(num_graphs);
-	std::cerr<<"working on NPU Graphs\n";
+	//std::cerr<<"\n\n\nWorking on NPU Graphs\n";
 	std::set<NodeType> PreservedTypes = {NodeType::NPU, NodeType::Input, NodeType::Receiver, NodeType::Output, NodeType::Sender};
 	for(auto k=0;k<_gs.size();k++){
 		std::vector<NodeIdxPair> inputs;
@@ -174,24 +131,24 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 			{
 				if(node != nullptr && node->type() == NodeType::Input)
 				{
-					std::cerr<<"adding input node "<<node->name()<<" to inputs\n";
+					//std::cerr<<"adding input node "<<node->name()<<" to inputs\n";
 					inputs.push_back({node->id(),0});
 
 				}
 				else if(node != nullptr && node->type() == NodeType::Receiver)
 				{
-					std::cerr<<"adding rec node "<<node->name()<<" to inputs\n";
+					//std::cerr<<"adding rec node "<<node->name()<<" to inputs\n";
 					inputs.push_back({node->id(),0});
 				}
 				else if(node != nullptr && node->type() == NodeType::Sender)
 				{
-					std::cerr<<"adding sender node "<<node->name()<<" to outputs\n";
+					//std::cerr<<"adding sender node "<<node->name()<<" to outputs\n";
 					outputs.push_back({node->id(),0});
 				}
 
 				else if(node != nullptr && node->type() == NodeType::Output)
 				{
-					std::cerr<<"adding output node "<<node->name()<<" to outputs\n";
+					//std::cerr<<"adding output node "<<node->name()<<" to outputs\n";
 					outputs.push_back({node->id(),0});
 				}
 				/*else{
@@ -209,14 +166,15 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 			if (pos != std::string::npos) {
 				name.erase(pos, substr.length());
 			}
+			name="NPU_"+name;
 			NodeParams  common_params_node = { name, all_hints[k].target_hint };
 			NodeID nid=GraphBuilder::add_npu_node(g, common_params_node, inputs, outputs);
 			NPUNode* n=dynamic_cast<NPUNode*>(g.node(nid));
 			//Remove all nodes except preserved node types
 			for(auto &node : g.nodes()){
-				std::cerr<<"checking node "<<node->name()<<"\n";
+				//std::cerr<<"checking node "<<node->name()<<"\n";
 				if (PreservedTypes.find(node->type()) == PreservedTypes.end()){
-					std::cerr<<"removing "<<node->name()<<std::endl;
+					//std::cerr<<"removing "<<node->name()<<std::endl;
 					g.remove_node(node->id());
 				}
 			}
@@ -228,7 +186,7 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 
 	}
 
-	std::cerr<<"Finalizing all graph\n";
+	std::cerr<<"\n\n*********************\nStart finalizing Graphs\n*******************\n\n";
 	_manager.set_num_graphs(num_graphs);
 	std::vector<std::thread> threads;
 	bool p=true;
@@ -269,14 +227,14 @@ void StreamPipeline::finalize_parallel(int i,std::set<int> *b, int blocking)
 	if(PE[i]=='L')
 		cluster='L';
 	std::stringstream stream;
-	stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
+	//stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
 	std::cerr<<stream.str();
 	stream.str(std::string());
 	set_cores(&set,cluster);
 	ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
 	//std::cerr<<"Thread "<<i<<" set: "<<set.__bits<<std::endl;
 	//std::this_thread::sleep_for(std::chrono::milliseconds(20000));
-	stream<<"Starting finalizing graph "<<i<<" target "<<std::to_string((int)(all_hints[i].target_hint))<<std::endl;
+	//stream<<"Starting finalizing graph "<<i<<" target "<<std::to_string((int)(all_hints[i].target_hint))<<std::endl;
 	std::cerr<<stream.str();
 	stream.str(std::string());
 
@@ -289,6 +247,7 @@ void StreamPipeline::finalize_parallel(int i,std::set<int> *b, int blocking)
 
 void StreamPipeline::run(int n)
 {
+
 	int method=1;
 	if (method==0){
 		auto t1=std::chrono::high_resolution_clock::now();
@@ -296,12 +255,12 @@ void StreamPipeline::run(int n)
 		auto t2=std::chrono::high_resolution_clock::now();
 		reset_timings();
 		double x1=std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
-		std::cerr<<"warm up took "<<x1*1000<<"ms\n";
-		std::cerr<<"start running graphs\n";
+		std::cerr<<"Warm up took "<<x1*1000<<"ms\n";
+		std::cerr<<"Start running graphs\n";
 		std::vector<std::thread> threads;
 		t1=std::chrono::high_resolution_clock::now();
 		for(auto i=0;i<_gs.size();i++){
-			threads.push_back(std::thread(&StreamPipeline::run_parallel,this,i,n));
+			threads.push_back(std::thread(&StreamPipeline::run_parallel,this,i,n_runs));
 		}
 		t2=std::chrono::high_resolution_clock::now();
 		//double x1=std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();//157ms for 3 threads
@@ -314,11 +273,12 @@ void StreamPipeline::run(int n)
 		std::cerr<<"\n\n\n*********************************************\nstart running graphs\n*************************************************\n\n\n";
 		std::vector<std::thread> threads;
 		for(auto i=0;i<_gs.size();i++){
-			threads.push_back(std::thread(&StreamPipeline::run_w_parallel,this,i,n));
+			threads.push_back(std::thread(&StreamPipeline::run_w_parallel,this,i,n_runs));
 		}
 		for(auto i=0;i<_gs.size();i++){
 			threads[i].join();
 		}
+		_manager.print_times(n_runs);
 	}
 
 }
@@ -349,13 +309,13 @@ void StreamPipeline::run_parallel(int i, int n)
 	if(PE[i]=='L')
 		cluster='L';
 	std::stringstream stream;
-	stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
+	//stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
 	std::cerr<<stream.str();
 	stream.str(std::string());
 	set_cores(&set,cluster);
 	ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
 	stream.str(std::string());
-	stream<<"runing graph "<<i<<std::endl;
+	//stream<<"runing graph "<<i<<std::endl;
 	std::cerr<<stream.str();
     _manager.execute_graph(*_gs[i],n);
     //_manager.execute_graph(_g,n);
@@ -372,16 +332,22 @@ void StreamPipeline::run_w_parallel(int i, int n)
 	if(PE[i]=='L')
 		cluster='L';
 	std::stringstream stream;
-	stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
-	std::cerr<<stream.str();
-	stream.str(std::string());
+	//stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
+	//std::cerr<<stream.str();
+	//stream.str(std::string());
 	set_cores(&set,cluster);
 	ARM_COMPUTE_EXIT_ON_MSG(sched_setaffinity(0, sizeof(set), &set), "Error setting thread affinity");
-	stream.str(std::string());
-	stream<<"runing graph "<<i<<std::endl;
-	std::cerr<<stream.str();
+	//stream.str(std::string());
+	//stream<<"runing graph "<<i<<std::endl;
+	//std::cerr<<stream.str();
 	std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    _manager.warmup_and_execute_graph(*_gs[i],n);
+	bool pipeline=false;
+	if(pipeline){
+		_manager.warmup_and_execute_graph_pipeline(*_gs[i],n_runs);
+	}
+	else{
+		_manager.warmup_and_execute_graph_serial(*_gs[i],n_runs);
+	}
     //_manager.execute_graph(_g,n);
 }
 
@@ -413,7 +379,8 @@ void StreamPipeline::run(int n)
 
 void StreamPipeline::measure(int n)
 {
-	_manager.print_times(*_gs[tail_graph_id], n);
+	_manager.print_times(n);
+	//_manager.print_times(*_gs[tail_graph_id], n);
 	//_manager.print_times(_g, n);
 }
 
@@ -618,7 +585,7 @@ void StreamPipeline::add_graph(int start, int end, char _PE, char _Host_PE){
 		/*GraphContext ctx;
 		_ctxs.emplace_back(std::move(ctx));*/
 		_ctxs.emplace_back(GraphContext());
-    	std::cerr<<"Adding Graph"<<id<<" target "<<std::to_string((int)(target))<<" PE: "<<_PE<<
+    	std::cout<<"Adding Graph"<<id<<" target "<<std::to_string((int)(target))<<" PE: "<<_PE<<
     			" Host PE: "<<_Host_PE<<" Layers: "<<start<<"-"<<end<<std::endl;
 }
 NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes, NodeID& last_tail_node, int& last_tail_graph, std::string layer_name ){
@@ -627,6 +594,8 @@ NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes
 	///std::cin>>ssss;
 	//std::cerr<<"\n\n\n------layer_name: "<<layer_name<<"\n";
 	//std::cerr<<"prev layer number: "<<current_layer<<std::endl;
+
+	//If you want to skip first layer (if instead of ending layer go with starting layer)
 	static bool starting_layer=true;
 	if (is_next_layer(layer_name)){
 		if(starting_layer){
@@ -636,7 +605,7 @@ NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes
 			current_layer++;
 		}
 	}
-	//std::cerr<<"current layer number: "<<current_layer<<std::endl;
+	//std::cerr<<"current layer number: "<<current_layer<<" layer name: "<<layer_name<<std::endl;
 	IStreamPipeline::_target_graph=target_graph(current_layer);
 	/*For creating the layer after the last node, in case that the layer has multiple layers which are from other graphs, then we need to change the tail node and tail graph of the stream
 	to the last node
@@ -755,11 +724,11 @@ NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes
 		last_tail_graph=mapped_node.second;
 	}
 
-	/*
-	if (is_next_layer(layer_name)){
+
+	/*if (is_end_layer(layer_name)){
 		current_layer++;
-	}
-	*/
+	}*/
+
 
 	return mapped_node.first;
 }

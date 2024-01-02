@@ -189,7 +189,7 @@ NodeID GraphBuilder::add_npu_node(Graph &g, NodeParams params, std::vector<NodeI
     NodeID nid = g.add_node<NPUNode>(inputs, outputs);
     NPUNode* n=dynamic_cast<NPUNode*>(g.node(nid));
     n->restructure_graph();
-    std::cerr<<"npu node created\n";
+    std::cerr<<"npu node created\n\n";
     /*unsigned int i = 0;
     for(const auto &input : inputs)
 	{

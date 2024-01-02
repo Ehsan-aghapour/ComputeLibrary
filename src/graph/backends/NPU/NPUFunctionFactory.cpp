@@ -68,7 +68,7 @@ std::unique_ptr<IFunction> NPUFunctionFactory::create(INode *node, GraphContext 
     }
 
     NodeType type = node->type();
-    std::cerr<<"type of node:"<<node->name()<<" is "<<type<<std::endl;
+    //std::cerr<<"type of node:"<<node->name()<<" is "<<type<<std::endl;
     switch(type)
     {
         case NodeType::NPU:

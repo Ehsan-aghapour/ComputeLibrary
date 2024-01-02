@@ -122,6 +122,12 @@ namespace utils
     os << "Order is : "
     		<< common_params.order
     		<< std::endl;
+    os << "freqs of layers : "
+    		<< common_params.freqs
+			<<std::endl;
+    os << "power_profile_mode : "
+    		<< common_params.power_profile_mode
+			<<std::endl;
 
     os << "GPU host is: "
     		<< common_params.gpu_host
@@ -137,6 +143,9 @@ namespace utils
     os << "Number of little cores is : "
 			<< common_params.little_cores
 			<< std::endl;
+    os << "Print task names : "
+    			<< common_params.print_tasks
+    			<< std::endl;
 
 
     if(common_params.save){
@@ -180,13 +189,17 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 	  little_cores(parser.add_option<SimpleOption<int>>("little_cores", 4)),
 	  layer_time(parser.add_option<SimpleOption<int>>("layer_time", 0)),
 	  order(parser.add_option<SimpleOption<std::string>>("order")),
+	  freqs(parser.add_option<SimpleOption<std::string>>("freqs")),
+	  power_profile_mode(parser.add_option<SimpleOption<std::string>>("power_profile_mode","whole")),
 	  gpu_host(parser.add_option<SimpleOption<char>>("gpu_host",'B')),
 	  npu_host(parser.add_option<SimpleOption<char>>("npu_host",'B')),
 	  input_s(parser.add_option<SimpleOption<int>>("input_s", 227)),
 	  input_c(parser.add_option<SimpleOption<int>>("input_c", 3)),
 	  kernel_s(parser.add_option<SimpleOption<int>>("kernel_s", 11)),
 	  kernel_c(parser.add_option<SimpleOption<int>>("kernel_c", 96)),
-	  stride(parser.add_option<SimpleOption<int>>("stride", 2))
+	  stride(parser.add_option<SimpleOption<int>>("stride", 2)),
+	  print_tasks(parser.add_option<SimpleOption<int>>("print_tasks", 0))
+
 {
     std::set<arm_compute::graph::Target> supported_targets
     {
@@ -251,8 +264,11 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     little_cores->set_help("Number of little cores");
     layer_time->set_help("Layer timing");
     order->set_help("order of processors for sub graphs, eg., B-L-G");
+    freqs->set_help("Frequency index for each element seperated with - ");
+    power_profile_mode->set_help("power_profile_mode layers/transfers/whole");
     gpu_host->set_help("GPU host B or L");
     npu_host->set_help("NPU host B or L");
+    print_tasks->set_help("print tasks of the graph and starting and ending tasks");
 }
 
 CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
@@ -291,7 +307,9 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.total_cores			 = options.total_cores->value();
     common_params.little_cores			 = options.little_cores->value();
     common_params.layer_time			 = options.layer_time->value();
-    common_params.order              = options.order->value();
+    common_params.order              	= options.order->value();
+    common_params.freqs					= options.freqs->value();
+    common_params.power_profile_mode		= options.power_profile_mode->value();
     common_params.gpu_host              = options.gpu_host->value();
     common_params.npu_host              = options.npu_host->value();
 
@@ -300,7 +318,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.kernel_c			 = options.kernel_c->value();
     common_params.kernel_s			 = options.kernel_s->value();
     common_params.stride			 = options.stride->value();
-
+    common_params.print_tasks		 = options.print_tasks->value();
     return common_params;
 }
 } // namespace utils

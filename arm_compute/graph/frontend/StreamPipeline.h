@@ -174,6 +174,13 @@ public:
     	return &_manager;
     }
 
+    void set_num_runs(int n){
+    	n_runs=n;
+    }
+
+    /*std::vector<std::unique_ptr<Graph>> get_graphs(){
+    	return _gs;
+    }*/
 private:
     //Important: GraphContext must be declared *before* the GraphManager because the GraphManager
     //allocates resources from the context and therefore needs to be destroyed before the context during clean up.
@@ -184,6 +191,7 @@ private:
     std::vector<GraphContext> _ctxs;
     std::vector<std::unique_ptr<Graph>>        _gs;       /**< Internal graph representation of the stream */
     Graph        _g;       /**< Internal graph representation of the stream */
+
 
     //Ehsan
     //std::chrono::time_point<std::chrono::high_resolution_clock> start;
@@ -207,7 +215,8 @@ private:
     arm_compute::utils::CommonGraphParams  common_params;
     std::vector<GraphConfig> 				configs;
     //NodeMap				node_map;
-    int					n_warmup=2;
+    int					n_warmup=3;
+    int					n_runs=1;
 };
 } // namespace frontend
 } // namespace graph

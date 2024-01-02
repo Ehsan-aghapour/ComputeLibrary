@@ -109,6 +109,7 @@ private:
 	double	t_receiver_read=0;
 	double	t_receiver_wait=0;
 	int		num_run=0;
+	int		Frame=0;
 };
 
 
@@ -149,6 +150,7 @@ private:
 	bool is_npu = false;
 	double	sending_time=0;
 	int		num_run=0;
+	int		Frame=0;
 };
 
 

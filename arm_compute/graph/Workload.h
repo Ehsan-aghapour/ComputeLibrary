@@ -102,10 +102,40 @@ struct ExecutionTask
 
     double time(int n);
     void reset();
+
+    /*DVFS */
+    void set_freq(std::array<int, 3> freqs){
+		LittleFreq=freqs[0];
+		bigFreq=freqs[1];
+		GPUFreq=freqs[2];
+		return;
+	}
+	void apply_freq(std::string name="");
+	void switch_GPIO_starting();
+	void switch_GPIO_ending();
+	static void init();
+	static void finish();
+
+	static int get_max_l();
+	static int get_max_b();
+	static int get_max_g();
+
+	int LittleFreq=-1;
+	int bigFreq=-1;
+	int GPUFreq=-1;
+	bool starting=false;
+	//static DVFS dvfs;
+
+
     double t;
     int n=0;
     bool block=0;
     bool ending=0;
+    bool governor=0;
+    bool starting_gpio_switch=0;
+    bool ending_gpio_switch=0;
+    bool profile_layers=0;
+    bool profile_transfers=0;
 };
 
 /** Execution workload */

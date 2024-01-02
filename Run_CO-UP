@@ -1,16 +1,43 @@
 #!/bin/bash
 
+# --print_tasks=1 
 #./Run_CO-UP model=Alex --order=BBBBBBBB push=1 compile=1
-#./Run_CO-UP model=Mobile --order=NNNNNNNNNNNNNNNBGGGGGGGLLLLL --n=60 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
-#./Run_CO-UP model=Yolo --order=BBBBBBBGGGGGBBBBBLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBLLLLLLLLLLLLLLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+#./Run_CO-UP model=MobileV1 --order=NNNNNNNNNNNNNNNBGGGGGGGLLLLL --n=60 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+#./Run_CO-UP model=YOLOv3 --order=BBBBBBBGGGGGBBBBBLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBLLLLLLLLLLLLLLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
 # when just conv:
-#./Run_CO-UP model=Yolo --order=BBBGGBBLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
-
+#./Run_CO-UP model=YOLOv3 --order=BBBGGBBLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
+#NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+#BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBN
+#BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBNNNNNNNNNN
 #set -x
+#if any command fails the script stops instead of continuing 
+set -e
 
 
 # Declare an associative array to store options and values
 declare -A options
+# Get the directory of the script
+SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
+
+governor="governor_pandoon"
+governor_path="$SCRIPT_DIR/utils/DVFS/${governor}.ko"  # Assign your new value to a variable
+
+ab
+
+adb push $governor_path /data/local/tmp/
+#adb shell insmod /data/local/tmp/$governor
+if adb shell lsmod | grep -wq "$governor"; then
+    echo "Module is already inserted, removing and reinserting..."
+    #adb shell rmmod "$governor"
+else
+adb shell insmod "/data/local/tmp/${governor}.ko"
+fi
+#adb shell lsmod
+
+#file_path="utils/DVFS/DVFS.h"
+#sed -i "s|static std::string governor_module=\"[^\"]*\"|static std::string governor_module=\"$x\"|" "$file_path"
+
+
 
 # Loop through command-line arguments
 for arg in "$@"; do
@@ -41,7 +68,7 @@ adb shell 'echo 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
 
 current_dir=$(pwd)
 p="/data/data/com.termux/files/home/ARMCL-RockPi"
-#p="/data/local/tmp/ARM-CO-UP"
+p="/data/local/ARM-CO-UP"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
 #_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
@@ -83,6 +110,7 @@ then
 fi
 
 v="${options[--order]}"
+caching="NO"
 caching="YES"
 
 if ((0)); then
@@ -91,9 +119,12 @@ if ((0)); then
 	count=$(awk -FN '{print NF-1}' <<<"$v")
 	
 	end=$((start+count-1))
+	
+	#start=$((start+1))
+	#end=$((end+1))
+
 	#echo $start
 	#echo $end
-	
 	echo "Checking file: /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn"
 	echo "File exists: $( [ -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ] && echo yes || echo no )"
 	echo "Caching value: $caching"
@@ -128,6 +159,9 @@ while [[ $pos -lt ${#v} ]]; do
             pos=$((pos+1))
         done
         end=$((pos-1))
+
+		#start=$((start+1))
+		#end=$((end+1))
         echo "start=$start, end=$end"
 		
 			if [[ `adb shell ls $p/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null` ]] && [[ $caching == "YES" ]]; then 
@@ -164,25 +198,25 @@ case "${options[model]}" in
 		dt=$_dt2
 		graph="graph_googlenet_pipeline"
         ;;
-    "Mobile" | "mobile")
+    "MobileV1" | "mobilev1")
 		lbl=$_lbl
 		img=$_img2
 		dt=$_dt3
 		graph="graph_mobilenet_pipeline"
         ;;
-	"Res50" | "res50")
+	"ResV1_50" | "res50")
 		lbl=$_lbl
 		img=$_img2
 		dt=$_dt4
 		graph="graph_resnet50_pipeline"
         ;;
-	"Squeeze" | "squeeze")
+	"SqueezeV1" | "squeeze")
 		lbl=$_lbl
-		img=$_img2
+		img=$_img1
 		dt=$_dt5
 		graph="graph_squeezenet_pipeline"
         ;;
-	"Yolo" | "yolo")
+	"YOLOv3" | "yolo")
 		lbl=$_lbl_detection
 		img=$_img3
 		dt=$_dt6
@@ -194,21 +228,24 @@ case "${options[model]}" in
         ;;
 esac
 
-
-if [ "${options[compile]}" == "1" ]
-	then 
-		cd ${laptop_dir}
-		./b64.sh 23
-		cd ${current_dir}
+echo ${grpah}
+#graph=graph_mobilenet
+if [ "${options[compile]}" == "1" ]; then
+    cd "${laptop_dir}"
+    ./b64.sh 23
+    cd "${current_dir}"
+	#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
+    adb push "${laptop_dir}/build/examples/Pipeline/${graph}" "$p/test_graph/"
+	#adb push "${laptop_dir}/build/examples/graph_mobilenet" "$p/test_graph/"
+else
+    if [ "${options[push]}" == "1" ]; then
 		#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
-		adb push ${laptop_dir}/build/examples/Pipeline/${graph} $p/test_graph/
-		
-	fi
+        adb push "${laptop_dir}/build/examples/Pipeline/${graph}" "$p/test_graph/"
+    fi
+fi
 
-	if [ "${options[push]}" == "1" ]
-	then 
-		#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/ 
-		adb push ${laptop_dir}/build/examples/Pipeline/${graph} $p/test_graph/
-		
-	fi
-	adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
+echo "#!/bin/bash" > ${SCRIPT_DIR}/run_command.sh
+echo "adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}" >> ${SCRIPT_DIR}/run_command.sh
+chmod +x ${SCRIPT_DIR}/run_command.sh
+#adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
+

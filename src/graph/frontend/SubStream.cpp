@@ -36,7 +36,7 @@ SubStream::SubStream(IStream &s)
     : _s(s)
 {
     _hints     = s.hints();
-    std::cerr<<"new sub stream with tail node: "<<s.tail_node()<<" and tail graph: "<<s.get_tail_graph_id()<<std::endl;
+    //std::cerr<<"new sub stream with tail node: "<<s.tail_node()<<" and tail graph: "<<s.get_tail_graph_id()<<std::endl;
     _tail_node = s.tail_node();
     tail_graph_id=s.get_tail_graph_id();
     //tail_graph_id=IStreamPipeline::_target_graph;

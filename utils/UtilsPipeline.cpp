@@ -26,10 +26,15 @@
 //DIR
 #include <dirent.h>
 
+#include "utils/Power/Power.h"
+#include "utils/DVFS/DVFS.h"
+
+
 namespace arm_compute
 {
 namespace utils
 {
+
 
 
 
@@ -50,11 +55,30 @@ void read_directory(const std::string& name, stringvec& v)
     closedir(dirp);
 }
 
+// Helper function to convert a string to lowercase
+std::string toLowerCase(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return str;
+}
 
+// Function to remove "net" from the end of a string if it exists
+std::string removeNetFromEnd(std::string str) {
+    const std::string suffix = "net";
+    if (str.size() >= suffix.size() &&
+        str.substr(str.size() - suffix.size()) == suffix) {
+        // Remove the last 3 characters (the length of "net")
+        str.erase(str.size() - suffix.size());
+    }
+    return str;
+}
 
 
 #define Frequency_Setting 0
+#define Power_Measurement 1
+#define LW 1
 #ifndef BENCHMARK_EXAMPLES
+#define Loop 1
 int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline> example)
 {
     //std::cerr << "\n"<< argv[0] << "\n\n";
@@ -69,8 +93,13 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
         system("echo userspace > /sys/devices/platform/ff9a0000.gpu/devfreq/ff9a0000.gpu/governor");
         int f_i=1;
 #endif
+        example->initialize_dvfs();
+        example->initialize_power_measurement();
         bool status = example->do_setup(argc, argv);
-        std::cerr<<"setup finished\n\n";
+        if(example->get_common_params().print_tasks)
+        	example->print_tasks();
+
+        std::cout<<"setup finished\n\n";
         if(!status)
         {
             return 1;
@@ -101,7 +130,7 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
 		std::cin>>GFreq;
 
         while (BFreq && LFreq && GFreq){
-        	std::cerr<<f_i++<<" Running Graph with Frequency: "<<LFreq<<','<<BFreq<<','<<GFreq<<std::endl;
+        	std::cout<<f_i++<<" Running Graph with Frequency: "<<LFreq<<','<<BFreq<<','<<GFreq<<std::endl;
 			//Set Little CPU Frequency
 			cmd="echo " + to_string(LFreq) + " > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed";
 			system(cmd.c_str());
@@ -112,6 +141,8 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
 			cmd="echo " + to_string(GFreq) + " > /sys/devices/platform/ff9a0000.gpu/devfreq/ff9a0000.gpu/userspace/set_freq";
 			system(cmd.c_str());
         	sleep(2);
+
+        	example->set_freq( "{{" + LFreq + "-" + BFreq + "-" + GFreq + "}}" );
         	example->do_run();
         	std::cin>>LFreq;
         	std::cin>>BFreq;
@@ -119,13 +150,52 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
 
         }
         example->do_finish();
+        example->do_teardown();
+#elif LW
+#if Loop
+        std::string fqs;
+        std::cout<<"Please Enter the desired Frequency setttings: \n"<<std::flush;
+        std::cout.flush();
+        std::cin>>fqs;
+        int i=0;
+        while(fqs!="end"){
+
+        	std::cout<<i++<<" Running Graph with "<<fqs<<" LW DVFS\n";
+        	//set_freq_map(fqs,example->get_common_params().order,example->name());
+        	example->set_freqs(fqs);
+        	example->set_GPIOs(example->get_common_params().power_profile_mode);
+        	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        	//example->do_run(freq_layer);
+        	example->do_run();
+
+        	std::cout<<"Profiling these DVFS settings finised\n";
+        	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        	std::cout<<"Please Enter the desired Frequency setttings: \n"<<std::flush;
+        	std::cout.flush();
+        	std::cin>>fqs;
+        }
+        example->do_finish();
+        example->do_teardown();
 #else
+        std::cout<<" Running Graph with "<<example->get_common_params().freqs<<" LW DVFS\n";
+        example->set_freqs(example->get_common_params().freqs);
+        example->set_GPIOs(example->get_common_params().power_profie_mode);
         example->do_run();
+        std::cout<<"Profiling these DVFS settings finised\n";
         example->do_finish();
         example->do_teardown();
 #endif
 
-        std::cerr << "\nTest passed\n";
+#else
+        //set_freq_map(example->common_params.freqs,example->common_params.order,example->Name);
+        example->do_run();
+        example->do_finish();
+        example->do_teardown();
+
+#endif
+        arm_compute::graph::ExecutionTask::finish();
+        std::cout << "\nTest passed\n";
         return 0;
     }
 #ifdef ARM_COMPUTE_CL
@@ -150,6 +220,21 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
     return -1;
 }
 #endif /* BENCHMARK_EXAMPLES */
+
+void Example_Pipeline::initialize_dvfs(){
+	arm_compute::graph::ExecutionTask::init();
+}
+
+void Example_Pipeline::initialize_power_measurement(){
+#if Power_Measurement
+	if (-1 == GPIOExport(POUT))
+		std::cerr<<"Could not Export GPIO\n";
+	if (-1 == GPIODirection(POUT, OUT))
+		std::cerr<<"Could not set GPIO direction\n";
+	if (-1 == GPIOWrite(POUT, 0))
+		std::cerr<<"Could not write 0 to GPIO\n";
+#endif
+}
 
 
 bool Example_Pipeline::do_setup_pipeline(int argc, char **argv){

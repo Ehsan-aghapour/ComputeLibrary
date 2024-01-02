@@ -53,7 +53,14 @@ void allocate_const_tensors_pipeline(Graph &g);
 void call_all_tasks_pipeline(ExecutionWorkload &workload,int n=0);
 
 void reset_transmit_timings(ExecutionWorkload &workload);
-
+void reset_NPU_timings(ExecutionWorkload &workload);
+void NPU_set_preallocated_outputs(ExecutionWorkload &workload);
+int NPU_destroy(ExecutionWorkload &workload);
+void print_NPU_times(ExecutionWorkload &workload, int num_run);
+void set_ending_tasks(ExecutionWorkload &workload, std::vector<std::string>* ending_tasks=nullptr);
+void set_governor_tasks(ExecutionWorkload &workload, std::vector<std::string>* governor_tasks=nullptr);
+//void set_GPIO_tasks(ExecutionWorkload &workload, std::string mode, std::vector<std::string>* GPIO_tasks=nullptr);
+//void set_tasks_freqs(ExecutionWorkload &workload, std::vector<std::array<int, 3>> _freqs, bool repeat);
 
 } // namespace detail
 } // namespace graph
