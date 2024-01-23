@@ -257,6 +257,7 @@ private:
     const bool                     _bgr;
     std::unique_ptr<IPreprocessor> _preprocessor;
     int							iterator=0;
+    int                         frame=0;
     std::vector<std::string>		image_list;
 
 };

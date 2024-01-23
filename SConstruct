@@ -93,11 +93,75 @@ if not env['install_dir'].startswith('/') and install_path != "":
 
 env.Append(LIBPATH = [build_path])
 
-NPU_LIBS=['rknn_api','log','stdc++','dl']
+
+
+
+# Function to find all subdirectories under a given directory
+def find_subdirectories(directory):
+    return [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
+
+# Function to find all libraries in a given directory (excluding prefixes and suffixes)
+def find_libraries(directory):
+    return [lib.replace('lib', '').split('.')[0] for lib in os.listdir(directory) if lib.startswith('lib') and lib.endswith('.so')]
+
+
+
+
+
+'''NPU_LIBS=['rknn_api','log','stdc++','dl']
 NPU_LINKFLAGS=['-Wl,-rpath,build/']
 env.Append(LIBS=NPU_LIBS,LIBPATH='build/',LINKFLAGS=NPU_LINKFLAGS)
 #env.Append(LINKFLAGS=NPU_LINKFLAGS)
-#env.Append(LIBPATH='build/')
+#env.Append(LIBPATH='build/')'''
+
+# Specify the base directory for NPU libraries
+base_npu_libpath = 'NPU/Libs/'
+target_device='RockPi'
+NPU_LIBS=['rknn_api','log','stdc++','dl']
+NPU_LINKFLAGS=['-Wl,-rpath,./']
+if len(target_device):
+    current_device_libpath = os.path.abspath(os.path.join(base_npu_libpath, target_device))
+    env.Append(LIBS=NPU_LIBS, LIBPATH=[current_device_libpath], LINKFLAGS=NPU_LINKFLAGS)
+
+
+else:
+
+
+    # Find all subdirectories under the base NPU directory
+    all_devices = find_subdirectories(base_npu_libpath)
+
+    # Specify the NPU libraries
+    NPU_LIBS = []
+
+    # Specify the NPU libraries
+    NPU_LIBS_PATH = []
+
+    # Loop through all devices, discover libraries, and append to NPU_LIBS and LIBPATH
+    for device_name in all_devices:
+        # Construct the LIBPATH for the current device
+        current_device_libpath = os.path.abspath(os.path.join(base_npu_libpath, device_name))
+
+        # Find available libraries for the current device
+        device_libs = find_libraries(current_device_libpath)
+
+        # Append libraries to the NPU_LIBS list
+        NPU_LIBS.extend(device_libs)
+
+        # Append libraries path
+        NPU_LIBS_PATH.append(current_device_libpath)
+
+    # Append NPU_LIBS to the LIBS in the environment
+        
+    print(f'Adding NPU Libs: {NPU_LIBS} and NPU Libs Path: {NPU_LIBS_PATH}')
+    env.Append(LIBS=NPU_LIBS, LIBPATH=NPU_LIBS_PATH)
+
+
+    Board_seach_path='/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP/NPU/RockPi'
+    # Specify the linker flags
+    NPU_LINKFLAGS = ['-Wl,-rpath,{}'.format(Board_seach_path)]
+
+    # Append the global linker flags to the environment
+    env.Append(LINKFLAGS=NPU_LINKFLAGS)
 
 
 Export('env')

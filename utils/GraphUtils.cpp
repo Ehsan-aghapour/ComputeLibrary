@@ -284,9 +284,10 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
     	//iterator=(iterator+1)%(image_list.size());
     	iterator=(iterator)%(image_list.size());
     	_filename=image_list[iterator];
-    	std::cerr<<"\n\n************\nPhoto_index:"<<iterator<<std::endl;
+    	std::cerr<<"\n\n************\nPhoto_index:"<<iterator<<"\tFrame Index:"<<frame<<std::endl;
     	std::cerr<<"Reading image: "<<_filename<<"\n*************\n\n\n";
     	iterator++;
+        frame++;
 
         auto image_loader = utils::ImageLoaderFactory::create(_filename);
         ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
