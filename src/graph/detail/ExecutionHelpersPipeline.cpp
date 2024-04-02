@@ -104,7 +104,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 								   << std::endl);
 			 */
 
-			//std::cerr<<"node name: "<<node->name()<<std::endl;
+			//std::cerr<<"\n\n\n\nnode name: "<<node->name()<<std::endl;
 			if(node != nullptr)
 			{
 				//std::cerr<<"node is not null\n";
@@ -117,6 +117,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 				{
 					std::cerr<<"Graph ("<<g.id()<<") "<<"Task "<<task_number++<<": "<<node->name()<<"\n";
 					workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
+					std::cerr<<"task has been emplaced\n";
 				}
 			}
 		}
@@ -358,6 +359,10 @@ void set_governor_tasks(ExecutionWorkload &workload, std::vector<std::string> *g
 				governor_tasks->push_back(workload.tasks[i].node->name());
 		}
 	}
+	/*static int k=0;
+	for(auto task:*governor_tasks){
+		std::cerr<<"\n"<<k++<<" _gov task: "<<task;
+	}*/
 	return;
 }
 

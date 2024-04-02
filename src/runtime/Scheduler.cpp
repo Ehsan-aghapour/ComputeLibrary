@@ -56,9 +56,12 @@ namespace
 std::map<Scheduler::Type, std::unique_ptr<IScheduler>> init()
 {
     std::map<Scheduler::Type, std::unique_ptr<IScheduler>> m;
+    //std::cerr<<"init ST\n";
     m[Scheduler::Type::ST] = std::make_unique<SingleThreadScheduler>();
 #if defined(ARM_COMPUTE_CPP_SCHEDULER)
+    //std::cerr<<"init CPP\n";
     m[Scheduler::Type::CPP] = std::make_unique<CPPScheduler>();
+    //std::cerr<<"now init CPP2\n";
     m[Scheduler::Type::CPP2] = std::make_unique<CPPScheduler>();
 #endif // defined(ARM_COMPUTE_CPP_SCHEDULER)
 #if defined(ARM_COMPUTE_OPENMP_SCHEDULER)
@@ -96,7 +99,7 @@ Scheduler::Type Scheduler::get_type()
 
 IScheduler &Scheduler::get()
 {
-
+    //std::cerr<<"Scheduler.cpp:: get scheduler, type: "<<int(_scheduler_type)<<std::endl;
     if(_scheduler_type == Type::CUSTOM)
     {
         if(_custom_scheduler == nullptr)
@@ -113,14 +116,19 @@ IScheduler &Scheduler::get()
 
         if(_schedulers.empty())
         {
+        	//std::cerr<<"init of schedulers\n";
             _schedulers = init();
+            //std::cerr<<"init done\n";
         }
+        //std::cerr<<"Running CPU is: "<<sched_getcpu()<<std::endl;
         if(sched_getcpu()>(Little_cores-1)){
+            //std::cerr<<"Setting scheduler to CPP2  for big cluster ...\n";
 			if(_scheduler_type==Scheduler::Type::CPP){
 				_scheduler_type=Scheduler::Type::CPP2;
 			}
 		}
 		if(sched_getcpu()<(Little_cores)){
+            //std::cerr<<"setting scheduler to CPP for litte cluster\n";
 			if(_scheduler_type==Scheduler::Type::CPP2){
 				_scheduler_type=Scheduler::Type::CPP;
 			}
@@ -130,8 +138,10 @@ IScheduler &Scheduler::get()
         //std::cout<<"\nsch type:"<<int(_scheduler_type)<<"\t num_threads:"<<(*it->second).num_threads()<<std::endl;
         if(it != _schedulers.end())
         {
-		//Ehsan
-	    //std::cout<<"scheduler.cpp, scheduler type: "<<static_cast<std::underlying_type<Type>::type>(_scheduler_type)<<std::endl;
+			//Ehsan
+			//std::cout<<"scheduler.cpp, scheduler type: "<<static_cast<std::underlying_type<Type>::type>(_scheduler_type)<<std::endl;
+			//std::cerr<<"scheduler.cpp, scheduler type: "<<static_cast<std::underlying_type<Type>::type>(_scheduler_type)<<std::endl;
+			//it->second->print_threads();
             return *it->second;
         }
         else

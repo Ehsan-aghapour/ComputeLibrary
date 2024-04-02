@@ -202,7 +202,8 @@ public:
 
     int npu_init_context(int npu_index){
     	//std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+NPU_Model_Name[npu_index];
-    	std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+NPU_Model_Name;
+    	//std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+NPU_Model_Name;
+    	std::string model_name="/data/local/ARM-CO-UP/graphs/"+NPU_Model_Name;
     	//std::string mm="deploy.rknn";
     	//std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+mm;
 #if NPU_Debug
@@ -726,7 +727,8 @@ public:
         		}
         	}
         }
-        NPU_Model_Name=NPU_Model_Name+'_'+std::to_string(start_N+1)+'_'+std::to_string(end_N+1)+".rknn";
+        //NPU_Model_Name=NPU_Model_Name+'_'+std::to_string(start_N+1)+'_'+std::to_string(end_N+1)+".rknn";
+        NPU_Model_Name=NPU_Model_Name+'_'+std::to_string(start_N)+'_'+std::to_string(end_N)+".rknn";
         for(int i=0;i<Layers;i++){
         	if(i==0){
         		//Stream graph(i,"AlexNet");
@@ -1038,6 +1040,7 @@ public:
     	std::vector<std::thread*> npu_stages;
     	int n=common_params.n;
     	//NPU:
+    	auto tbegin = std::chrono::high_resolution_clock::now();
 		for(int i=0;i<NPU_Contexts.size();i++){
 			npu_stages.push_back(new std::thread(&GraphAlexnetExample::run_npu,this,i));
 		}
@@ -1056,6 +1059,11 @@ public:
     	for(int i=0;i<npu_stages.size();i++){
 			npu_stages[i]->join();
 		}
+    	auto tend = std::chrono::high_resolution_clock::now();
+		double cost0 = std::chrono::duration_cast<std::chrono::duration<double>>(tend - tbegin).count();
+		//Ehsan
+		double cost = cost0/(common_params.n+1);
+		std::cout << "COST:" << cost << std::endl;
     	for(int i=0;i<graphs.size();i++){
 			//std::cout<<"graph_id: "<<i<<" \t start: "<<graphs[i]->get_start_time().time_since_epoch().count()<<" \t end: "<<graphs[i]->get_finish_time().time_since_epoch().count()<<std::endl;
     		if(common_params.layer_time)
@@ -1134,7 +1142,7 @@ public:
 		graphs[graph_id]->set_output_time(0);
 		graphs[graph_id]->set_cost_time(0);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		PrintThread{}<<"\nrun: Start running graph "<<graph_id<<std::flush<<std::endl;
 		/*if(starting){
 			std::this_thread::sleep_for(std::chrono::milliseconds(2000));

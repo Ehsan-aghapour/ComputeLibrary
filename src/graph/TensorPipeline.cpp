@@ -537,6 +537,7 @@ bool TensorPipelineReceiver::receive_data(){
 					//s="NPU receiver graph:" + std::to_string(graph_id) + "_"+name+" waiting for sender to send the data\n";
 					//std::cerr<<s;
 				}
+				//tensor->handle()->map(false);
 				condVar.wait(lck, [this]{ return get_data_sent(); });
 				auto tend=std::chrono::high_resolution_clock::now();
 				duration_wait=1000*(std::chrono::duration_cast<std::chrono::duration<double>>(tend - tstart).count());

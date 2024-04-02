@@ -117,6 +117,9 @@ public:
 
 	}
 	int config_pipeline(){
+
+		set_common_params(common_params);
+
 		std::string order = common_params.order;
 		int Layers = order.size();
 		if (Layers == 0){
@@ -154,7 +157,7 @@ public:
 			}
 		}
 
-		set_common_params(common_params);
+
 
 
 		return 0;

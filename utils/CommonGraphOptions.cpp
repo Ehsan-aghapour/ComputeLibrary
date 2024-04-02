@@ -143,6 +143,9 @@ namespace utils
     os << "Number of little cores is : "
 			<< common_params.little_cores
 			<< std::endl;
+    os << "Number of big cores is : "
+    			<< common_params.big_cores
+    			<< std::endl;
     os << "Print task names : "
     			<< common_params.print_tasks
     			<< std::endl;
@@ -163,8 +166,8 @@ namespace utils
 
 CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     : help(parser.add_option<ToggleOption>("help")),
-      threads(parser.add_option<SimpleOption<int>>("threads", 1)),
-	  threads2(parser.add_option<SimpleOption<int>>("threads2", 1)),
+      threads(parser.add_option<SimpleOption<int>>("threads", 2)),
+	  threads2(parser.add_option<SimpleOption<int>>("threads2", 4)),
       target(),
       data_type(),
       data_layout(),
@@ -187,6 +190,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 	  n(parser.add_option<SimpleOption<int>>("n", 1)),
 	  total_cores(parser.add_option<SimpleOption<int>>("total_cores", 6)),
 	  little_cores(parser.add_option<SimpleOption<int>>("little_cores", 4)),
+	  big_cores(parser.add_option<SimpleOption<int>>("big_cores", 2)),
 	  layer_time(parser.add_option<SimpleOption<int>>("layer_time", 0)),
 	  order(parser.add_option<SimpleOption<std::string>>("order")),
 	  freqs(parser.add_option<SimpleOption<std::string>>("freqs")),
@@ -262,6 +266,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     n->set_help("number of run");
     total_cores->set_help("Number of total cores");
     little_cores->set_help("Number of little cores");
+    big_cores->set_help("Number of big cores");
     layer_time->set_help("Layer timing");
     order->set_help("order of processors for sub graphs, eg., B-L-G");
     freqs->set_help("Frequency index for each element seperated with - ");
@@ -306,6 +311,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.n						 = options.n->value();
     common_params.total_cores			 = options.total_cores->value();
     common_params.little_cores			 = options.little_cores->value();
+    common_params.big_cores			 = options.big_cores->value();
     common_params.layer_time			 = options.layer_time->value();
     common_params.order              	= options.order->value();
     common_params.freqs					= options.freqs->value();

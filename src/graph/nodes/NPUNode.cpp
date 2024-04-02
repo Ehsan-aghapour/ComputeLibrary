@@ -91,7 +91,7 @@ bool NPUNode::restructure_graph(){
 		int j=0;
 		int n_output_edges=input_node->output_edges().size();
 		std::set<EdgeID> output_edges_copy = input_node->output_edges();
-		std::cerr<<"re-struct input node "<<input_node->name()<<" to the npu node\n";
+		std::cerr<<"re-struct input node "<<input_node->name()<<" with "<<n_output_edges<<"out edges to the npu node\n";
 		for(auto edge_id:output_edges_copy){
 			auto edge=_graph->edge(edge_id);
 			if(edge->consumer()->type()!=arm_compute::graph::NodeType::NPU){

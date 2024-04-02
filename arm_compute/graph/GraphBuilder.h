@@ -101,6 +101,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
+
+    //Ehsan Early Exit
+    /** Adds an early exit output layer node to the graph
+         *
+         * @param[in] g        Graph to add the node to
+         * @param[in] params   Common node parameters
+         * @param[in] input    Input to the output node as a NodeID-Index pair
+         * @param[in] accessor (Optional) Accessor of the output node data
+         *
+         * @return Node ID of the created node, EmptyNodeID in case of error
+         */
+        static NodeID add_early_exit_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an activation layer node to the graph
      *
      * @param[in] g              Graph to add the node to

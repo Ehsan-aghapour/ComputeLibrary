@@ -118,6 +118,35 @@ private:
     unsigned int        _connection_idx;
 };
 
+
+//Ehsan Early Exit
+/** Output Layer */
+class EarlyExitOutputLayer final : public ILayer
+{
+public:
+    /** Construct an output layer.
+     *
+     * @param[in] accessor       Accessor to give output tensor data to.
+     * @param[in] connection_idx (Optional) Input connection index
+     */
+	EarlyExitOutputLayer(ITensorAccessorUPtr accessor, unsigned int connection_idx = 0)
+        : _accessor(std::move(accessor)), _connection_idx(connection_idx)
+    {
+    	_name="output";
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), _connection_idx };
+        return GraphBuilder::add_output_node(s.graph(), common_params, input, std::move(_accessor));
+    }
+
+private:
+    ITensorAccessorUPtr _accessor;
+    unsigned int        _connection_idx;
+};
+
 /** Activation Layer */
 class ActivationLayer final : public ILayer
 {

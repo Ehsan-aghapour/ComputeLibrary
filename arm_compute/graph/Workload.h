@@ -136,6 +136,7 @@ struct ExecutionTask
     bool ending_gpio_switch=0;
     bool profile_layers=0;
     bool profile_transfers=0;
+    char processor='B';
 };
 
 /** Execution workload */

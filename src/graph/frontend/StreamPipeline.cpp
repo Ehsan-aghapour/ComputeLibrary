@@ -42,6 +42,7 @@ namespace frontend
 {
 void StreamPipeline::set_common_params(arm_compute::utils::CommonGraphParams  _common_params){
 	common_params=_common_params;
+	//std::cerr<<"set common params; num threads: "<<common_params.threads<<std::endl;
 }
 StreamPipeline::StreamPipeline(size_t id, std::string _name)
     : _manager(),  num_graphs(0), name(std::move(_name))//, current_layer(0)
@@ -156,6 +157,15 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 				}*/
 
 			}
+
+			/*std::cerr<<g.nodes().size()<<std::endl;
+			for(auto &node : g.nodes()){
+				if(node)
+				std::cerr<<"checking node "<<node->id()<<"\n";
+
+			}*/
+
+
 			//add npu node:
 			std::string name=g.name() + "_" + std::to_string(start_layer[k]) + "_" + std::to_string(end_layer[k]);
 			std::string substr = "Net";
@@ -178,10 +188,11 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 					g.remove_node(node->id());
 				}
 			}
-
-
-
-
+			/*std::cerr<<"NPU graph node counts original graph: "<<g.nodes().size()<<std::endl;
+			for(auto &node : g.nodes()){
+				if(node)
+				std::cerr<<"node "<<node->name()<<"\n";
+			}*/
 		}
 
 	}
@@ -189,7 +200,7 @@ void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::se
 	std::cerr<<"\n\n*********************\nStart finalizing Graphs\n*******************\n\n";
 	_manager.set_num_graphs(num_graphs);
 	std::vector<std::thread> threads;
-	bool p=true;
+	bool p=false;
 	if(p){
 		for(auto i=0;i<_gs.size();i++){
 				_ctxs[i].set_config(configs[i]);
@@ -572,21 +583,27 @@ void StreamPipeline::add_graph(int start, int end, char _PE, char _Host_PE){
 		all_hints.emplace_back(hint);
 		GraphConfig config;
 		int num_threads=0;
-		if(_PE=='B')
+		int cluster=0;
+		if(_PE=='B'){
 			num_threads=common_params.threads;
-		if(_PE=='L')
+			cluster=1;
+		}
+		if(_PE=='L'){
 			num_threads=common_params.threads2;
+			cluster=0;
+		}
 		config.use_tuner   = common_params.enable_tuner;
 		config.tuner_mode  = common_params.tuner_mode;
 		config.tuner_file  = common_params.tuner_file;
 		config.mlgo_file   = common_params.mlgo_file;
 		config.num_threads = num_threads;
+		config.cluster=cluster;
 		configs.emplace_back(config);
 		/*GraphContext ctx;
 		_ctxs.emplace_back(std::move(ctx));*/
 		_ctxs.emplace_back(GraphContext());
     	std::cout<<"Adding Graph"<<id<<" target "<<std::to_string((int)(target))<<" PE: "<<_PE<<
-    			" Host PE: "<<_Host_PE<<" Layers: "<<start<<"-"<<end<<std::endl;
+    			" Host PE: "<<_Host_PE<<" num threads: "<<num_threads<<" Layers: "<<start<<"-"<<end<<std::endl;
 }
 NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes, NodeID& last_tail_node, int& last_tail_graph, std::string layer_name ){
 	//std::cerr<<"size of graphs:"<<_gs.size()<<std::endl;

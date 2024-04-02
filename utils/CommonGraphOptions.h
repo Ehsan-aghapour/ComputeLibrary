@@ -94,8 +94,8 @@ namespace utils
 struct CommonGraphParams
 {
     bool                             help{ false };
-    int                              threads{ 0 };
-    int                              threads2{ 0 };
+    int                              threads{ 2 };
+    int                              threads2{ 4 };
     arm_compute::graph::Target       target{ arm_compute::graph::Target::NEON };
     arm_compute::DataType            data_type{ DataType::F32 };
     //arm_compute::DataType            data_type{ DataType::QASYMM8};
@@ -121,6 +121,7 @@ struct CommonGraphParams
     int								 n{1};
     int								 total_cores{6};
     int								 little_cores{4};
+    int								 big_cores{2};
     int								 layer_time{0};
     std::string						 order{"B-L-G"};
     std::string						 freqs{};
@@ -203,6 +204,7 @@ public:
     SimpleOption<int>					   *n;
     SimpleOption<int>					   *total_cores;
     SimpleOption<int>					   *little_cores;
+    SimpleOption<int>					   *big_cores;
     SimpleOption<int>					   *layer_time;
 
     SimpleOption<int>					   *input_c;

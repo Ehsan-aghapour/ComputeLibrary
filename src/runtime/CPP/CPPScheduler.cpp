@@ -143,6 +143,11 @@ public:
     /** Function ran by the worker thread. */
     void worker_thread();
 
+    //Ehsan
+    int get_core_pin(){
+        return _core_pin;
+    }
+
 private:
     std::thread                        _thread{};
     ThreadInfo                         _info{};
@@ -159,6 +164,7 @@ private:
 Thread::Thread(int core_pin)
     : _core_pin(core_pin)
 {
+    std::cerr<<"Worker Thread:: worder thread created with core_pin: "<<_core_pin<<std::endl;
     _thread = std::thread(&Thread::worker_thread, this);
 }
 
@@ -245,6 +251,7 @@ struct CPPScheduler::Impl final
     }
     void set_num_threads(unsigned int num_threads, unsigned int thread_hint)
     {
+        std::cerr<<"set number of threads (no afinity)\n\n";
         _num_threads = num_threads == 0 ? thread_hint : num_threads;
         _threads.resize(_num_threads - 1);
     }
@@ -252,8 +259,19 @@ struct CPPScheduler::Impl final
     {
         _num_threads = num_threads == 0 ? thread_hint : num_threads;
 
+        //std::cerr<<"Here in cppscheduler cluster is: "<<cfg.cluster<<std::endl;
+
         // Set affinity on main thread
+
+        int host_core=func(0, thread_hint, cfg);
         set_thread_affinity(func(0, thread_hint, cfg));
+        std::cerr<<"\n\n\n************************\n";
+        std::cerr<<"set thread with affinity; cluster "<<cfg.cluster<<std::endl;
+        std::cerr<<"_num_threads is: "<<_num_threads<<std::endl;
+        std::cerr<<"set affinity of main thread to core "<< host_core<<std::endl;
+
+
+
 
         // Set affinity on worked threads
         _threads.clear();
@@ -261,11 +279,20 @@ struct CPPScheduler::Impl final
         {
             _threads.emplace_back(func(i, thread_hint, cfg));
         }
+        std::cerr<<"\n*******************************\n\n";
     }
     unsigned int num_threads() const
     {
         return _num_threads;
     }
+
+    void print_threads(){
+       std::cerr<<"Num_threads: "<<_num_threads<<std::endl;
+       for(auto &t :_threads){
+               std::cerr<<"core_pin: "<<t.get_core_pin()<<std::endl;
+       }
+    }
+
 
     void run_workloads(std::vector<IScheduler::Workload> &workloads);
 
@@ -287,6 +314,7 @@ CPPScheduler::CPPScheduler()
     : _impl(std::make_unique<Impl>(num_threads_hint()))
 {
 	//Ehsan
+	//std::cerr<<"constructor of CPP scheduler\n";
 	//int mapped_core_index=0;
 }
 
@@ -310,6 +338,11 @@ unsigned int CPPScheduler::num_threads() const
 {
     return _impl->num_threads();
 }
+
+void CPPScheduler::print_threads(){
+       _impl->print_threads();
+}
+
 
 #ifndef DOXYGEN_SKIP_THIS
 void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)

@@ -90,8 +90,8 @@ struct GraphConfig
     std::string mlgo_file{ "heuristics.mlgo" };        /**< Filename to load MLGO heuristics from */
     int 	    cluster{1};
     int			total_cores{6};
-    int			big_cores{4};
-    int			little_cores{2};
+    int			big_cores{2};
+    int			little_cores{4};
     bool		first_big{false};
 };
 
@@ -197,7 +197,8 @@ enum class NodeType
 	//Ehsan
 	Receiver,
 	Sender,
-	NPU
+	NPU,
+	EarlyExitOutput,
 };
 
 /** Backend Memory Manager affinity **/

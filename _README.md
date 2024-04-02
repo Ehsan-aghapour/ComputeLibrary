@@ -198,3 +198,81 @@ Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other
 countries.
 
 Tizen is a registered trademark of The Linux Foundation.
+
+
+
+# VIM3/3L GPIO Header
+
+## Reference table
+
+### 5.15
+
+| GPIO num | Name               | Pin | Pin | Name     | GPIO num |
+|----------|--------------------|-----|-----|----------|----------|
+|          | 5V                 | 1   | 21  | **GND**  |          |
+|          | 5V                 | 2   | 22  | PIN.A15  | 491      |
+|          | USB_DM             | 3   | 23  | PIN.A14  | 490      |
+|          | USB_DP             | 4   | 24  | **GND**  |          |
+|          | **GND**            | 5   | 25  | PIN.AO2  | 414      |
+|          | MCU3V3             | 6   | 26  | PIN.AO3  | 415      |
+|          | MCUNRST            | 7   | 27  | 3V3      |          |
+|          | MCUSWIM            | 8   | 28  | **GND**  |          |
+|          | **GND**            | 9   | 29  | PIN.A1   | 477      |
+|          | ADC0               | 10  | 30  | PIN.A0   | 476      |
+|          | 1V8                | 11  | 31  | PIN.A3   | 479      |
+|          | ADC1               | 12  | 32  | PIN.A2   | 478      |
+| 422      | PIN.AO10           | 13  | 33  | PIN.A4   | 480      |
+|          | **GND**            | 14  | 34  | **GND**  |          |
+| 449      | PIN.H6             | 15  | 35  | PWM-F    | 448      |
+| 450      | PIN.H7             | 16  | 36  | RTC      |          |
+|          | **GND**            | 17  | 37  | PIN.H4   | 431      |
+|          | UART_RX / PIN.AO1  | 18  | 38  | MCU-FA1  |          |
+|          | UART_TX / PIN.AO0  | 19  | 39  | PIN.Z15  | 442      |
+|          | 3V3                | 20  | 40  | **GND**  |          |
+
+### 4.9
+
+| GPIO num | Name               | Pin | Pin | Name     | GPIO num |
+|----------|--------------------|-----|-----|----------|----------|
+|          | 5V                 | 1   | 21  | **GND**  |          |
+|          | 5V                 | 2   | 22  | PIN.A15  | 475      |
+|          | USB_DM             | 3   | 23  | PIN.A14  | 474      |
+|          | USB_DP             | 4   | 24  | **GND**  |          |
+|          | **GND**            | 5   | 25  | PIN.AO2  | 498      |
+|          | MCU3V3             | 6   | 26  | PIN.AO3  | 499      |
+|          | MCUNRST            | 7   | 27  | 3V3      |          |
+|          | MCUSWIM            | 8   | 28  | **GND**  |          |
+|          | **GND**            | 9   | 29  | PIN.A1   | 461      |
+|          | ADC0               | 10  | 30  | PIN.A0   | 460      |
+|          | 1V8                | 11  | 31  | PIN.A3   | 463      |
+|          | ADC1               | 12  | 32  | PIN.A2   | 462      |
+| 506      | PIN.AO10           | 13  | 33  | PIN.A4   | 464      |
+|          | **GND**            | 14  | 34  | **GND**  |          |
+| 433      | PIN.H6             | 15  | 35  | PWM-F    | 432      |
+| 434      | PIN.H7             | 16  | 36  | RTC      |          |
+|          | **GND**            | 17  | 37  | PIN.H4   | 431      |
+|          | UART_RX / PIN.AO1  | 18  | 38  | MCU-FA1  |          |
+|          | UART_TX / PIN.AO0  | 19  | 39  | PIN.Z15  | 426      |
+|          | 3V3                | 20  | 40  | **GND**  |          |
+
+
+```bash
+# Example setting up pin 35 (GPIO 432)
+echo 432 | tee /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio432/direction
+cat /sys/class/gpio/gpio432/value
+echo 1 > /sys/class/gpio/gpio432/value
+cat /sys/class/gpio/gpio432/value
+```
+
+```bash
+# connect Khadas board to PC via ethernet cable:
+# first change the ethernet ip setting -> shared to other computers 
+# Clean the arp table
+sudo ip -s neigh flush all
+# check IP of the board
+arp
+# Connect to the ip of the board on port 5555:
+adb connect ip:5555
+```
+

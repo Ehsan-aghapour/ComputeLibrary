@@ -21,6 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+//Ehsan
+//#include <string>
+
 #include "Utils.h"
 
 #ifdef ARM_COMPUTE_CL
@@ -86,8 +89,47 @@ void discard_comments_and_spaces(std::ifstream &fs)
     }
 }
 } // namespace
-#define Frequency_Setting 0
+#define Frequency_Setting 1
 #ifndef BENCHMARK_EXAMPLES
+int LittleFrequencyTable[] = {408000, 600000, 816000, 1008000, 1200000, 1416000};
+int BigFrequencyTable[] = {408000, 600000, 816000, 1008000, 1200000, 1416000, 1608000, 1800000};
+int GPUFrequencyTable[] = {200000000, 300000000, 400000000, 600000000, 800000000};
+bool get_freqs(int &l, int &b, int &g){
+	std::string freqs;
+	std::cin>>freqs;
+	std::cerr<<"the input freq is "<<freqs<<std::endl;
+	//bool finished=false;
+	if (freqs=="end"){
+		return true;
+	}
+	if (freqs.size() >= 2 && freqs.front() == '{' && freqs.back() == '}') {
+			freqs = freqs.substr(1, freqs.size() - 2);
+			if (freqs.size() >= 2 && freqs.front() == '{' && freqs.back() == '}'){
+				freqs = freqs.substr(1, freqs.size() - 2);
+			    std::replace(freqs.begin(), freqs.end(), '-', ' '); // Replace '-' with whitespace
+			    std::istringstream iss(freqs);
+			    if (!(iss >> l >> b >> g)) {
+			        std::cerr << "Parsing error!" << std::endl;
+			        return true;
+			    }
+			}
+			else{
+				std::cerr<<"freqs format is not supported\n";
+			}
+	}
+	else{
+		l=std::stoi(freqs);
+		std::cin>>b;
+		std::cin>>g;
+	}
+	if(l<1000){
+		l=LittleFrequencyTable[l];
+		b=BigFrequencyTable[b];
+		g=GPUFrequencyTable[g];
+	}
+	return false;
+}
+
 int run_example(int argc, char **argv, std::unique_ptr<Example> example)
 {
     std::cout << "\n"
@@ -108,9 +150,9 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
         }
 #if Frequency_Setting
         //Min
-        int LFreq=408000, BFreq=408000, GFreq=200000000;
+        //int LFreq=408000, BFreq=408000, GFreq=200000000;
         //Max
-        //int LFreq=1416000, BFreq=1800000, GFreq=800000000;
+        int LFreq=1416000, BFreq=1800000, GFreq=800000000;
 
         std::string cmd="";
 
@@ -127,11 +169,16 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
 		cmd="echo " + to_string(GFreq) + " > /sys/devices/platform/ff9a0000.gpu/devfreq/ff9a0000.gpu/userspace/set_freq";
 		system(cmd.c_str());
 		*/
+        /*
         std::cin>>LFreq;
 		std::cin>>BFreq;
 		std::cin>>GFreq;
+		*/
+        get_freqs(LFreq, BFreq, GFreq);
+        //while (BFreq && LFreq && GFreq){
+        bool finish=false;
+        while (!finish){
 
-        while (BFreq && LFreq && GFreq){
         	std::cerr<<f_i++<<" Running Graph with Frequency: "<<LFreq<<','<<BFreq<<','<<GFreq<<std::endl;
 			//Set Little CPU Frequency
 			cmd="echo " + to_string(LFreq) + " > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed";
@@ -144,9 +191,11 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
 			system(cmd.c_str());
         	sleep(2);
         	example->do_run();
-        	std::cin>>LFreq;
+        	std::cerr<<"enter freqs of Little, big, GPU:\n";
+        	/*std::cin>>LFreq;
         	std::cin>>BFreq;
-        	std::cin>>GFreq;
+        	std::cin>>GFreq;*/
+        	finish=get_freqs(LFreq, BFreq, GFreq);
 
         }
         example->do_finish();

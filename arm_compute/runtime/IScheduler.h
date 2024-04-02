@@ -200,6 +200,12 @@ public:
      */
     unsigned int num_threads_hint() const;
 
+    //Ehsan
+    virtual void print_threads(){
+       std::cerr<<"base class\n";
+    }
+
+
 protected:
     /** Execute all the passed workloads
      *

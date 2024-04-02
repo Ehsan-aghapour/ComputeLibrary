@@ -134,6 +134,21 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
     return nid;
 }
 
+//Ehsan Early Exit
+NodeID GraphBuilder::add_early_exit_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor)
+{
+    check_nodeidx_pair(input, g);
+
+    NodeID nid = g.add_node<OutputNode>();
+    g.add_connection(input.node_id, input.index, nid, 0);
+    set_node_params(g, nid, params);
+    //auto t=ITensorAccessorUPtr();
+    set_accessor_on_node(g, nid, false, 0, std::move(accessor));
+
+    return nid;
+}
+
+
 
 //************************************************ Ehsan ***********************************************
 

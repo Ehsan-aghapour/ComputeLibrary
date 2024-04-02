@@ -162,7 +162,8 @@ public:
 
     int npu_init_context(int npu_index){
         	//std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+NPU_Model_Name[npu_index];
-        	std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+NPU_Model_Name;
+        	//std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+NPU_Model_Name;
+    		std::string model_name="/data/local/ARM-CO-UP/graphs/"+NPU_Model_Name;
         	//std::string mm="deploy.rknn";
         	//std::string model_name="/data/data/com.termux/files/home/ARMCL-RockPi/graphs/"+mm;
     #if NPU_Debug
@@ -669,7 +670,8 @@ public:
 				}
 			}
 		}
-		NPU_Model_Name=NPU_Model_Name+'_'+std::to_string(start_N+1)+'_'+std::to_string(end_N+1)+".rknn";
+		//NPU_Model_Name=NPU_Model_Name+'_'+std::to_string(start_N+1)+'_'+std::to_string(end_N+1)+".rknn";
+		NPU_Model_Name=NPU_Model_Name+'_'+std::to_string(start_N)+'_'+std::to_string(end_N)+".rknn";
 		for(int i=0;i<Layers;i++){
 			if(i==0){
 				if (order[i]=='B'){

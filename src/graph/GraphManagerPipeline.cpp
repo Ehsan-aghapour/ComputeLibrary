@@ -84,6 +84,9 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
     }*/
     std::cerr<<"Graph id: "<<graph.id()<<" Target is: "<<forced_target<<std::endl;
 #endif
+    /*if (graph.id()==2){
+    	std::cerr<<graph<<std::endl;
+    }*/
     force_target_to_graph(graph, forced_target);
 
     //std::cerr<<"1\n";
@@ -167,9 +170,51 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 		std::string test;
 		std::cin>>test;
 	}*/
+    if(graph.id()==2){
+    	DotGraphPrinter p;
+    	p.print(graph,std::cout);
+    }
 
     // Perform topological sort
     std::vector<NodeID> topological_sorted_nodes = dfs(graph);
+
+    //It add npu node twice when there are two edges from input to npu node for example
+    //GLLLLNNNNNNNNNNLLLLLLLLLNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNLNLLLLLLLLL (graph2)
+    //so remove the repatative nodes in this vector when target in npu
+    if(forced_target==arm_compute::graph::Target::NPU){
+    	std::set<int> seen;
+    	std::vector<NodeID> uniqueVec;
+		for (int elem : topological_sorted_nodes) {
+			if (seen.insert(elem).second) {
+				uniqueVec.push_back(elem);
+			}
+		}
+		topological_sorted_nodes.clear();
+		for (int elem : uniqueVec) {
+			topological_sorted_nodes.push_back(elem);
+		}
+
+		std::cerr<<"topological node counts original graph: "<<topological_sorted_nodes.size()<<std::endl;
+		for(auto &node : topological_sorted_nodes){
+			if(node)
+			std::cerr<<"after topo node "<<graph.node(node)->name()<<"\n";
+		}
+    }
+    /*
+     * // Use std::remove_if with a lambda function to remove duplicates in-place
+    topological_sorted_nodes.erase(
+        std::remove_if(
+            topological_sorted_nodes.begin(),
+            topological_sorted_nodes.end(),
+            [&](int elem) {
+                return !seen.insert(elem).second;
+            }
+        ),
+        topological_sorted_nodes.end()
+    );
+     */
+
+
 
     //std::cerr<<"size of topological sorted nodes: "<<topological_sorted_nodes.size()<<std::endl;
     // Validate all nodes
@@ -294,6 +339,20 @@ void GraphManagerPipeline::finalize_graph(Graph &graph, GraphContext &ctx, PassM
 		}
 
 		ii++;
+	}
+
+	char processor='B';
+	if (ctx.config().cluster==0){
+		processor='L';
+	}
+	if(target==arm_compute::graph::Target ::CL){
+		processor='G';
+	}
+	if(target==arm_compute::graph::Target ::NPU){
+		processor='N';
+	}
+	for(auto &task:workload.tasks){
+			task.processor=processor;
 	}
 
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
@@ -1213,6 +1272,8 @@ void GraphManagerPipeline::set_GPIO_tasks(std::string power_profie_mode){
 		}
 	}
 
+	bool simultaneously=false;
+
 	auto &_workload = _workloads.find(0)->second;
 	if (_workload.graph->name()=="YOLOv3" && power_profie_mode!="whole"){
 
@@ -1297,9 +1358,18 @@ void GraphManagerPipeline::extract_governor_tasks(std::string mode){
 				if (isInList(not_governor, task.node->name())){
 					task.governor=false;
 					std::cerr<<"change governor to false for task:"<<task.node->name()<<std::endl;
+					/*auto it = std::find(governor_tasks.begin(), governor_tasks.end(), task.node->name());
+					if (it != governor_tasks.end()) {
+						governor_tasks.erase(it);
+					}*/
 				}
 			}
 		}
+	}
+	int k=0;
+	std::cerr<<governor_tasks.size()<<std::endl;
+	for(auto task:governor_tasks){
+		std::cerr<<"\n"<<k++<<" gov task: "<<task;
 	}
 
 }
@@ -1325,16 +1395,29 @@ void GraphManagerPipeline::set_freqs(std::string freqs, std::string _order, char
 	if (freqs.size() >= 2 && freqs.front() == '{' && freqs.back() == '}') {
 		freqs = freqs.substr(1, freqs.size() - 2);
 		if (freqs.size() >= 2 && freqs.front() == '{' && freqs.back() == '}'){
-			extract_governor_tasks("PEs");
 			freqs = freqs.substr(1, freqs.size() - 2);
-		    int l, b, g;
-		    std::replace(freqs.begin(), freqs.end(), '-', ' '); // Replace '-' with whitespace
-		    std::istringstream iss(freqs);
-		    if (!(iss >> l >> b >> g)) {
-		        std::cerr << "Parsing error!" << std::endl;
-		        return;
-		    }
-		    governor_freqs[governor_tasks[0]]={l,b,g};
+			extract_governor_tasks("PEs");
+			if(freqs=="min" or freqs=="[min]"){
+					for(auto task :governor_tasks){
+						governor_freqs[task]={0,0,0};
+					}
+				}
+			else if(freqs=="max" or freqs=="[max]"){
+					for(auto task :governor_tasks){
+						governor_freqs[task]={5,7,4};
+					}
+				}
+				//std::cerr<<"\n\n\n\n*************\nfrerqs are:"<<freqs<<std::endl;
+			else{
+				int l, b, g;
+				std::replace(freqs.begin(), freqs.end(), '-', ' '); // Replace '-' with whitespace
+				std::istringstream iss(freqs);
+				if (!(iss >> l >> b >> g)) {
+					std::cerr << "Parsing error!" << std::endl;
+					return;
+				}
+				governor_freqs[governor_tasks[0]]={l,b,g};
+			}
 		}
 		else{
 			extract_governor_tasks("graphs");
@@ -1349,8 +1432,16 @@ void GraphManagerPipeline::set_freqs(std::string freqs, std::string _order, char
 }
 void GraphManagerPipeline::set_freq_map(std::string freqs, std::string _order, char GPU_Host, char NPU_Host){
 	if(freqs=="min" or freqs=="[min]"){
+		extract_governor_tasks("PEs");
 		for(auto task :governor_tasks){
 			governor_freqs[task]={0,0,0};
+		}
+		return;
+	}
+	if(freqs=="max" or freqs=="[max]"){
+		extract_governor_tasks("PEs");
+		for(auto task :governor_tasks){
+			governor_freqs[task]={5,7,4};
 		}
 		return;
 	}
@@ -1407,8 +1498,11 @@ void GraphManagerPipeline::set_freq_map(std::string freqs, std::string _order, c
 
 	std::stringstream ss(freqs);
 	std::string token;
-	int i=governor_tasks.size()-1;
-	int _method=2;
+	//For iterating over orders mapping letters
+	int i=_order.size()-1;
+	//for iterating over governor_tasks (for consequitive Ns in order there is one gevernor task just)
+	int governor_task_index=governor_tasks.size()-1;
+	int _method=1;
 	char prev_p;
 	while (std::getline(ss, token, '-')) {
 		//freq_layer[*it++] = std::stoi(token);
@@ -1442,6 +1536,7 @@ void GraphManagerPipeline::set_freq_map(std::string freqs, std::string _order, c
 				if(_method==2){
 					while( i < (_order.size()-1 ) ){
 						if (_order[i]==_order[i+1]){
+							//std::getline(ss, token, '-');
 							i=i+1;
 						}
 						else{
@@ -1458,11 +1553,15 @@ void GraphManagerPipeline::set_freq_map(std::string freqs, std::string _order, c
 				std::cerr<<"set freq skipping layer "<<i<<" which is mapped on NPU"<<std::endl;
 			}
 			else{
-				governor_freqs[governor_tasks[i]]={l,b,g};
+				std::cerr<<"\n** i:"<<i<<" governor index:"<<governor_task_index<<" "<<governor_tasks[governor_task_index]<<std::endl;
+				governor_freqs[governor_tasks[governor_task_index]]={l,b,g};
+				governor_task_index++;
+				governor_task_index=governor_task_index%governor_tasks.size();
 			}
 			prev_p=p;
 		}
 		if(_method==2){
+			std::cerr<<"**"<<i<<" "<<governor_tasks[i]<<std::endl;
 			governor_freqs[governor_tasks[i]]={l,b,g};
 		}
 		i=i+1;
@@ -1479,14 +1578,17 @@ void GraphManagerPipeline::set_governor_freqs(){
 	int i=0;
 	for(auto p : governor_freqs){
 		std::cerr<<"governor "<<i++<<" task:"<<p.first<<" freqs:"<<p.second[0]<<","<<p.second[1]<<","<<p.second[2]<<std::endl;
+		//std::cerr<<"governor "<<i++<<std::endl;
 	}
 	for (unsigned int id = 0; id < _workloads.size(); ++id) {
 		auto &workload = _workloads.find(id)->second;
 		for(auto& task:workload.tasks){
 	    	if(!task.task)
 	    		continue;
+	    	if(task.ending)
+	    		std::cerr<<id<<"---- "<<task.node->name()<<"    processor:"<<task.processor<<std::endl;
 	    	if(task.governor){
-	    		//std::cerr<<"setting freq of governor task "<<task.node->name()<<std::endl;
+	    		std::cerr<<"setting freq of governor task "<<task.node->name()<<std::endl;
 	    		task.set_freq(governor_freqs.at(task.node->name()));
 	    	}
 		}

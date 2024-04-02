@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --print_tasks=1 
-#./Run_CO-UP model=Alex --order=BBBBBBBB push=1 compile=1
+#./Run_CO-UP model=Alex --order=BBBBBBBB push=1 compile=1 --threads=2 --threads2=4
 #./Run_CO-UP model=MobileV1 --order=NNNNNNNNNNNNNNNBGGGGGGGLLLLL --n=60 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
 #./Run_CO-UP model=YOLOv3 --order=BBBBBBBGGGGGBBBBBLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBLLLLLLLLLLLLLLLLLLLLLLGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG --n=3 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
 # when just conv:
@@ -71,6 +71,11 @@ p="/data/data/com.termux/files/home/ARMCL-RockPi"
 p="/data/local/ARM-CO-UP"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
+laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP"
+
+## which implementation (co-up=pipeline)
+target_implementation='Pipeline'
+#target_implementation='n-pipe-NPU'
 #_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
 
 _dt1="$p/assets/${S}/alexnet/"
@@ -228,6 +233,11 @@ case "${options[model]}" in
         ;;
 esac
 
+## change pipeline to n_pip_npu for testing the prvious implementation
+if [ $target_implementation == 'n-pipe-NPU' ]; then
+	graph=$(echo "$graph" | sed 's/pipeline/n_pipe_npu/g')
+fi
+
 echo ${grpah}
 #graph=graph_mobilenet
 if [ "${options[compile]}" == "1" ]; then
@@ -235,7 +245,7 @@ if [ "${options[compile]}" == "1" ]; then
     ./b64.sh 23
     cd "${current_dir}"
 	#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
-    adb push "${laptop_dir}/build/examples/Pipeline/${graph}" "$p/test_graph/"
+    adb push "${laptop_dir}/build/examples/${target_implementation}/${graph}" "$p/test_graph/"
 	#adb push "${laptop_dir}/build/examples/graph_mobilenet" "$p/test_graph/"
 else
     if [ "${options[push]}" == "1" ]; then

@@ -40,7 +40,7 @@ IScheduler::IScheduler()
 
 
 	//Ehsan
-	//std::cout<<"IScheduler.cpp, cpu_num: "<<_cpu_info.get_cpu_num()<<" _num_threads_hint: "<<_num_threads_hint<<std::endl;
+	//std::cerr<<"IScheduler.cpp, cpu_num: "<<_cpu_info.get_cpu_num()<<" _num_threads_hint: "<<_num_threads_hint<<std::endl;
 	
 }
 
