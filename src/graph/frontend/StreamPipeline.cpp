@@ -628,6 +628,7 @@ NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes
 	to the last node
 	std::pair<NodeID,int> last_node=std::make_pair(this->tail_node(),this->get_tail_graph_id());*/
 	//If this layer is starting layer of a subgraph
+	//std::cerr<<current_layer<<"   "<<start_layer.size()<<"   "<<IStreamPipeline::_target_graph<<std::endl;
 	if (current_layer==start_layer[IStreamPipeline::_target_graph]){
 		_hints=all_hints[IStreamPipeline::_target_graph];
 		//std::cerr<<"Starting Graph "<<IStreamPipeline::_target_graph<<" containing layers "<<start_layer[IStreamPipeline::_target_graph]<<"-"<<end_layer[IStreamPipeline::_target_graph]<<std::endl;
@@ -636,7 +637,6 @@ NodeID StreamPipeline::next_layer(std::vector<std::pair<NodeID,int>> input_nodes
 	if (current_layer==end_layer[IStreamPipeline::_target_graph]){
 		//std::cerr<<"Ending layer of Graph "<<IStreamPipeline::_target_graph<<"\n";
 	}
-
 	//check input nodes of this layer to see in which subgraph they are
 	for(auto &input_node:input_nodes){
 		//If input node is in another graph

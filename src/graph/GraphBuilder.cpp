@@ -138,8 +138,8 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
 NodeID GraphBuilder::add_early_exit_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor)
 {
     check_nodeidx_pair(input, g);
-
-    NodeID nid = g.add_node<OutputNode>();
+    //std::cerr<<"\n\nCreating Early exit node...\n\n";
+    NodeID nid = g.add_node<EarlyExitOutputNode>();
     g.add_connection(input.node_id, input.index, nid, 0);
     set_node_params(g, nid, params);
     //auto t=ITensorAccessorUPtr();

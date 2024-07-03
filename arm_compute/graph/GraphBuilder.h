@@ -112,7 +112,7 @@ public:
          *
          * @return Node ID of the created node, EmptyNodeID in case of error
          */
-        static NodeID add_early_exit_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID add_early_exit_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an activation layer node to the graph
      *
      * @param[in] g              Graph to add the node to

@@ -72,5 +72,6 @@
 #include "arm_compute/graph/nodes/ReceiverNode.h"
 #include "arm_compute/graph/nodes/SenderNode.h"
 #include "arm_compute/graph/nodes/NPUNode.h"
+#include "arm_compute/graph/nodes/EarlyExitOutputNode.h"
 
 #endif /* ARM_COMPUTE_GRAPH_NODES_H */

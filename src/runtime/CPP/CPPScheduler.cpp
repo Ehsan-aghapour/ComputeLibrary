@@ -164,7 +164,8 @@ private:
 Thread::Thread(int core_pin)
     : _core_pin(core_pin)
 {
-    std::cerr<<"Worker Thread:: worder thread created with core_pin: "<<_core_pin<<std::endl;
+	//First it creates Threads (when initalizaing the vector with the size of default thread number(2), then it clear the vector and full it with correct initialized threads"
+    std::cerr<<"Worker Thread:: worker thread created with core_pin: "<<_core_pin<<std::endl;
     _thread = std::thread(&Thread::worker_thread, this);
 }
 
@@ -266,9 +267,10 @@ struct CPPScheduler::Impl final
         int host_core=func(0, thread_hint, cfg);
         set_thread_affinity(func(0, thread_hint, cfg));
         std::cerr<<"\n\n\n************************\n";
-        std::cerr<<"set thread with affinity; cluster "<<cfg.cluster<<std::endl;
+        std::cerr<<"set thread with affinity:\n";
+        std::cerr<<"cluster: "<<cfg.cluster<<std::endl;
         std::cerr<<"_num_threads is: "<<_num_threads<<std::endl;
-        std::cerr<<"set affinity of main thread to core "<< host_core<<std::endl;
+        std::cerr<<"set affinity of main thread to core: "<< host_core<<std::endl;
 
 
 

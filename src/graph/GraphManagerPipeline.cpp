@@ -1134,8 +1134,12 @@ void GraphManagerPipeline::print_times_details(int graph_id, int n)
 		std::cout<<c++<<"\tLayer Name: "<<task.node->name()
 				<<" \t Layer time: "<<task.time(n)
 				<<" \t number of inputs: "<<task.node->num_inputs()
-				<<" \t input shape: "<<task.node->input(0)->desc().shape
-				<<" \t output shape: "<<task.node->output(0)->desc().shape<<std::endl;
+				<<" \t input shape: "<<task.node->input(0)->desc().shape;
+		//if (task.node->name().find(substring) == std::string::npos)
+		if(task.node->name()!="EarlyExitOutput")
+			std::cout<<" \t output shape: "<<task.node->output(0)->desc().shape<<std::endl;
+		else
+			std::cout<<"\n";
 
 		tt+=task.time(n);
 		if(task.ending){
@@ -1367,7 +1371,7 @@ void GraphManagerPipeline::extract_governor_tasks(std::string mode){
 		}
 	}
 	int k=0;
-	std::cerr<<governor_tasks.size()<<std::endl;
+	std::cerr<<"\n\n\nNumber of governor tasks: "<<governor_tasks.size()<<std::endl;
 	for(auto task:governor_tasks){
 		std::cerr<<"\n"<<k++<<" gov task: "<<task;
 	}

@@ -132,14 +132,16 @@ public:
 	EarlyExitOutputLayer(ITensorAccessorUPtr accessor, unsigned int connection_idx = 0)
         : _accessor(std::move(accessor)), _connection_idx(connection_idx)
     {
-    	_name="output";
+
+    	_name="EarlyExitOutput";
     }
 
     NodeID create_layer(IStream &s) override
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), _connection_idx };
-        return GraphBuilder::add_output_node(s.graph(), common_params, input, std::move(_accessor));
+        //return GraphBuilder::add_output_node(s.graph(), common_params, input, std::move(_accessor));
+        return GraphBuilder::add_early_exit_output_node(s.graph(), common_params, input, std::move(_accessor));
     }
 
 private:

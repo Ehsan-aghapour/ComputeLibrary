@@ -1,2 +1,2 @@
 #!/bin/bash
-adb shell /data/local/ARM-CO-UP/test_graph/graph_yolov3_pipeline --data=/data/local/ARM-CO-UP/assets//yolov3/ --image=/data/local/ARM-CO-UP/assets//ppm_images_608/ --labels=/data/local/ARM-CO-UP/assets//coco.names --npu_host=B --threads2=4 --threads=2 --order=NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNLLLLNLNNNLNLNLLNNNNLNLLLLLNNNN --kernel_c=4800 --power_profile_mode=whole --gpu_host=B --n=10
+adb shell "cd /data/local/ARM-CO-UP/test_graph/; ./graph_resnet18_earlyexit --order=GGGGGGG --n=100"

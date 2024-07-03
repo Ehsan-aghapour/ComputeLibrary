@@ -79,7 +79,6 @@ public:
 	}
 
 	int init(int argc, char **argv){
-
 		cmd_parser.parse(argc, argv);
 		cmd_parser.validate();
 
@@ -124,11 +123,26 @@ public:
 		int Layers = order.size();
 		if (Layers == 0){
 			order='B';
+			add_graph(0, 0, 'B', 'B');
 		}
 		int id = 0;
 		char PE = order[0];
 		int start = 0;
 		int end = 0;
+
+		/*situation that just one char is enter for order*/
+		if(Layers==1){
+			char Host_PE=PE;
+			if (PE=='G'){
+				Host_PE=common_params.gpu_host;
+			}
+			if (PE=='N'){
+				Host_PE=common_params.npu_host;
+			}
+			add_graph(start, end, PE, Host_PE);
+		}
+
+
 		for(int i=1 ; i < Layers ; i++){
 			if(order[i] != PE){
 				end = i-1;
@@ -159,7 +173,7 @@ public:
 
 
 
-
+		std::cerr<<"\n\n**********************************\nGraphs(subgrahs) are initialized for adding layers based on mapping\n**************************************\n\n\n\n\n";
 		return 0;
 
 	}
@@ -290,7 +304,6 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
 template <typename T>
 int run_example_pipeline(int argc, char **argv)
 {
-
 	std::unique_ptr<Example_Pipeline> example_pipeline=std::make_unique<T>();
 	/*CommandLineParser  cmd_parser;
 	CommonGraphOptions common_opts(cmd_parser);

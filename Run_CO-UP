@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#early exit:
+#./Run_CO-UP model=resnet18EE compile=1 push=1
+
 # --print_tasks=1 
 #./Run_CO-UP model=Alex --order=BBBBBBBB push=1 compile=1 --threads=2 --threads2=4
 #./Run_CO-UP model=MobileV1 --order=NNNNNNNNNNNNNNNBGGGGGGGLLLLL --n=60 --threads=2 --threads2=4 --GPU_Host=B push=1 compile=1
@@ -19,19 +22,41 @@ declare -A options
 # Get the directory of the script
 SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 
+current_dir=$(pwd)
+p="/data/data/com.termux/files/home/ARMCL-RockPi"
+p="/data/local/ARM-CO-UP"
+laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
+laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
+laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP"
+
+_img="$p/assets/images"
+_dt="$p/assets"
+_lbl="$p/assets/labels"
+
+## which implementation (co-up=pipeline)
+target_implementation='Pipeline'
+target_implementation='EarlyExit'
+#target_implementation='n-pipe-NPU'
+#_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
+
 governor="governor_pandoon"
 governor_path="$SCRIPT_DIR/utils/DVFS/${governor}.ko"  # Assign your new value to a variable
 
 ab
 
+adb push Layers.conf "$p/test_graph/"
+echo -e "\n*********************************************\nLayers config pushed\n**********************************************\n\n\n\n\n"
+
 adb push $governor_path /data/local/tmp/
+echo -e "\n*********************************************\ngovernor module pushed\n**********************************************\n\n\n\n\n"
 #adb shell insmod /data/local/tmp/$governor
 if adb shell lsmod | grep -wq "$governor"; then
-    echo "Module is already inserted, removing and reinserting..."
+    echo -e -e "Module is already inserted, removing and reinserting..."
     #adb shell rmmod "$governor"
 else
 adb shell insmod "/data/local/tmp/${governor}.ko"
 fi
+echo -e -e "\n*********************************************\ngovernor module inserted\n**********************************************\n\n\n\n\n"
 #adb shell lsmod
 
 #file_path="utils/DVFS/DVFS.h"
@@ -54,63 +79,59 @@ done
 
 # Print the contents of the options array
 #for key in "${!options[@]}"; do
-#  echo "Option: $key, Value: ${options[$key]}"
+#  echo -e "Option: $key, Value: ${options[$key]}"
 #done
 
-adb shell 'echo userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
-adb shell 'echo userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
-adb shell 'echo 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
-adb shell 'echo 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
+adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
+adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
+adb shell 'echo -e 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
+adb shell 'echo -e 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
 
-adb shell 'echo userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
+adb shell 'echo -e userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
 #adb shell 'cat /sys/class/devfreq/ff9a0000.gpu/governor'
-adb shell 'echo 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
-
-current_dir=$(pwd)
-p="/data/data/com.termux/files/home/ARMCL-RockPi"
-p="/data/local/ARM-CO-UP"
-laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
-laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
-laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP"
-
-## which implementation (co-up=pipeline)
-target_implementation='Pipeline'
-#target_implementation='n-pipe-NPU'
-#_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
-
-_dt1="$p/assets/${S}/alexnet/"
-_dt2="$p/assets/${S}/googlenet/"
-_dt3="$p/assets/${S}/mobilenet/"
-_dt4="$p/assets/${S}/resnet50/"
-_dt5="$p/assets/${S}/squeezenet/"
-_dt6="$p/assets/${S}/yolov3/"
-
-_img1="$p/assets/${S}/ppm_images_227/"
-_img2="$p/assets/${S}/ppm_images_224/"
-_img3="$p/assets/${S}/ppm_images_608/"
+adb shell 'echo -e 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
 
 
-_lbl="$p/assets/${S}/labels.txt"
-_lbl_detection="$p/assets/${S}/coco.names"
+
+#_dt1="$p/assets/${S}/alexnet/"
+#_dt2="$p/assets/${S}/googlenet/"
+#_dt3="$p/assets/${S}/mobilenet/"
+#_dt4="$p/assets/${S}/resnet50/"
+#_dt5="$p/assets/${S}/squeezenet/"
+#_dt6="$p/assets/${S}/yolov3/"
+#_dt7="$p/assets/${S}/inceptionv3_model/"
+#_dt8="$p/assets/${S}/inceptionv4_model/"
+#_dt9="$p/assets/${S}/inception_resnet_v2_model/"
 
 
-lbl=""
-img=""
-dt=""
+
+
+#ppm_img_227="$p/assets/images/ppm_images_227/"
+#ppm_img_224="$p/assets/${S}/ppm_images_224/"
+#ppm_img_608="$p/assets/${S}/ppm_images_608/"
+#jpg_img_224="$p/assets/${S}/jpg_images_224/"
+#jpg_img_299="$p/assets/${S}/jpg_images_299/"
+
+
+#_lbl="$p/assets/${S}/labels.txt"
+#_lbl_detection="$p/assets/${S}/coco.names"
+
+
+
 
 remaining_options=()
 for key in "${!options[@]}"; do
   if [[ $key != "model" && $key != "push" && $key != "compile" ]]
   then
-  	#echo "rem Option: $key, Value: ${options[$key]}"
+  	#echo -e "rem Option: $key, Value: ${options[$key]}"
   	remaining_options+=("$key=${options[$key]}")
   fi
 done
 
 if [ "$1" == "-h" ]
 then
-   echo "pushtest [1-binarygraph] [2-board push dir] [3-target] [4-image?] [5-data?] [6-labels?] [7-n] [8-save?] [9-annotate?] [10-partition_point] [11-partition_point2] [12-order] [13-layer_timing] [14-Big_threads] [15-little_threads] [16-Graph] [17-GPU_host] [18-NPU_host]" ;
-   echo "data: 1-alexnet 2-googlenet 3-mobilenet 4-resnet50 5-squeezenet";
+   echo -e "pushtest [1-binarygraph] [2-board push dir] [3-target] [4-image?] [5-data?] [6-labels?] [7-n] [8-save?] [9-annotate?] [10-partition_point] [11-partition_point2] [12-order] [13-layer_timing] [14-Big_threads] [15-little_threads] [16-Graph] [17-GPU_host] [18-NPU_host]" ;
+   echo -e "data: 1-alexnet 2-googlenet 3-mobilenet 4-resnet50 5-squeezenet";
    exit; 
 fi
 
@@ -128,24 +149,27 @@ if ((0)); then
 	#start=$((start+1))
 	#end=$((end+1))
 
-	#echo $start
-	#echo $end
-	echo "Checking file: /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn"
-	echo "File exists: $( [ -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ] && echo yes || echo no )"
-	echo "Caching value: $caching"
+	#echo -e $start
+	#echo -e $end
+	echo -e "Checking file: /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn"
+	echo -e "File exists: $( [ -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ] && echo -e yes || echo -e no )"
+	echo -e "Caching value: $caching"
 	if (( $count>0 )); then
 		if [[ `adb shell ls $p/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null` ]] && [[ $caching == "YES" ]]; then 
-			echo "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+			echo -e "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+			echo -e "\n*********************************************\nNPU parts are on the board\n**********************************************\n\n\n\n\n"
 		else
 			#if [ ! -f /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn ]; then
 			if [[ ! -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ]] || [[ $caching == "NO" ]]; then
 				#/home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/a.out ${16} $start $end
 				/home/ehsan/UvA/Sub_Model/CO-UP.out ${options[model]} $start $end
+				echo -e "\n*********************************************\nNPU parts are sliced and prepared\n**********************************************\n\n\n\n\n"
 				sleep 2
 			fi
 			#adb -s DKORWVI0P0 push /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
 			#adb -s DKORWVI0P0 push /home/ehsan/UvA/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
 			adb  push /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn $p/graphs/${options[model]}_${start}_${end}.rknn
+			echo -e "\n*********************************************\nNPU parts are pushed\n**********************************************\n\n\n\n\n"
 			sleep 5
 		fi
 	fi
@@ -167,20 +191,23 @@ while [[ $pos -lt ${#v} ]]; do
 
 		#start=$((start+1))
 		#end=$((end+1))
-        echo "start=$start, end=$end"
+        echo -e "start=$start, end=$end"
 		
 			if [[ `adb shell ls $p/graphs/${options[model]}_${start}_${end}.rknn 2> /dev/null` ]] && [[ $caching == "YES" ]]; then 
-				echo "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+				echo -e "file $p/graphs/${options[model]}_${start}_${end}.rknn exist on board";
+				echo -e "\n*********************************************\nNPU part is on the board alreay\n**********************************************\n\n\n\n\n"
 			else
 				#if [ ! -f /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn ]; then
 				if [[ ! -f /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn ]] || [[ $caching == "NO" ]]; then
 					#/home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/a.out ${16} $start $end
 					/home/ehsan/UvA/Sub_Model/CO-UP.out ${options[model]} $start $end
+					echo -e "\n*********************************************\nNPU part sliced and prepared\n**********************************************\n\n\n\n\n"
 					sleep 2
 				fi
 				#adb -s DKORWVI0P0 push /home/ehsan/UvA/ARMCL/Khadas/ARMCL-Local/scripts/blobs_extractor/Working_tree/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
 				#adb -s DKORWVI0P0 push /home/ehsan/UvA/Sub_Model/${16}/${16}_${start}_${end}.rknn $p/graphs/${16}_${start}_${end}.rknn
 				adb  push /home/ehsan/UvA/Sub_Model/${options[model]}/${options[model]}_${start}_${end}.rknn $p/graphs/${options[model]}_${start}_${end}.rknn
+				echo -e "\n*********************************************\nNPU part pushed\n**********************************************\n\n\n\n\n"
 				sleep 5
 			fi
     else
@@ -189,60 +216,88 @@ while [[ $pos -lt ${#v} ]]; do
 done
 
 
+img=""
+dt=""
+lbl=""
 
 case "${options[model]}" in
     "Alex" | "alex")
-		lbl=$_lbl
-		img=$_img1
-		dt=$_dt1
+		lbl=${_lbl}/labels.txt
+		img=${_img}/ppm_images_227/
+		dt=$_dt
 		graph="graph_alexnet_pipeline"
         ;;
     "Google" | "google")
-		lbl=$_lbl
-		img=$_img2
-		dt=$_dt2
+		lbl=${_lbl}/labels.txt
+		img=${_img}/jpg_images_224/
+		dt=$_dt
 		graph="graph_googlenet_pipeline"
         ;;
     "MobileV1" | "mobilev1")
-		lbl=$_lbl
-		img=$_img2
-		dt=$_dt3
+		lbl=${_lbl}/labels.txt
+		img=${_img}/ppm_images_224/
+		dt=$_dt
 		graph="graph_mobilenet_pipeline"
         ;;
 	"ResV1_50" | "res50")
-		lbl=$_lbl
-		img=$_img2
-		dt=$_dt4
+		lbl=${_lbl}/labels.txt
+		img=${_img}/ppm_images_224/
+		dt=$_dt
 		graph="graph_resnet50_pipeline"
         ;;
 	"SqueezeV1" | "squeeze")
-		lbl=$_lbl
-		img=$_img1
-		dt=$_dt5
+		lbl=${_lbl}/labels.txt
+		img=${_img}/ppm_images_227/
+		dt=$_dt
 		graph="graph_squeezenet_pipeline"
         ;;
-	"YOLOv3" | "yolo")
-		lbl=$_lbl_detection
-		img=$_img3
-		dt=$_dt6
-		graph="graph_yolov3_pipeline"
-		
+	"InceptionV3" | "inceptionv3")
+		lbl=${_lbl}/labels.txt
+		img=${_img}/jpg_images_299/
+		dt=$_dt
+		graph="graph_inception_v3_pipeline"
         ;;
+	"InceptionV4" | "inceptionv4")
+		lbl=${_lbl}/labels.txt
+		img=${_img}/jpg_images_299/
+		dt=$_dt
+		graph="graph_inception_v4_pipeline"
+        ;;
+	"InceptionResnetV2" | "inceptionresnetv2")
+		lbl=${_lbl}/labels.txt
+		img=${_img}/jpg_images_299/
+		dt=$_dt
+		graph="graph_inception_resnet_v2_pipeline"
+        ;;
+	"YOLOv3" | "yolo")
+		lbl=${_lbl}/coco.names
+		img=${_img}/ppm_images_608/
+		dt=$_dt
+		graph="graph_yolov3_pipeline"
+        ;;
+	"MobileV1EE" | "mobilev1EE")
+		graph="graph_mobilenet_earlyexit"
+        ;;
+	"Res18EE" | "res18EE")
+		graph="graph_resnet18_earlyexit"
+        ;;
+	
     *)
-        echo "Unknown fruit."
+        echo -e "Unknown fruit."
         ;;
 esac
 
 ## change pipeline to n_pip_npu for testing the prvious implementation
 if [ $target_implementation == 'n-pipe-NPU' ]; then
-	graph=$(echo "$graph" | sed 's/pipeline/n_pipe_npu/g')
+	graph=$(echo -e "$graph" | sed 's/pipeline/n_pipe_npu/g')
 fi
 
-echo ${grpah}
+echo -e ${grpah}
 #graph=graph_mobilenet
 if [ "${options[compile]}" == "1" ]; then
     cd "${laptop_dir}"
     ./b64.sh 23
+	echo -e "\n*********************************************\nEnd of Building process\n**********************************************\n\n\n\n\n"
     cd "${current_dir}"
 	#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
     adb push "${laptop_dir}/build/examples/${target_implementation}/${graph}" "$p/test_graph/"
@@ -250,12 +305,23 @@ if [ "${options[compile]}" == "1" ]; then
 else
     if [ "${options[push]}" == "1" ]; then
 		#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
-        adb push "${laptop_dir}/build/examples/Pipeline/${graph}" "$p/test_graph/"
+        adb push "${laptop_dir}/build/examples/${target_implementation}/${graph}" "$p/test_graph/"
     fi
 fi
+echo -e "\n*********************************************\nbinary graph file pushed\n**********************************************\n\n\n\n\n"
 
-echo "#!/bin/bash" > ${SCRIPT_DIR}/run_command.sh
-echo "adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}" >> ${SCRIPT_DIR}/run_command.sh
+echo -e "#!/bin/bash" > ${SCRIPT_DIR}/run_command.sh
+
+if [ "$dt" == "" ]; then
+    echo -e "adb shell \"cd $p/test_graph/; ./${graph} ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
+else
+	echo -e "adb shell \"cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
+fi
+
+echo -e "\n*********************************************\nrun command in run_command.sh ready to run\n**********************************************\n\n\n\n\n"
+
+#echo -e "adb shell cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}" >> ${SCRIPT_DIR}/run_command.sh
 chmod +x ${SCRIPT_DIR}/run_command.sh
+./run_command.sh
 #adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
 

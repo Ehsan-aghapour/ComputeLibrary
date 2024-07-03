@@ -173,6 +173,24 @@ private:
                   0.001f)
               .set_name("Conv2d_0/BatchNorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name("Conv2d_0/Relu6");
+
+        SubStream  earlyexit_0(graph);
+        /*earlyexit_0<< ConvolutionLayer(
+                          1U, 1U, 1000U,
+                          get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy", DataLayout::NCHW),
+                          get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),
+                          PadStrideInfo(1, 1, 0, 0))
+                      .set_name("Logits/Conv2d_1c_1x1");*/
+        earlyexit_0<< PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, DataLayout::NHWC, PadStrideInfo(4, 4, 0, 0))).set_name("pool1");
+        earlyexit_0<<FullyConnectedLayer(
+                10U,
+                get_weights_accessor("", "/earlyexit_linear_0_w.npy",DataLayout::NCHW),
+                get_weights_accessor("", "/earlyexit_linear_0_b.npy",DataLayout::NCHW))
+            .set_name("linear_0");//data_path
+        //earlyexit_0<< SoftmaxLayer().set_name("prob");
+        earlyexit_0<<EarlyExitOutputLayer(get_output_accessor(common_params, 5));
+        //earlyexit_0<< SoftmaxLayer().set_name("prob")
+        //earlyexit_0<< OutputLayer(get_output_accessor(common_params, 5));
         graph << get_dwsc_node_float(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0));
         graph << get_dwsc_node_float(data_path, "Conv2d_2", 128 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
         graph << get_dwsc_node_float(data_path, "Conv2d_3", 128 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));

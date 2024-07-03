@@ -117,6 +117,173 @@ Run the AlexNet graph with this command. Select NEON or CL to run it on CPU or G
 <br/>
 
 
+# Add new DL model
+The ARM-COUP framework is designed with a core functionality that allows for the easy addition of new models. By leveraging the original ARM-CL operations, you can incorporate any arbitrary model into the framework with minimal effort. Below, we provide a guide on how to add a new model to the ARM-COUP framework.
+
+You can refer to the example models in the examples directory of ARM-CL, such as graph_alexnet, graph_googlenet, graph_mobilenet, and others. These examples will help you understand the structure required for your desired model.
+
+To add a new model, follow these instructions using graph_alexnet as a reference. The graph_alexnet.cpp file is located in the examples directory.
+
+1. Make a copy of the model into the COUP dir and change the name (you can add COUP at the end of the file name)
+
+2. First to utilize the ARM-COUP backbone include its util file, :
+#include "utils/UtilsPipeline.h"
+now the model could run using the ARM-COUP backbone
+
+3. Then, you change the parent class to COUP framework:
+change this:
+class GraphAlexnetExample : public Example
+to this:
+class GraphAlexnetExample : public Example_Pipeline
+
+
+4. The variable of the CNN class are moved to the parent class (Example_Pipeline); so first comment them in the end of the class:
+/*
+CommandLineParser  cmd_parser;
+CommonGraphOptions common_opts;
+CommonGraphParams  common_params;
+Stream     graph;
+*/
+ SO, you do not need to initialize varaiables, rather it will happen in parent class:
+change this:
+: cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "AlexNet")
+to this:
+: Example_Pipeline(0, "AlexNet")
+
+So the following lines that set and print the common_params also need to be commented:
+cmd_parser.parse(argc, argv);
+cmd_parser.validate();
+common_params = consume_common_graph_parameters(common_opts);
+if(common_params.help)
+{
+    cmd_parser.print_help(argv[0]);
+    return false;
+}
+ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
+std::cout << common_params << std::endl;
+
+5. Finally, in the main function, you just need to call run function of the COUP rather than original run function:
+change this:
+return arm_compute::utils::run_example<GraphAlexnetExample>(argc, argv);
+to this:
+return arm_compute::utils::run_example_pipeline<GraphAlexnetExample>(argc, argv);
+
+Now the model will run in ARM-COUP framewrok and all the functionalities of the framework such as co-operative run on different processors, time and power profiling, DVFS, thread management, and ... supported for the model.
+
+ARM-COUP has a script, which automatically handle pushing the model file into the board and run with the desired arguments; if you want to run your model using this script, just need to add your model file name into cases(case "${options[model]}" in). For exmaple for alexnet it is added like this:
+"Alex" | "alex")
+    graph="graph_alexnet_pipeline"
+    ;;
+
+which means when you define model=Alex or model=alex it will push and run graph_alexnet_pipeline file.
+
+Additionlly, if you want to run with the weights data (extracted from pretrained model), first extract the weights data (using scripts provided by armcl) and push it into the baord ("$p/assets/cnn_data" directory). Then set data (_dt[X]), images, and label variables. For example for Alexnet we extracted the weights data and push it into board ("$p/assets/cnn_data/" directory) and have set variables:
+
+"Alex" | "alex")
+	lbl=${_lbl}/labels.txt
+	img=${_img}/ppm_images_227/
+	dt=$_dt
+	graph="graph_alexnet_pipeline"
+	;;
+
+Then you can mapp model layers into a desired processor (Little CPU cluster, Big CPU cluster, GPU, or NPU). So you need to know the layers of the model. Now, when you run the model with the COUP framework (no arguments needed), the framework will print the list of layers of the model, so you know the name and number of layers:
+./Run_CO-UP model=AlexNet
+(./Run_CO-UP model=AlexNet compile=1 -> first compile and push the model into board then runs it)
+
+
+As, user usually do not want to consider each single layer(operation) as one unit, you can change the granularity by defining the super layers. For this purpose, you will define the starting and ending layers for each super layer. You can define it with two methods; 
+A) in utils/main_layer_checker.h file, there are two data structures starting_task_names and ending_task_names, that for each model the name of the starting layers(task) and ending layers are stored; which you can add those for your model. you will add a new record to the starting_task_names and ending_task_names maps; with the key of the model name and the value of starting layer names and ending layer names respectively. For the key use the model name that is defined in the model file class (for example for alexnet model: GraphAlexnetExample class in graph_alexnet.cpp). Here you can see it for alexnet for example.
+
+starting layers:
+inline std::map<std::string, std::unordered_set<std::string>> starting_task_names{
+	{
+		"alexnet",
+		{ "conv1",
+			//"conv2_g0",
+			//"conv2_g1",
+			"conv2",
+			"conv3",
+			//"conv4_g0",
+			//"conv4_g1",
+			"conv4",
+			//"conv5_g0",
+			//"conv5_g1",
+			"conv5",
+			"fc6",
+			"fc7",
+			"fc8",
+		}
+	},
+    ...
+
+ending layers:
+
+inline std::map<std::string, std::unordered_set<std::string>> ending_task_names{
+	{
+		"alexnet",
+		{
+			"pool1",
+			"pool2",
+			"relu3",
+			"relu4",
+			"pool5",
+			"relu6",
+			"relu7",
+			"prob"
+		}
+	},
+    ...
+
+B) The second method is to define them in Layers.conf file in the main directory. In this method you put the starting and ending layer of the super layer with the following format:
+[model name]
+starting_task_of_super_layer_1
+ending_task_of_super_layer_1
+starting_task_of_super_layer2
+ending_task_of_super_layer2
+...
+ 
+For example for Alexnet model:
+
+[AlexNet]
+#Layer1
+conv1
+pool1
+#Layer2
+conv2
+pool2
+#Layer3
+conv3
+relu3
+#Layer4
+conv4
+relu4
+#Layer5
+conv5
+pool5
+#Layer6
+fc6
+relu6
+#Layer7
+fc7
+relu7
+#Layer8
+fc8
+prob
+#End of AlexNet
+
+The comment lines(start with #) are not needed, they are just for better readability. This method is easier and more readable than the previsous method. You just need to run the model with ARM-COUP without needing any argument, it will prints model name and list of the layers. Copy and append them into the Layers.conf file and based on your desired define the super layers boundaries (start and end points). This file should be placed in the same directory as binary file of the model that you finally run. At runtime it read this file and filled the starting_task_names and ending_task_names automatically.
+
+Now, that the super layers are defined, you can map them to desired processor using --order argument; for example --order=BBBLLGGG for mapping super layers of alexnet model into Big  cluster, Little cluster and GPU.
+
+Also, it is possible to perform super-layer level DVFS when running the model. 
+
+
+
+
+
+ 
+
+
 <div align="center">
  <img src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png"><br><br>
 </div>

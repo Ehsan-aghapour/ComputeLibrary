@@ -200,6 +200,9 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_stack_layer<NEStackLayer, NETargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::StridedSliceLayer:
             return detail::create_strided_slice_layer<NEStridedSlice, NETargetInfo>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
+        //Ehsan Early Exit
+        case NodeType::EarlyExitOutput:
+        	return detail::create_early_exit_layer<NEEarlyExitLayer, NETargetInfo>(*polymorphic_downcast<EarlyExitOutputNode *>(node));
         default:
             return nullptr;
     }

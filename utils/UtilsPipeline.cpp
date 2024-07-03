@@ -94,7 +94,9 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
         int f_i=1;
 #endif
         example->initialize_dvfs();
+        std::cerr<<"\n\n************\n DVFS is initialized \n******************\n\n\n";
         example->initialize_power_measurement();
+        std::cerr<<"\n\n************\n Power setup has set up \n******************\n\n\n";
         bool status = example->do_setup(argc, argv);
         if(example->get_common_params().print_tasks)
         	example->print_tasks();
@@ -154,9 +156,12 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
 #elif LW
 #if Loop
         std::string fqs;
-        std::cout<<"Please Enter the desired Frequency setttings: \n"<<std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
+        std::cout<<"Please Enter the desired Frequency settings(\"end\" for finish): \n"<<std::flush;
         std::cout.flush();
         std::cin>>fqs;
+        std::cerr<<"\n\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         int i=0;
         while(fqs!="end"){
 
@@ -169,11 +174,13 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
         	//example->do_run(freq_layer);
         	example->do_run();
 
-        	std::cout<<"Profiling these DVFS settings finised\n";
-        	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-        	std::cout<<"Please Enter the desired Frequency setttings: \n"<<std::flush;
+        	std::cout<<"Profiling these DVFS settings finished\n\n\n";
+        	std::cout.flush();
+        	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        	std::cout<<"Please Enter the desired Frequency settings(\"end\" for finish): \n"<<std::flush;
         	std::cout.flush();
         	std::cin>>fqs;
+        	std::cerr<<"\n\n";
         }
         example->do_finish();
         example->do_teardown();

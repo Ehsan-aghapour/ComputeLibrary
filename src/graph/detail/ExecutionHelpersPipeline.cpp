@@ -48,6 +48,11 @@
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
 
+//#include "arm_compute/runtime/NEON/functions/NEEarlyExitLayer.h"
+//#include "arm_compute/graph/nodes/EarlyExitOutputNode.h"
+//#include "arm_compute/graph/backends/FunctionHelpers.h"
+
+
 namespace arm_compute
 {
 namespace graph
@@ -107,7 +112,12 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 			//std::cerr<<"\n\n\n\nnode name: "<<node->name()<<std::endl;
 			if(node != nullptr)
 			{
+				//arm_compute::graph::backends::detail::create_early_exit_layer<NEEarlyExitLayer>(*utils::cast::polymorphic_downcast<EarlyExitOutputNode *>(node));
 				//std::cerr<<"node is not null\n";
+				if (node->type()==NodeType::EarlyExitOutput){
+					node->set_assigned_target(Target::NEON);
+
+				}
 				Target                     assigned_target = node->assigned_target();
 
 				backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
@@ -117,7 +127,7 @@ ExecutionWorkload configure_all_nodes_pipeline(Graph &g, GraphContext &ctx, cons
 				{
 					std::cerr<<"Graph ("<<g.id()<<") "<<"Task "<<task_number++<<": "<<node->name()<<"\n";
 					workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
-					std::cerr<<"task has been emplaced\n";
+					//std::cerr<<"task has been emplaced\n";
 				}
 			}
 		}

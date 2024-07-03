@@ -28,6 +28,11 @@
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/frontend/ILayer.h"
 
+
+#include <iostream>
+#include <fstream> // For file I/O
+#include <string>
+
 namespace arm_compute
 {
 namespace graph
@@ -153,18 +158,49 @@ bool IStreamPipeline::is_next_layer(std::string name){
 
     }*/
 
+void addNameToFile(const std::string& filename, const std::string& name) {
+    // Open the file in append mode
+    std::ofstream file(filename, std::ios::app);
+
+    if (file.is_open()) {
+        // Write the name to a new line in the file
+        file << name << std::endl;
+        file.close(); // Close the file after writing
+    } else {
+        std::cerr << "Error opening file: " << filename << std::endl;
+    }
+}
+
+
 bool IStreamPipeline::is_next_layer(std::string name){
 		static int index=-1;
+		static bool header=false;
+		std::string file_name="Layers.log";
+		if (!header){
+			parseConfigFile("./Layers.conf");
+			std::cerr<<"\n\n\n*******************************************************************************************\n";
+			std::cerr<<"                                   Layer Names                                                   \n";
+			std::cerr<<"*******************************************************************************************\n\n";
+			std::cerr<<"["<<graph_name<<"]"<<std::endl;
+			//addNameToFile("Layers.log", graph_name);
+			header=true;
+		}
 		bool starting=check_starting(graph_name,name);
+		//std::cerr<<"check is next layer "<<starting<<std::endl;
+		//addNameToFile("Layers.log", name);
 		if(starting){
 			index++;
+			std::cerr<<"\n----------------------------------------------------------------\n";
+			std::cerr<<"Layer "<<index;
+			std::cerr<<"\n----------------------------------------------------------------\n";
 			std::string indent=(index%2)?"":"\t\t\t";
-			std::cerr <<indent<< index<<" layer: "<<name << std::endl;
+			std::cerr <<indent<<name << std::endl;
 			return true;
 		}
 		else{
 			std::string indent=(index%2)?"":"\t\t\t";
-			std::cerr <<indent<<index<< " skipping layer: "<<name << std::endl;
+			std::cerr<<indent<<name << std::endl;
+			//std::cerr<<"dd\n";
 			return false;
 		}
 

@@ -6,7 +6,9 @@
 #include <string>
 #include <unordered_set>
 
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 inline std::map<std::string, std::unordered_set<std::string>> ending_task_names{
 	{
@@ -202,7 +204,47 @@ inline std::map<std::string, std::unordered_set<std::string>> ending_task_names{
 			"conv2d_74/LeakyRelu",
 			"Yolo3" 
 		}
+	},
+	{
+		"resnet18",
+		{
+			"pool1/MaxPool",
+			"block1/unit1/bottleneck_v1/Relu",
+			"block1/unit2/bottleneck_v1/Relu",
+			"block2/unit1/bottleneck_v1/Relu",
+			"block2/unit2/bottleneck_v1/Relu",
+			"block3/unit1/bottleneck_v1/Relu",
+			"block3/unit2/bottleneck_v1/Relu",
+			"block4/unit1/bottleneck_v1/Relu",
+			//"block4/unit2/bottleneck_v1/Relu",
+			"pool5",
+			"output",
+
+			"EarlyExitOutput",
+
+			/*
+			//Earlyexits
+			"attention_0/mul",
+			"scala_0/poolAVG",
+			//"EE0/predictions/Softmax",
+			"EarlyExitOutput",
+
+			"attention_1/mul",
+			"scala_1/poolAVG",
+			//"EE1/predictions/Softmax",
+			"EarlyExitOutput",
+
+			"attention_2/mul",
+			"scala_2/poolAVG",
+			//"EE2/predictions/Softmax",
+			"EarlyExitOutput",
+			*/
+
+
+		}
+
 	}
+
 
 
 
@@ -383,13 +425,41 @@ inline std::map<std::string, std::unordered_set<std::string>> starting_task_name
 			"conv2d_74",
 			"conv2d_75"
 		}
+	},
+	{
+		"resnet18",
+		{
+			/*"conv1/convolution",
+			"block1/unit1/bottleneck_v1/conv1/convolution",
+			"block1/unit2/bottleneck_v1/conv1/convolution",
+			"block2/unit1/bottleneck_v1/conv1/convolution",
+			"block2/unit2/bottleneck_v1/conv1/convolution",
+			"block3/unit1/bottleneck_v1/conv1/convolution",
+			"block3/unit2/bottleneck_v1/conv1/convolution",
+			"block4/unit1/bottleneck_v1/conv1/convolution",
+			"block4/unit2/bottleneck_v1/conv1/convolution",
+			"logits/convolution",
+			//early exits
+			"attention_0/sepConv_0/depthwiseConv_0",
+			//"scala_0/sepConv_0/depthwiseConv_0",
+			//"EE0/FC",
+
+			"attention_1/sepConv_0/depthwiseConv_0",
+			//"scala_1/sepConv_0/depthwiseConv_0",
+			//"EE1/FC",
+
+			"attention_2/sepConv_0/depthwiseConv_0",
+			//"scala_2/sepConv_0/depthwiseConv_0",
+			//"EE2/FC"*/
+
+		}
 	}
 
 
 
 
-
 };
+
 	
 inline std::string toLowerCase(std::string str) {
     std::transform(str.begin(), str.end(), str.begin(),
@@ -409,6 +479,63 @@ inline bool check_starting(std::string model, std::string layer){
 		return true;
 	}
 	return (starting_task_names[toLowerCase(model)].count(layer) > 0);
+}
+
+
+
+
+//Read from config file
+// Function to trim whitespace from a string
+inline std::string trim(const std::string& str) {
+    const char* whitespace = " \t\n\r";
+    const auto strBegin = str.find_first_not_of(whitespace);
+    if (strBegin == std::string::npos)
+        return ""; // no content
+
+    const auto strEnd = str.find_last_not_of(whitespace);
+    const auto strRange = strEnd - strBegin + 1;
+
+    return str.substr(strBegin, strRange);
+}
+
+
+// Function to parse the configuration file
+inline void parseConfigFile(const std::string& filename) {
+    std::ifstream file(filename);
+    std::ofstream file2("./heyy.txt");
+    if (!file.is_open()) {
+        std::cerr << "Failed to open the file." << std::endl;
+        return;
+    }
+
+    std::string line;
+    std::string current_model;
+    bool is_starting_task = true;
+
+    while (std::getline(file, line)) {
+        line = trim(line);
+
+        if (line.empty() || line[0] == '#') {
+            continue; // Skip empty lines and comments
+        }
+
+        if (line[0] == '[' && line.back() == ']') {
+            // New model section
+            current_model = line.substr(1, line.size() - 2);
+            starting_task_names[current_model] = {};
+            ending_task_names[current_model] = {};
+            is_starting_task = true; // Reset for the new model
+        } else if (!current_model.empty()) {
+            if (is_starting_task) {
+                starting_task_names[current_model].insert(line);
+            } else {
+                ending_task_names[current_model].insert(line);
+            }
+            is_starting_task = !is_starting_task; // Alternate between starting and ending tasks
+        }
+    }
+
+    file.close();
 }
 
 	

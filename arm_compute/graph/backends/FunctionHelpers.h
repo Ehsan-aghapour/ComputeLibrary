@@ -1929,6 +1929,23 @@ std::unique_ptr<IFunction> create_npu_function(NPUNode &node)
     return std::move(func);
 }
 
+//Ehsan EarlyExit
+template <typename EarlyExitFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_early_exit_layer(EarlyExitOutputNode &node){
+	auto func = std::make_unique<EarlyExitFunction>();
+	typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+	func->configure(input);
+	return std::move(func);
+}
+
+//Ehsan EarlyExit
+template <typename EarlyExitFunction>
+std::unique_ptr<IFunction> create_early_exit_layer(EarlyExitOutputNode &node){
+	auto func = std::make_unique<EarlyExitFunction>();
+	//typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+	//func.configure(input);
+	return std::move(func);
+}
 
 
 } // namespace detail

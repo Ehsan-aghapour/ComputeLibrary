@@ -149,4 +149,8 @@
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
+//Ehsan Early Exit
+#include "arm_compute/runtime/NEON/functions/NEEarlyExitLayer.h"
+
+
 #endif /* ARM_COMPUTE_NEFUNCTIONS_H */

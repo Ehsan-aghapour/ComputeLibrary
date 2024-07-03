@@ -661,18 +661,18 @@ void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
 
     _output_stream << "---------- Top " << _top_n << " predictions ----------" << std::endl
                   << std::endl;
-    bool pr=false;
+    bool pr=true;
     for(size_t i = 0; i < _top_n; ++i)
     {
     	if (pr){
         _output_stream << std::fixed << std::setprecision(4)
                        << +classes_prob[index.at(i)]
                        << " - [id = " << index.at(i) << "]"
-                       //<< ", " << _labels[index.at(i)]
+                       << ", " << _labels[index.at(i)]
 						<< std::endl;
     	}
     }
-    std::cerr<<"finish getting output"<<tensor.info()->tensor_shape()<<std::endl;
+    //std::cerr<<"finish getting output"<<tensor.info()->tensor_shape()<<std::endl;
 }
 
 bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
