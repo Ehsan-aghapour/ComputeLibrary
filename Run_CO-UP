@@ -40,11 +40,17 @@ target_implementation='EarlyExit'
 #_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
 
 governor="governor_pandoon"
-governor_path="$SCRIPT_DIR/utils/DVFS/${governor}.ko"  # Assign your new value to a variable
+posix="_Khadas"
+posix="_RockPi"
+governor_path="$SCRIPT_DIR/utils/DVFS/${governor}${posix}.ko"
+
+little_cores=4
+big_cores=2
+
 
 ab
 
-adb push Layers.conf "$p/test_graph/"
+adb push ${laptop_dir}/Layers.conf "$p/test_graph/"
 echo -e "\n*********************************************\nLayers config pushed\n**********************************************\n\n\n\n\n"
 
 adb push $governor_path /data/local/tmp/
@@ -54,7 +60,7 @@ if adb shell lsmod | grep -wq "$governor"; then
     echo -e -e "Module is already inserted, removing and reinserting..."
     #adb shell rmmod "$governor"
 else
-adb shell insmod "/data/local/tmp/${governor}.ko"
+adb shell insmod "/data/local/tmp/${governor}${posix}.ko"
 fi
 echo -e -e "\n*********************************************\ngovernor module inserted\n**********************************************\n\n\n\n\n"
 #adb shell lsmod
@@ -81,15 +87,16 @@ done
 #for key in "${!options[@]}"; do
 #  echo -e "Option: $key, Value: ${options[$key]}"
 #done
+if false; then
+	adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
+	adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
+	adb shell 'echo -e 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
+	adb shell 'echo -e 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
 
-adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
-adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
-adb shell 'echo -e 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
-adb shell 'echo -e 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
-
-adb shell 'echo -e userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
-#adb shell 'cat /sys/class/devfreq/ff9a0000.gpu/governor'
-adb shell 'echo -e 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
+	adb shell 'echo -e userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
+	#adb shell 'cat /sys/class/devfreq/ff9a0000.gpu/governor'
+	adb shell 'echo -e 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
+fi
 
 
 
@@ -313,14 +320,15 @@ echo -e "\n*********************************************\nbinary graph file push
 echo -e "#!/bin/bash" > ${SCRIPT_DIR}/run_command.sh
 
 if [ "$dt" == "" ]; then
-    echo -e "adb shell \"cd $p/test_graph/; ./${graph} ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
+    echo -e "adb shell \"cd $p/test_graph/; ./${graph} --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
 else
-	echo -e "adb shell \"cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
+	echo -e "adb shell \"cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
 fi
 
 echo -e "\n*********************************************\nrun command in run_command.sh ready to run\n**********************************************\n\n\n\n\n"
 
 #echo -e "adb shell cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}" >> ${SCRIPT_DIR}/run_command.sh
+cat ${SCRIPT_DIR}/run_command.sh
 chmod +x ${SCRIPT_DIR}/run_command.sh
 ./run_command.sh
 #adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"

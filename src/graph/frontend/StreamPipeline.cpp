@@ -109,8 +109,8 @@ public:
 
 
 void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::set<int> *b, int blocking)
+//void StreamPipeline::finalize(Target target, const GraphConfig &config, arm_compute::utils::CommonGraphParams *common_params=nullptr){
 {
-
 	std::vector<int> indicesToRemove;
 	for(auto k=0;k<_gs.size();k++){
 		if(_gs[k]->nodes().size()==0){
@@ -598,6 +598,11 @@ void StreamPipeline::add_graph(int start, int end, char _PE, char _Host_PE){
 		config.mlgo_file   = common_params.mlgo_file;
 		config.num_threads = num_threads;
 		config.cluster=cluster;
+
+		config.big_cores=common_params.big_cores;
+		config.little_cores=common_params.little_cores;
+		config.total_cores=common_params.total_cores;
+
 		configs.emplace_back(config);
 		/*GraphContext ctx;
 		_ctxs.emplace_back(std::move(ctx));*/

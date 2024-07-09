@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 #define IN  0
 #define OUT 1
 
@@ -19,7 +21,7 @@
 static int
 GPIOExport(int pin)
 {
-#define BUFFER_MAX 3
+#define BUFFER_MAX 4
 	char buffer[BUFFER_MAX];
 	ssize_t bytes_written;
 	int fd;
@@ -30,8 +32,13 @@ GPIOExport(int pin)
 		return(-1);
 	}
 
-	bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
-	write(fd, buffer, bytes_written);
+	bytes_written = snprintf(buffer, BUFFER_MAX, "%d\n", pin);
+	if (write(fd, buffer, bytes_written) == -1) {
+        fprintf(stderr, "Failed to write to export! Error: %s\n", strerror(errno));
+        close(fd);  // Close the file descriptor before returning
+        return(-1);
+    }
+	//write(fd, buffer, bytes_written);
 	close(fd);
 	return(0);
 }

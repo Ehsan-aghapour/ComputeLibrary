@@ -73,6 +73,7 @@ public:
      */
 
     void create_graphs();
+    //void finalize(Target target, const GraphConfig &config, arm_compute::utils::CommonGraphParams *common_params=nullptr);
     void finalize(Target target, const GraphConfig &config, std::set<int> *b=NULL, int blocking=0);
     void finalize_parallel(int i,std::set<int> *b, int blocking);
     /** Executes the stream **/

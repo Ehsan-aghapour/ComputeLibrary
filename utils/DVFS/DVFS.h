@@ -2,7 +2,25 @@
 #define DVFS_H
 
 
+#define debuglevel 0
 
+#define kernelspace 0
+#define userspace 1
+#define mode kernelspace
+
+#define rockpi 0
+#define khadas 1
+#define board rockpi
+
+#if board == khadas
+    //const std::string CPU_PATH = "/sys/devices/system/cpu/cpufreq/";
+    // Frequency tables for Khadas board
+    inline const std::vector<int> LittleFrequencyTable = {500000, 667000, 1000000, 1200000, 1398000, 1512000, 1608000, 1704000, 1800000};
+    inline const std::vector<int> BigFrequencyTable = {500000, 667000, 1000000, 1200000, 1398000, 1512000, 1608000, 1704000, 1800000, 1908000, 2016000, 2100000, 2208000};
+#elif board == rockpi
+	inline const std::vector<int> LittleFrequencyTable = {408000, 600000, 816000, 1008000, 1200000, 1416000};
+    inline const std::vector<int> BigFrequencyTable = {408000, 600000, 816000, 1008000, 1200000, 1416000, 1608000, 1800000};
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,7 +100,9 @@ public:
 	}
 
 
-	int commit_freq(int Little, int big, int GPU){
+	int commit_freq(int Little, int big, int GPU, std::string name=""){
+
+			int duration=0;
 	        static int l,b,g=0;
 	        if (Little>-1){
 	                l=Little;
@@ -93,10 +113,15 @@ public:
 	        if(GPU>-1){
 	                g=GPU;
 	        }
+			timespec t_start,t_end;
+#if mode == kernelspace
 	        union ptr ptr_freqs;
-	        timespec t_start,t_end;
-	        //std::cout<<fd<<" req freqs, little:"<<Little<<", big:"<<big<<", GPU:"<<GPU<<std::endl;
-	        //std::cout<<fd<<" apply freqs, little:"<<l<<", big:"<<b<<", GPU:"<<g<<std::endl;
+
+#if debuglevel == 1
+			std::cerr<<"task: "<<name<<std::endl;
+	        std::cout<<fd<<" req freqs, little:"<<Little<<", big:"<<big<<", GPU:"<<GPU<<std::endl;
+	        std::cout<<fd<<" apply freqs, little:"<<l<<", big:"<<b<<", GPU:"<<g<<std::endl;
+#endif
 	        clock_gettime(CLOCK_MONOTONIC, &t_start);
 	        g=4-g;
 	        int8_t dfreqs[3];
@@ -113,6 +138,55 @@ public:
 	        }
 	        clock_gettime(CLOCK_MONOTONIC, &t_end);
 	        unsigned long int ioctltime=diff_time(t_start,t_end);
+			duration=ioctltime/1000000;
+#endif
+
+#if mode == userspace
+
+#if board == khadas
+			std::string CPU_path="/sys/devices/system/cpu/cpufreq/";
+			std::string GPU_path="/sys/class/mpgpu/";
+			std::string Command="";
+			int little_freq = LittleFrequencyTable[l];
+    		int big_freq = BigFrequencyTable[b];
+
+#if debuglevel == 1
+			std::cerr<<"task: "<<name<<std::endl;
+	        std::cout<<fd<<" req freqs, little:"<<Little<<", big:"<<big<<", GPU:"<<GPU<<std::endl;
+	        std::cout<<fd<<" apply freqs, little_freq:"<<l<<", big_freq:"<<b<<std::endl;//", GPU:"<<g<<std::endl;
+#endif
+			//Google AOSP
+			//Command="echo " + std::string(freq) + " > " + CPU_path + "policy0/scaling_setspeed";
+			//Khadas AOSP
+			//if you want to do it manually just return
+			return 0;
+			clock_gettime(CLOCK_MONOTONIC, &t_start);
+			Command="echo " + std::to_string(little_freq) + " > " + CPU_path + "policy0/scaling_min_freq";
+	        system(Command.c_str());
+			Command="echo " + std::to_string(little_freq) + " > " + CPU_path + "policy0/scaling_max_freq";
+	        system(Command.c_str());
+			Command="echo " + std::to_string(big_freq) + " > " + CPU_path + "policy2/scaling_min_freq";
+			system(Command.c_str());
+			Command="echo " + std::to_string(big_freq) + " > " + CPU_path + "policy2/scaling_max_freq";
+	        system(Command.c_str());
+			//Khadas GPU: echo 4 > /sys/class/mpgpu/max_freq
+			Command="echo " + std::to_string(g) + " > " + GPU_path + "min_freq";
+			system(Command.c_str());
+			Command="echo " + std::to_string(g) + " > " + GPU_path + "max_freq";
+			system(Command.c_str());
+
+
+			clock_gettime(CLOCK_MONOTONIC, &t_end);
+			unsigned long int userspacetime=diff_time(t_start,t_end);
+			duration=userspacetime/1000000;
+#if debuglevel == 1 or true
+			std::cerr<<"DVFS duration: "<<duration<<" ms"<<std::endl;
+#endif
+
+#endif
+
+
+#endif
 	        return 0;
 	}
 
@@ -131,17 +205,53 @@ public:
 
 	int init_hikey(){
 	        std::string CPU_path="/sys/devices/system/cpu/cpufreq/";
-	        std::string GPU_path="/sys/devices/platform/e82c0000.mali/devfreq/e82c0000.mali";
+			std::string GPU_path="/sys/class/mpgpu/";
+			//For Google AOSP (Khadas AOSP has not GPU governor)
+			//std::string GPU_path="/sys/class/devfreq/ffe40000.gpu/";
+	        //std::string GPU_path="/sys/devices/platform/e82c0000.mali/devfreq/e82c0000.mali";
+			//For KHADAS AOSP:
+			//echo 4 > /sys/class/mpgpu/max_freq
+			//echo 4 > /sys/class/mpgpu/min_freq
+			std::string Command="";
+#if mode == kernelspace
 	        std::string IOCTL_path="/dev/pandoon_device";
-	        std::string Command="chmod 666 " + IOCTL_path;
-	        Command="echo pandoon > " + CPU_path + "policy4/scaling_governor";
+	        Command="chmod 666 " + IOCTL_path;
+			system(Command.c_str());
+	        Command="echo pandoon > " + CPU_path + "policy2/scaling_governor";
 	        system(Command.c_str());
 	        Command="echo pandoon > " + CPU_path + "policy0/scaling_governor";
 	        system(Command.c_str());
 	        Command="echo pandoon > " + GPU_path + "/governor";
-		system(Command.c_str());
+			system(Command.c_str());
+	        //Command= "echo 1 > " + IOCTL_path;
+			//system(Command.c_str());
+#endif
+#if mode == userspace
+			//Google AOSP:
+			//Command="echo userspace > " + CPU_path + "policy2/scaling_governor";
+			//Khadas AOSP
+			Command="echo performance > " + CPU_path + "policy2/scaling_governor";
+	        system(Command.c_str());
+	        Command="echo performance > " + CPU_path + "policy0/scaling_governor";
+	        system(Command.c_str());
+			//Khadas GPU: echo 4 > /sys/class/mpgpu/min_freq
+			Command="echo " + std::to_string(max_g) + " > " + GPU_path + "min_freq";
+			system(Command.c_str());
+	        //Command="echo pandoon > " + GPU_path + "/governor";
+			//system(Command.c_str());
+#endif
+			Command="cat " + CPU_path + "policy0/scaling_governor";
+			//printf("Little CPU governor: ");
+	        system(Command.c_str());
+	        Command="cat " + CPU_path + "policy2/scaling_governor";
+			//printf("Big CPU governor: ");
+	        system(Command.c_str());
+			Command="cat " + GPU_path + "min_freq";
+			//printf("Min GPU Frequency set to: ");
+	        system(Command.c_str());
+	        //Command="cat " + GPU_path + "/governor";
+	        //system(Command.c_str());
 
-	        Command= "echo 1 > " + IOCTL_path;
 	        return 0;
 	}
 
@@ -159,7 +269,7 @@ public:
 	        Command="echo pandoon > " + GPU_path + "/governor";
 		system(Command.c_str());
 
-	        Command="cat " + CPU_path + "policy4/scaling_governor";
+	        Command="cat " + CPU_path + "policy0/scaling_governor";
 	        system(Command.c_str());
 	        Command="cat " + CPU_path + "policy4/scaling_governor";
 	        system(Command.c_str());
@@ -186,7 +296,12 @@ public:
 
 	}
 	void init(){
-		init_rockpi();
+#if board == rockpi
+		//init_rockpi();
+#endif
+#if board ==khadas
+		init_hikey();
+#endif
 		open_pandoon();
 	}
 	void finish(){
@@ -237,9 +352,15 @@ public:
 		return max_g;
 	}
 
+#if board == rockpi
 	inline static int max_l=5;
 	inline static int max_b=7;
 	inline static int max_g=4;
+#elif board == khadas
+	inline static int max_l=LittleFrequencyTable.size()-1;
+	inline static int max_b=BigFrequencyTable.size()-1;
+	inline static int max_g=4;
+#endif
 };
 
 //int DVFS::fd=-1;

@@ -1024,6 +1024,7 @@ void GraphManagerPipeline::warmup_and_execute_graph_serial(Graph &graph, int nn)
 		detail::call_all_tasks_pipeline(it->second,nn);
 		tfinish=std::chrono::high_resolution_clock::now();
 		double t_run=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish-tstart).count();
+		//std::cerr<<Frame<<"->"<<t_run<<std::endl;
 		task_time[graph.id()] += t_run;
 
 		///std::cerr<<"graph "<<graph.id()<<" before sends\n";
@@ -1373,7 +1374,7 @@ void GraphManagerPipeline::extract_governor_tasks(std::string mode){
 	int k=0;
 	std::cerr<<"\n\n\nNumber of governor tasks: "<<governor_tasks.size()<<std::endl;
 	for(auto task:governor_tasks){
-		std::cerr<<"\n"<<k++<<" gov task: "<<task;
+		std::cerr<<"\n"<<k++<<" gov task: "<<task<<std::endl;
 	}
 
 }
@@ -1391,6 +1392,10 @@ std::string removeConsecutiveDuplicates(const std::string& input) {
     return result;
 }
 
+/*RockPi
+ * int L_max_freq=5;
+int B_max_freq=7;
+int G_max_freq=4;*/
 void GraphManagerPipeline::set_freqs(std::string freqs, std::string _order, char GPU_Host, char NPU_Host){
 	governor_freqs.clear();
 	if(freqs==""){
@@ -1408,7 +1413,7 @@ void GraphManagerPipeline::set_freqs(std::string freqs, std::string _order, char
 				}
 			else if(freqs=="max" or freqs=="[max]"){
 					for(auto task :governor_tasks){
-						governor_freqs[task]={5,7,4};
+						governor_freqs[task]={arm_compute::graph::ExecutionTask::get_max_l(),arm_compute::graph::ExecutionTask::get_max_b(),arm_compute::graph::ExecutionTask::get_max_g()};
 					}
 				}
 				//std::cerr<<"\n\n\n\n*************\nfrerqs are:"<<freqs<<std::endl;
@@ -1445,7 +1450,7 @@ void GraphManagerPipeline::set_freq_map(std::string freqs, std::string _order, c
 	if(freqs=="max" or freqs=="[max]"){
 		extract_governor_tasks("PEs");
 		for(auto task :governor_tasks){
-			governor_freqs[task]={5,7,4};
+			governor_freqs[task]={arm_compute::graph::ExecutionTask::get_max_l(),arm_compute::graph::ExecutionTask::get_max_b(),arm_compute::graph::ExecutionTask::get_max_g()};
 		}
 		return;
 	}

@@ -49,9 +49,10 @@ void ExecutionTask::finish(){
 }
 
 void ExecutionTask::apply_freq(std::string _name){
+	//std::cerr<<"apply_freq "<<governor<<std::endl;
 	if(governor){
 		//std::cerr<<"Layer: "<<node->name()<<" Applying freqs Little:"<<LittleFreq<<" big: "<<bigFreq<<" GPU:"<<GPUFreq<<std::endl;
-		dvfs.commit_freq(LittleFreq, bigFreq, GPUFreq);
+		dvfs.commit_freq(LittleFreq, bigFreq, GPUFreq, _name);
 
 	}
 	/*else{
@@ -113,6 +114,8 @@ void ExecutionTask::operator()()
 
 void ExecutionTask::operator()(int nn)
 {
+	//std::cerr<<profile_transfers<<profile_layers<<std::endl;
+	//auto tstart=std::chrono::high_resolution_clock::now();
 	switch_GPIO_starting();
 	if(!profile_transfers){
 		t+=TaskExecutor::get().execute_function2(*this,nn);
@@ -137,6 +140,9 @@ void ExecutionTask::operator()(int nn)
     		std::this_thread::sleep_for(std::chrono::milliseconds(8));
     	}
     }
+    //auto tfinish=std::chrono::high_resolution_clock::now();
+    //double t_run=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish-tstart).count();
+    //std::cerr<<node->name()<<":"<<t<<"--"<<t_run*1000<<std::endl;
 
 }
 

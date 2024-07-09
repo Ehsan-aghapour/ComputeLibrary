@@ -92,8 +92,8 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_BatchNorm_beta.npy"),
                   0.0000100099996416f)
               .set_name("conv1/BatchNorm")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1/Relu")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1/Relu");
+              //<< PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
 
         add_residual_block(data_path, "block1", weights_layout, 64, 2, 1);
 
@@ -204,13 +204,18 @@ private:
 
             unsigned int middle_stride = 1;
 
-            if(i == (num_units - 1))
+            /*if(i == (num_units - 1))
             {
                 middle_stride = stride;
+            }*/
+
+            if(i == 0 and stride!=1){
+            	middle_stride=stride;
             }
 
             SubStream right(graph);
-            right << ConvolutionLayer(
+            //Change for resnet18
+            /*right << ConvolutionLayer(
                       1U, 1U, base_depth,
                       get_weights_accessor(data_path, unit_path + "conv1_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
@@ -223,9 +228,8 @@ private:
                       get_weights_accessor(data_path, unit_path + "conv1_BatchNorm_beta.npy"),
                       0.0000100099996416f)
                   .set_name(unit_name + "conv1/BatchNorm")
-                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "conv1/Relu")
-
-                  << ConvolutionLayer(
+                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "conv1/Relu")*/
+            right << ConvolutionLayer(
                       3U, 3U, base_depth,
                       get_weights_accessor(data_path, unit_path + "conv2_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
@@ -241,7 +245,9 @@ private:
                   << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "conv1/Relu")
 
                   << ConvolutionLayer(
-                      1U, 1U, base_depth * 4,
+                		  //Change for resnet18
+                      //1U, 1U, base_depth * 4,
+                	  1U, 1U, base_depth,
                       get_weights_accessor(data_path, unit_path + "conv3_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                       PadStrideInfo(1, 1, 0, 0))
@@ -254,14 +260,18 @@ private:
                       0.0000100099996416f)
                   .set_name(unit_name + "conv2/BatchNorm");
 
-            if(i == 0)
+            //Change for resnet18
+            if(i == 0 and stride!=1)
             {
                 SubStream left(graph);
                 left << ConvolutionLayer(
-                         1U, 1U, base_depth * 4,
+                		//Change for resnet18
+                         //1U, 1U, base_depth * 4,
+						 1U, 1U, base_depth,
                          get_weights_accessor(data_path, unit_path + "shortcut_weights.npy", weights_layout),
                          std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                         PadStrideInfo(1, 1, 0, 0))
+                         //PadStrideInfo(1, 1, 0, 0))
+						 PadStrideInfo(middle_stride, middle_stride, 0, 0))
                      .set_name(unit_name + "shortcut/convolution")
                      << BatchNormalizationLayer(
                          get_weights_accessor(data_path, unit_path + "shortcut_BatchNorm_moving_mean.npy"),
@@ -312,7 +322,7 @@ private:
     	    			1, 1, channels_in,
     	                get_weights_accessor("", "", DataLayout::NCHW),
     	                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-    	                PadStrideInfo(stride, stride, 0, 0))
+    	                PadStrideInfo(1, 1, 0, 0))
     	            .set_name(_pre_name+"pointwiseConv_0");
     	stream<< BatchNormalizationLayer(
                 get_weights_accessor("", ""),
@@ -331,13 +341,13 @@ private:
 		stream<<DepthwiseConvolutionLayer(kernel_size, kernel_size,
 				get_weights_accessor("", "", DataLayout::NCHW),
 				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-				PadStrideInfo(stride, stride, padding, padding))
+				PadStrideInfo(1, 1, padding, padding))
 			 .set_name(_pre_name+"depthwiseConv_1");
     	stream<<ConvolutionLayer(
 						1, 1, channels_out,
 						get_weights_accessor("", "", DataLayout::NCHW),
 						std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-						PadStrideInfo(stride, stride, 0, 0))
+						PadStrideInfo(1, 1, 0, 0))
 					.set_name(_pre_name+"pointwiseConv_1");
     	stream<< BatchNormalizationLayer(
 				get_weights_accessor("", ""),

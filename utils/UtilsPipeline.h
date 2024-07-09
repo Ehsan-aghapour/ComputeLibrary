@@ -84,6 +84,9 @@ public:
 
 		// Consume common parameters
 		common_params = consume_common_graph_parameters(common_opts);
+		/*config.big_cores=common_params.big_cores;
+		config.little_cores=common_params.little_cores;
+		config.total_cores=common_params.total_cores;*/
 
 		// Return when help menu is requested
 		if(common_params.help)
@@ -279,6 +282,7 @@ protected:
     CommonGraphOptions 				common_opts;
     CommonGraphParams  				common_params;
 	graph::frontend::StreamPipeline	graph;
+	arm_compute::graph::GraphConfig config;
 	int								start_indx;
 	int 							end_indx;
 	char 							PE;
