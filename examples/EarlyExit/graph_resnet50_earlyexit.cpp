@@ -21,29 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#define Pipeline 1
+#if Pipeline == 1
+#include "utils/UtilsPipeline.h"
+#endif
+
 #include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
-#include "utils/UtilsPipeline.h"
 
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement ResNet18 network using the Compute Library's graph API */
-class GraphResNet18EEExample : public Example_Pipeline
+/** Example demonstrating how to implement ResNetV1_50 network using the Compute Library's graph API */
+#if Pipeline == 1
+class GraphResNetV1_50EEExample : public Example_Pipeline
+#else
+class GraphResNetV1_50EEExample : public Example
+#endif
 {
 public:
-	GraphResNet18EEExample()
-		: Example_Pipeline(0, "ResNet18")
+    GraphResNetV1_50EEExample()
+#if Pipeline == 1
+    :Example_Pipeline(0,"ResNetV1_50_EE")
+#else
+        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ResNetV1_50_EE")
+#endif
     {
     }
     bool do_setup(int argc, char **argv) override
     {
+#if Pipeline == 0
         // Parse arguments
-/*        cmd_parser.parse(argc, argv);
+        cmd_parser.parse(argc, argv);
         cmd_parser.validate();
 
         // Consume common parameters
@@ -55,12 +68,11 @@ public:
             cmd_parser.print_help(argv[0]);
             return false;
         }
-
+#endif
+        bool early_exits=true;
         // Print parameter values
         std::cout << common_params << std::endl;
-        */
 
-    	bool early_exits=true;
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
 
@@ -84,7 +96,9 @@ public:
                   3U, 3U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_weights.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                  PadStrideInfo(1, 1, 1, 1))
+				  //Diff python model
+                  //PadStrideInfo(2, 2, 3, 3))
+				  PadStrideInfo(1, 1, 1, 1))
               .set_name("conv1/convolution")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_BatchNorm_moving_mean.npy"),
@@ -96,13 +110,15 @@ public:
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1/Relu");
               //<< PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
 
-        add_residual_block(data_path, "block1", weights_layout, 64, 2, 1);
+        //Diff python model (first block stride vs last block stride)
+        //add_residual_block(data_path, "block1", weights_layout, 64, 3, 2);
+        add_residual_block(data_path, "block1", weights_layout, 64, 3, 1);
 
         /*******************First early exit branch*********************/
-        if(early_exits){
+		if(early_exits){
 			SubStream EE0(graph);
-			add_attention(EE0, 64);
-			add_scala(EE0, {64,128,256});
+			add_attention(EE0, 256);
+			add_scala(EE0, {256,512,1024});
 			EE0<< ConvolutionLayer(
 					  1U, 1U, 100U,
 					  get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy", weights_layout),
@@ -112,17 +128,16 @@ public:
 				  << FlattenLayer().set_name("EE0/predictions/Reshape")
 				  << SoftmaxLayer().set_name("EE0/predictions/Softmax")
 				  << EarlyExitOutputLayer(get_output_accessor(common_params, 5));
-        }
-        /****************************************************************/
+		}
+		/****************************************************************/
 
-
-        add_residual_block(data_path, "block2", weights_layout, 128, 2, 2);
+        add_residual_block(data_path, "block2", weights_layout, 128, 4, 2);
 
         /*******************Second early exit branch*********************/
-        if(early_exits){
+		if(early_exits){
 			SubStream EE1(graph);
-			add_attention(EE1, 128);
-			add_scala(EE1, {128,256});
+			add_attention(EE1, 512);
+			add_scala(EE1, {512,1024});
 			EE1<< ConvolutionLayer(
 					  1U, 1U, 100U,
 					  get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy", weights_layout),
@@ -132,17 +147,17 @@ public:
 				  << FlattenLayer().set_name("EE1/predictions/Reshape")
 				  << SoftmaxLayer().set_name("EE1/predictions/Softmax")
 				  << EarlyExitOutputLayer(get_output_accessor(common_params, 5));
-        }
+		}
 		/****************************************************************/
 
 
-        add_residual_block(data_path, "block3", weights_layout, 256, 2, 2);
+        add_residual_block(data_path, "block3", weights_layout, 256, 6, 2);
 
         /*******************Third early exit branch*********************/
-        if(early_exits){
+		   if(early_exits){
 			SubStream EE2(graph);
-			add_attention(EE2, 256);
-			add_scala(EE2, {256});
+			add_attention(EE2, 1024);
+			add_scala(EE2, {1024});
 			EE2<< ConvolutionLayer(
 					  1U, 1U, 100U,
 					  get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy", weights_layout),
@@ -152,12 +167,13 @@ public:
 				  << FlattenLayer().set_name("EE2/predictions/Reshape")
 				  << SoftmaxLayer().set_name("EE2/predictions/Softmax")
 				  << EarlyExitOutputLayer(get_output_accessor(common_params, 5));
-        }
+		   }
 		/****************************************************************/
 
 
-        add_residual_block(data_path, "block4", weights_layout, 512, 2, 2);
-
+        //Diff python model
+        //add_residual_block(data_path, "block4", weights_layout, 512, 3, 1);
+        add_residual_block(data_path, "block4", weights_layout, 512, 3, 2);
 
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("pool5")
               << ConvolutionLayer(
@@ -191,10 +207,12 @@ public:
     }
 
 private:
-    /*CommandLineParser  cmd_parser;
+#if Pipeline == 0
+    CommandLineParser  cmd_parser;
     CommonGraphOptions common_opts;
     CommonGraphParams  common_params;
-    Stream             graph;*/
+    Stream             graph;
+#endif
 
     void add_residual_block(const std::string &data_path, const std::string &name, DataLayout weights_layout,
                             unsigned int base_depth, unsigned int num_units, unsigned int stride)
@@ -211,18 +229,17 @@ private:
 
             unsigned int middle_stride = 1;
 
+            //Diff python model (first unit of each block vs last unit of each block
             /*if(i == (num_units - 1))
             {
                 middle_stride = stride;
             }*/
-
-            if(i == 0 and stride!=1){
-            	middle_stride=stride;
+            if (i==0){
+            	middle_stride = stride;
             }
 
             SubStream right(graph);
-            //Change for resnet18
-            /*right << ConvolutionLayer(
+            right << ConvolutionLayer(
                       1U, 1U, base_depth,
                       get_weights_accessor(data_path, unit_path + "conv1_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
@@ -235,8 +252,9 @@ private:
                       get_weights_accessor(data_path, unit_path + "conv1_BatchNorm_beta.npy"),
                       0.0000100099996416f)
                   .set_name(unit_name + "conv1/BatchNorm")
-                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "conv1/Relu")*/
-            right << ConvolutionLayer(
+                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "conv1/Relu")
+
+                  << ConvolutionLayer(
                       3U, 3U, base_depth,
                       get_weights_accessor(data_path, unit_path + "conv2_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
@@ -252,9 +270,7 @@ private:
                   << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "conv1/Relu")
 
                   << ConvolutionLayer(
-                		  //Change for resnet18
-                      //1U, 1U, base_depth * 4,
-                	  1U, 1U, base_depth,
+                      1U, 1U, base_depth * 4,
                       get_weights_accessor(data_path, unit_path + "conv3_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                       PadStrideInfo(1, 1, 0, 0))
@@ -267,16 +283,14 @@ private:
                       0.0000100099996416f)
                   .set_name(unit_name + "conv2/BatchNorm");
 
-            //Change for resnet18
-            if(i == 0 and stride!=1)
+            if(i == 0)
             {
                 SubStream left(graph);
                 left << ConvolutionLayer(
-                		//Change for resnet18
-                         //1U, 1U, base_depth * 4,
-						 1U, 1U, base_depth,
+                         1U, 1U, base_depth * 4,
                          get_weights_accessor(data_path, unit_path + "shortcut_weights.npy", weights_layout),
                          std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+						 //Diff python model (in left branch: squeeze with stride vs squeeze with pooling)
                          //PadStrideInfo(1, 1, 0, 0))
 						 PadStrideInfo(middle_stride, middle_stride, 0, 0))
                      .set_name(unit_name + "shortcut/convolution")
@@ -290,13 +304,14 @@ private:
 
                 graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
             }
-            else if(middle_stride > 1)
+            //Diff python model (in left branch: squeeze with stride vs squeeze with pooling)
+            /*else if(middle_stride > 1)
             {
                 SubStream left(graph);
                 left << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, common_params.data_layout, PadStrideInfo(middle_stride, middle_stride, 0, 0), true)).set_name(unit_name + "shortcut/MaxPool");
 
                 graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
-            }
+            }*/
             else
             {
                 SubStream left(graph);
@@ -307,98 +322,97 @@ private:
         }
     }
 
+
     void add_sepconv(SubStream &stream, int channels_in, int channels_out, int kernel_size, int stride, int padding, std::string pre_name="",int _i=-1){
 
-    	/**stream<<ConvolutionLayer(
-    			kernel_size, kernel_size, channels,
-                get_weights_accessor("", "", DataLayout::NCHW),
-                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                PadStrideInfo(stride, stride, padding, padding))
-            .set_name("conv2/convolution");*/
-    	static int i=0;
-    	if(_i!=-1){
-    		i=_i;
-    	}
-    	std::string _pre_name=pre_name+"sepConv_"+std::to_string(i++)+"/";
-    	stream<<DepthwiseConvolutionLayer(kernel_size, kernel_size,
-    			get_weights_accessor("", "", DataLayout::NCHW),
-				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-				PadStrideInfo(stride, stride, padding, padding))
-			 .set_name(_pre_name+"depthwiseConv_0");
-    	stream<<ConvolutionLayer(
-    	    			1, 1, channels_in,
-    	                get_weights_accessor("", "", DataLayout::NCHW),
-    	                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-    	                PadStrideInfo(1, 1, 0, 0))
-    	            .set_name(_pre_name+"pointwiseConv_0");
-    	stream<< BatchNormalizationLayer(
-                get_weights_accessor("", ""),
-				get_weights_accessor("", ""),
-				get_weights_accessor("", ""),
-				get_weights_accessor("", ""),
-                0.0000100099996416f).set_name("BN");
-    	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu");
+        	/**stream<<ConvolutionLayer(
+        			kernel_size, kernel_size, channels,
+                    get_weights_accessor("", "", DataLayout::NCHW),
+                    std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+                    PadStrideInfo(stride, stride, padding, padding))
+                .set_name("conv2/convolution");*/
+        	static int i=0;
+        	if(_i!=-1){
+        		i=_i;
+        	}
+        	std::string _pre_name=pre_name+"sepConv_"+std::to_string(i++)+"/";
+        	stream<<DepthwiseConvolutionLayer(kernel_size, kernel_size,
+        			get_weights_accessor("", "", DataLayout::NCHW),
+    				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+    				PadStrideInfo(stride, stride, padding, padding))
+    			 .set_name(_pre_name+"depthwiseConv_0");
+        	stream<<ConvolutionLayer(
+        	    			1, 1, channels_in,
+        	                get_weights_accessor("", "", DataLayout::NCHW),
+        	                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+        	                PadStrideInfo(1, 1, 0, 0))
+        	            .set_name(_pre_name+"pointwiseConv_0");
+        	stream<< BatchNormalizationLayer(
+                    get_weights_accessor("", ""),
+    				get_weights_accessor("", ""),
+    				get_weights_accessor("", ""),
+    				get_weights_accessor("", ""),
+                    0.0000100099996416f).set_name("BN");
+        	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu");
 
-    	/**stream<<ConvolutionLayer(
-				kernel_size, kernel_size, channels,
-				get_weights_accessor("", "", DataLayout::NCHW),
-				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-				PadStrideInfo(stride, stride, padding, padding))
-			.set_name("conv2/convolution");*/
-		stream<<DepthwiseConvolutionLayer(kernel_size, kernel_size,
-				get_weights_accessor("", "", DataLayout::NCHW),
-				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-				PadStrideInfo(1, 1, padding, padding))
-			 .set_name(_pre_name+"depthwiseConv_1");
-    	stream<<ConvolutionLayer(
-						1, 1, channels_out,
-						get_weights_accessor("", "", DataLayout::NCHW),
-						std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-						PadStrideInfo(1, 1, 0, 0))
-					.set_name(_pre_name+"pointwiseConv_1");
-    	stream<< BatchNormalizationLayer(
-				get_weights_accessor("", ""),
-				get_weights_accessor("", ""),
-				get_weights_accessor("", ""),
-				get_weights_accessor("", ""),
-				0.0000100099996416f).set_name("BN");
-    	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu");
+        	/**stream<<ConvolutionLayer(
+    				kernel_size, kernel_size, channels,
+    				get_weights_accessor("", "", DataLayout::NCHW),
+    				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+    				PadStrideInfo(stride, stride, padding, padding))
+    			.set_name("conv2/convolution");*/
+    		stream<<DepthwiseConvolutionLayer(kernel_size, kernel_size,
+    				get_weights_accessor("", "", DataLayout::NCHW),
+    				std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+    				PadStrideInfo(1, 1, padding, padding))
+    			 .set_name(_pre_name+"depthwiseConv_1");
+        	stream<<ConvolutionLayer(
+    						1, 1, channels_out,
+    						get_weights_accessor("", "", DataLayout::NCHW),
+    						std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+    						PadStrideInfo(1, 1, 0, 0))
+    					.set_name(_pre_name+"pointwiseConv_1");
+        	stream<< BatchNormalizationLayer(
+    				get_weights_accessor("", ""),
+    				get_weights_accessor("", ""),
+    				get_weights_accessor("", ""),
+    				get_weights_accessor("", ""),
+    				0.0000100099996416f).set_name("BN");
+        	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu");
 
-		return ;
-
-
-    }
-
-    void add_attention(SubStream &stream, int channel_size){
-    	//SubStream right(stream);
-    	static int i=0;
-    	std::string pre_name="attention_"+std::to_string(i++)+"/";
-    	add_sepconv(stream, channel_size,channel_size, 3, 2, 1,pre_name,0);
-    	stream<< BatchNormalizationLayer(
-    	                get_weights_accessor("", ""),
-    					get_weights_accessor("", ""),
-    					get_weights_accessor("", ""),
-    					get_weights_accessor("", ""),
-    	                0.0000100099996416f).set_name("BN");
-    	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu");
-    	stream << ResizeLayer(InterpolationPolicy::BILINEAR, 2, 2).set_name("Upsample");
-    	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)).set_name("Sigmoid");
-    	//stream << EltwiseLayer(std::move(stream), std::move(right), EltwiseOperation::Mul).set_name(pre_name+"mul");
-    	//stream << EltwiseLayer(stream, right, EltwiseOperation::Mul).set_name(pre_name+"mul");
-    }
-
-    void add_scala(SubStream  &stream, std::vector<int> channel_sizes){
-    	static int i=0;
-    	std::string pre_name="scala_"+std::to_string(i++)+"/";
-    	int k=0;
-    	for(int channel_size:channel_sizes){
-    		add_sepconv(stream, channel_size,2*channel_size, 3, 2, 1,pre_name,k);
-    		k=-1;
-    	}
-    	stream << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, DataLayout::NHWC)).set_name(pre_name+"poolAVG");
-    }
+    		return ;
 
 
+        }
+
+        void add_attention(SubStream &stream, int channel_size){
+        	//SubStream right(stream);
+        	static int i=0;
+        	std::string pre_name="attention_"+std::to_string(i++)+"/";
+        	add_sepconv(stream, channel_size,channel_size, 3, 2, 1,pre_name,0);
+        	stream<< BatchNormalizationLayer(
+        	                get_weights_accessor("", ""),
+        					get_weights_accessor("", ""),
+        					get_weights_accessor("", ""),
+        					get_weights_accessor("", ""),
+        	                0.0000100099996416f).set_name("BN");
+        	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu");
+        	stream << ResizeLayer(InterpolationPolicy::BILINEAR, 2, 2).set_name("Upsample");
+        	stream << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)).set_name("Sigmoid");
+        	//stream << EltwiseLayer(std::move(stream), std::move(right), EltwiseOperation::Mul).set_name(pre_name+"mul");
+        	//stream << EltwiseLayer(stream, right, EltwiseOperation::Mul).set_name(pre_name+"mul");
+        }
+
+        void add_scala(SubStream  &stream, std::vector<int> channel_sizes){
+        	static int i=0;
+        	std::string pre_name="scala_"+std::to_string(i++)+"/";
+        	int k=0;
+        	for(int channel_size:channel_sizes){
+        		add_sepconv(stream, channel_size,2*channel_size, 3, 2, 1,pre_name,k);
+        		k=-1;
+        	}
+        	stream << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, DataLayout::NHWC)).set_name(pre_name+"poolAVG");
+        }
 };
 
 /** Main program for ResNetV1_50
@@ -417,5 +431,9 @@ private:
  */
 int main(int argc, char **argv)
 {
-    return arm_compute::utils::run_example_pipeline<GraphResNet18EEExample>(argc, argv);
+#if Pipeline == 1
+	return arm_compute::utils::run_example_pipeline<GraphResNetV1_50EEExample>(argc, argv);
+#else
+    return arm_compute::utils::run_example<GraphResNetV1_50EEExample>(argc, argv);
+#endif
 }

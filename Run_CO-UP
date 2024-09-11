@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #early exit:
-#./Run_CO-UP model=resnet18EE compile=1 push=1
+#./Run_CO-UP model=res18EE compile=1 push=1
 
 # --print_tasks=1 
 #./Run_CO-UP model=Alex --order=BBBBBBBB push=1 compile=1 --threads=2 --threads2=4
@@ -288,6 +288,12 @@ case "${options[model]}" in
 	"Res18EE" | "res18EE")
 		graph="graph_resnet18_earlyexit"
         ;;
+	"Res50EE" | "res50EE")
+		graph="graph_resnet50_earlyexit"
+        ;;
+	"Vgg16EE" | "vgg16EE")
+		graph="graph_vgg16_earlyexit"
+        ;;
 	
     *)
         echo -e "Unknown fruit."
@@ -298,6 +304,9 @@ esac
 if [ $target_implementation == 'n-pipe-NPU' ]; then
 	graph=$(echo -e "$graph" | sed 's/pipeline/n_pipe_npu/g')
 fi
+
+
+echo -e -e "\n*********************************************\ngraph selected\n**********************************************\n\n\n\n\n"
 
 echo -e ${grpah}
 #graph=graph_mobilenet

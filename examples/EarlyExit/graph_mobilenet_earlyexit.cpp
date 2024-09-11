@@ -40,13 +40,13 @@ using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement MobileNet's network using the Compute Library's graph API */
 #if Pipeline==1
-class GraphMobilenetExample : public Example_Pipeline
+class GraphMobilenetEEExample : public Example_Pipeline
 #else
-class GraphMobilenetExample : public Example
+class GraphMobilenetEEExample : public Example
 #endif
 {
 public:
-	GraphMobilenetExample()
+	GraphMobilenetEEExample()
 #if Pipeline == 1
     	: Example_Pipeline(0, "MobileNetV1")
 #else
@@ -58,9 +58,9 @@ public:
 		model_id_opt->set_help("Mobilenet model id (0: 1.0_224, else: 0.75_160");
     }
 public:
-    GraphMobilenetExample(const GraphMobilenetExample &) = delete;
-    GraphMobilenetExample &operator=(const GraphMobilenetExample &) = delete;
-    ~GraphMobilenetExample() override                               = default;
+    GraphMobilenetEEExample(const GraphMobilenetEEExample &) = delete;
+    GraphMobilenetEEExample &operator=(const GraphMobilenetEEExample &) = delete;
+    ~GraphMobilenetEEExample() override                               = default;
     bool do_setup(int argc, char **argv) override
     {
 #if Pipeline==0
@@ -401,8 +401,8 @@ private:
 int main(int argc, char **argv)
 {
 #if Pipeline==1
-    return arm_compute::utils::run_example_pipeline<GraphMobilenetExample>(argc, argv);
+    return arm_compute::utils::run_example_pipeline<GraphMobilenetEEExample>(argc, argv);
 #else
-    return arm_compute::utils::run_example<GraphMobilenetExample>(argc, argv);
+    return arm_compute::utils::run_example<GraphMobilenetEEExample>(argc, argv);
 #endif
 }
