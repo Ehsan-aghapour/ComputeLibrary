@@ -350,5 +350,6 @@ echo -e "\n*********************************************\nrun command in run_com
 cat ${SCRIPT_DIR}/run_command.sh
 chmod +x ${SCRIPT_DIR}/run_command.sh
 #${SCRIPT_DIR}/run_command.sh
+#adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
 #while true; do adb shell cat /proc/$(adb shell ps -A | grep graph_googlenet_pipeline | awk '{print $2}')/status | grep VmRSS; sleep 1; done
 #while true; do adb shell cat /proc/$(adb shell ps -A | grep graph_googlenet_pipeline | awk '{print $2}')/status | grep -E 'VmRSS|VmHWM|VmPeak'; sleep 1; done
