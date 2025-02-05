@@ -158,6 +158,7 @@ public:
 			//Google AOSP
 			//Command="echo " + std::string(freq) + " > " + CPU_path + "policy0/scaling_setspeed";
 			//Khadas AOSP
+			//the usermode dvfs will have a high amount of overhead (increase exec time a lot)
 			//if you want to do it manually just return
 			return 0;
 			clock_gettime(CLOCK_MONOTONIC, &t_start);
