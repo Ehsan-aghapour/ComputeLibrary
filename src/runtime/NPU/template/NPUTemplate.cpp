@@ -36,6 +36,10 @@ void NPU<NPUType>::configure(ITensor *input, ITensor *output)
 }
 
 template <>
+void NPU<NPUType>::configure(std::string name, std::vector<arm_compute::ITensor *> inputs, std::vector<arm_compute::ITensor *> outputs){
+}
+
+template <>
 Status NPU<NPUType>::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
 	return Status{};

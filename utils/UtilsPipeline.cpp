@@ -169,8 +169,8 @@ int run_example_pipeline(int argc, char **argv, std::unique_ptr<Example_Pipeline
         	//set_freq_map(fqs,example->get_common_params().order,example->name());
         	example->set_freqs(fqs);
         	example->set_GPIOs(example->get_common_params().power_profile_mode);
-        	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        	//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         	//example->do_run(freq_layer);
         	example->do_run();
 

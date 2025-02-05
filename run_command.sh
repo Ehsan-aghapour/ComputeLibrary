@@ -1,2 +1,2 @@
 #!/bin/bash
-adb shell "cd /data/local/ARM-CO-UP/test_graph/; ./graph_resnet18_earlyexit --order=GGGGGGG --n=100"
+adb shell "cd /data/local/ARM-CO-UP/test_graph/; export LD_LIBRARY_PATH=/data/local/ARM-CO-UP/; ./graph_inception_v4_pipeline --data=/data/local/ARM-CO-UP/assets --image=/data/local/ARM-CO-UP/assets/images/jpg_images_299/ --labels=/data/local/ARM-CO-UP/assets/labels/labels.txt --little_cores=2 --threads2=2 --big_cores=4 --threads=4 --npu_host=B --threads2=2 --threads=4 --order=GGGGGGGGGGGGGGGGGGGGGGG --kernel_c=4800 --power_profile_mode=whole --gpu_host=B --n=30 "

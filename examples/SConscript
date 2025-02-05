@@ -168,9 +168,10 @@ if env['external_tests_dir']:
         
         
 #Ehsan
-if env['estate'] == '64':
+if env['estate'] == '64' or env['estate'] == '32':
     #SConscript('./n-pipe/SConscript',['examples_env','utils','graph_utils'])
-    SConscript('./n-pipe-NPU/SConscript',['examples_env','utils','graph_utils'])
+    #Deprecated: if you want to compile n-pipe-NPU as well, you should put the required libs in examples/n-pipe-NPU/libs dir and uncomment the following line (in ARM-COUP libs are in main dir/NPU/Libs)
+    ##SConscript('./n-pipe-NPU/SConscript',['examples_env','utils','graph_utils'])
     SConscript('./Pipeline/SConscript',['examples_env','utils','graph_utils'])
     SConscript('./EarlyExit/SConscript',['examples_env','utils','graph_utils'])
     # pipe-all could not be compiled because "void run(double &in, double &task, double &out);" in arm_compute/graph/frontend/Stream.h is not exist anymore

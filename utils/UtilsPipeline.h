@@ -63,6 +63,7 @@ public:
 
 	void init(int _id, char _PE, int start, int end, char _host_PE)
 	{
+		
 		assert(_id == id);
 		start_indx = start;
 		end_indx = end;
@@ -84,7 +85,7 @@ public:
 
 		// Consume common parameters
 		common_params = consume_common_graph_parameters(common_opts);
-
+		
 		// Return when help menu is requested
 		if(common_params.help)
 		{
@@ -279,6 +280,7 @@ protected:
     CommonGraphOptions 				common_opts;
     CommonGraphParams  				common_params;
 	graph::frontend::StreamPipeline	graph;
+	arm_compute::graph::GraphConfig config;
 	int								start_indx;
 	int 							end_indx;
 	char 							PE;

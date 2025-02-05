@@ -38,7 +38,7 @@ enum class NPUTypes{
 	Khadas,
 	temp,
 };
-const NPUTypes selectedNPU = NPUTypes::RockPi;
+const NPUTypes selectedNPU = NPUTypes::temp;
 
 template <NPUTypes NPUType>
 struct SelectDataStructure {
