@@ -164,6 +164,8 @@ else:
     # Append the global linker flags to the environment
     env.Append(LINKFLAGS=NPU_LINKFLAGS)
 
+env.Append(LIBS=['log','android'])
+
 
 Export('env')
 Export('vars')

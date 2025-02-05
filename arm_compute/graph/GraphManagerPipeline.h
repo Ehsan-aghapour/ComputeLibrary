@@ -140,6 +140,7 @@ public:
     	send_time.resize(n);
     	output_time.resize(n);
     	transmition_time.resize(n);
+    	latency_of_each_point.resize(n);
     }
     void print_tasks();
     void reset_timing(int graph_id);
@@ -176,7 +177,9 @@ private:
     std::vector<double> 					output_time;
     std::vector<double> 					send_time;
     std::vector<double>						transmition_time;
+    std::vector<double>						latency_of_each_point;
     double									latency_time=0;
+    //double									latency_time_desired_point=0;
     int 									num_graphs=1;
     int										warmup_n=3;
 	bool									parallel=true;

@@ -115,6 +115,7 @@ public:
         add_residual_block(data_path, "block1", weights_layout, 64, 3, 1);
 
         /*******************First early exit branch*********************/
+
 		if(early_exits){
 			SubStream EE0(graph);
 			add_attention(EE0, 256);
@@ -129,10 +130,12 @@ public:
 				  << SoftmaxLayer().set_name("EE0/predictions/Softmax")
 				  << EarlyExitOutputLayer(get_output_accessor(common_params, 5));
 		}
+
 		/****************************************************************/
 
-        add_residual_block(data_path, "block2", weights_layout, 128, 4, 2);
 
+        add_residual_block(data_path, "block2", weights_layout, 128, 4, 2);
+        //goto finalize;
         /*******************Second early exit branch*********************/
 		if(early_exits){
 			SubStream EE1(graph);
@@ -181,8 +184,9 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_biases.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              .set_name("logits/convolution")
-              << FlattenLayer().set_name("predictions/Reshape")
+              .set_name("logits/convolution");
+finalize:
+        graph<< FlattenLayer().set_name("predictions/Reshape")
               << SoftmaxLayer().set_name("predictions/Softmax")
               << OutputLayer(get_output_accessor(common_params, 5));
 

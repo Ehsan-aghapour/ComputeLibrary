@@ -297,7 +297,7 @@ public:
 	}
 	void init(){
 #if board == rockpi
-		//init_rockpi();
+		init_rockpi();
 #endif
 #if board ==khadas
 		init_hikey();

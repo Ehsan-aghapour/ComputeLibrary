@@ -154,7 +154,7 @@ public:
 				  << EarlyExitOutputLayer(get_output_accessor(common_params, 5));
         }
 		/****************************************************************/
-
+        //goto finalize;
 
         add_residual_block(data_path, "block4", weights_layout, 512, 2, 2);
 
@@ -170,6 +170,7 @@ public:
               << SoftmaxLayer().set_name("predictions/Softmax")
               << OutputLayer(get_output_accessor(common_params, 5));
 
+finalize:
         // Finalize graph
         GraphConfig config;
         config.num_threads      = common_params.threads;
