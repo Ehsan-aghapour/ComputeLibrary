@@ -105,6 +105,7 @@ for file in Glob("./graph_*.cpp"):
         prog = earlyexit_examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=earlyexit_examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
+    print(f'\nearly exit example is {example} and prog is {prog}')
     alias = earlyexit_examples_env.Alias(example, prog)
     Default(alias)
 
