@@ -1,0 +1,274 @@
+#git diff 909906b73 de021fe64 >> diffrockpiwithkhadas.text
+
+diff --git a/My_test/a.out b/My_test/a.out
+index a2f7581b4..a372ba26d 100755
+Binary files a/My_test/a.out and b/My_test/a.out differ
+diff --git a/My_test/gpio_test b/My_test/gpio_test
+deleted file mode 100755
+index 81b50c892..000000000
+Binary files a/My_test/gpio_test and /dev/null differ
+diff --git a/NPU/Libs/RockPi/b/librknn_api.so b/NPU/Libs/RockPi/b/librknn_api.so
+deleted file mode 100644
+index e37e26a64..000000000
+Binary files a/NPU/Libs/RockPi/b/librknn_api.so and /dev/null differ
+diff --git a/Libs/librockx.so b/NPU/Libs/RockPi/b/librockx.so
+similarity index 100%
+rename from Libs/librockx.so
+rename to NPU/Libs/RockPi/b/librockx.so
+diff --git a/Libs/librknn_api.so b/NPU/Libs/RockPi/librknn_api.so
+similarity index 100%
+rename from Libs/librknn_api.so
+rename to NPU/Libs/RockPi/librknn_api.so
+diff --git a/NPU/Libs/Shared/libc++_shared.so b/NPU/Libs/Shared/libc++_shared.so
+index 7d78bdd52..1e55f7f89 100755
+Binary files a/NPU/Libs/Shared/libc++_shared.so and b/NPU/Libs/Shared/libc++_shared.so differ
+diff --git a/NPU/Libs/Shared/liblog.so b/NPU/Libs/Shared/liblog.so
+index 0901b7782..3a83b68ca 100755
+Binary files a/NPU/Libs/Shared/liblog.so and b/NPU/Libs/Shared/liblog.so differ
+diff --git a/NPU/Libs/Shared/libstdc++.so b/NPU/Libs/Shared/libstdc++.so
+old mode 100755
+new mode 100644
+index 4bc8d2a7a..867d89b1b
+Binary files a/NPU/Libs/Shared/libstdc++.so and b/NPU/Libs/Shared/libstdc++.so differ
+diff --git a/Run_CO-UP b/Run_CO-UP
+index ebf1070e7..7fd2df970 100755
+--- a/Run_CO-UP
++++ b/Run_CO-UP
+@@ -28,7 +28,7 @@ p="/data/local/ARM-CO-UP"
+ laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
+ laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
+ laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP"
+-laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP32bit"
++#laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP32bit"
+ 
+ _img="$p/assets/images"
+ _dt="$p/assets"
+@@ -36,27 +36,26 @@ _lbl="$p/assets/labels"
+ 
+ ## which implementation (co-up=pipeline)
+ target_implementation='Pipeline'
+-#target_implementation='EarlyExit'
++target_implementation='EarlyExit'
+ #target_implementation='n-pipe-NPU'
+ #_path="/data/data/com.termux/files/home/ARMCL-RockPi/"
+ 
+ governor="governor_pandoon"
+ posix="_Khadas"
+-#posix="_RockPi"
++posix="_RockPi"
+ governor_path="$SCRIPT_DIR/utils/DVFS/${governor}${posix}.ko"
+ 
++
+ ## For RockPi
+ little_cores=4
+ big_cores=2
+-#ab
++ab
+ 
+ 
+ # For Khadas
+-little_cores=2
+-big_cores=4
+-ablan
+-
+-
++#little_cores=2
++#big_cores=4
++#ablan
+ 
+ adb push ${laptop_dir}/Layers.conf "$p/test_graph/"
+ echo -e "\n*********************************************\nLayers config pushed\n**********************************************\n\n\n\n\n"
+@@ -313,14 +312,15 @@ if [ $target_implementation == 'n-pipe-NPU' ]; then
+ 	graph=$(echo -e "$graph" | sed 's/pipeline/n_pipe_npu/g')
+ fi
+ 
++
+ echo -e -e "\n*********************************************\ngraph selected\n**********************************************\n\n\n\n\n"
+ 
+ echo -e ${grpah}
+ #graph=graph_mobilenet
+ if [ "${options[compile]}" == "1" ]; then
+     cd "${laptop_dir}"
+-    ./b.sh 23
+-	#./b64.sh 23
++	#./b.sh 23
++    ./b64.sh 23
+ 	echo -e "\n*********************************************\nEnd of Building process\n**********************************************\n\n\n\n\n"
+     cd "${current_dir}"
+ 	#adb push ${laptop_dir}/build/examples/NPU/${graph} $p/test_graph/
+@@ -336,8 +336,6 @@ echo -e "\n*********************************************\nbinary graph file push
+ 
+ echo -e "#!/bin/bash" > ${SCRIPT_DIR}/run_command.sh
+ 
+-
+-
+ ####for memory profiling I added & at the end of run command to run next script(mem.sh) in parallel
+ #dt=""
+ if [ "$dt" == "" ]; then
+@@ -346,9 +344,6 @@ else
+ 	echo -e "adb shell \"cd $p/test_graph/; export LD_LIBRARY_PATH=/data/local/ARM-CO-UP/; ./${graph} --data=$dt --image=$img --labels=$lbl --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]} \"" >> ${SCRIPT_DIR}/run_command.sh
+ fi
+ 
+-
+-
+-
+ echo -e "\n*********************************************\nrun command in run_command.sh ready to run\n**********************************************\n\n\n\n\n"
+ 
+ #echo -e "adb shell cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}" >> ${SCRIPT_DIR}/run_command.sh
+@@ -358,8 +353,3 @@ chmod +x ${SCRIPT_DIR}/run_command.sh
+ #adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
+ #while true; do adb shell cat /proc/$(adb shell ps -A | grep graph_googlenet_pipeline | awk '{print $2}')/status | grep VmRSS; sleep 1; done
+ #while true; do adb shell cat /proc/$(adb shell ps -A | grep graph_googlenet_pipeline | awk '{print $2}')/status | grep -E 'VmRSS|VmHWM|VmPeak'; sleep 1; done
+-
+-
+-
+-
+-
+diff --git a/SConscript b/SConscript
+index e9394c320..8564263df 100644
+--- a/SConscript
++++ b/SConscript
+@@ -235,8 +235,9 @@ if env['opencl']:
+ 
+     ##Ehsan
+     graph_files += Glob('src/graph/backends/NPU/*.cpp')
+-    #runtime_files += Glob('src/runtime/NPU/*/*.cpp')
++    runtime_files += Glob('src/runtime/NPU/*/*.cpp')
+     runtime_files += Glob('src/runtime/NPU/template/*.cpp')
++    
+ 
+     
+ 
+diff --git a/SConstruct b/SConstruct
+index b0d3a43b6..0855b2006 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -119,8 +119,9 @@ base_npu_libpath = 'NPU/Libs/'
+ #target_device='RockPi'
+ target_device=[]
+ #RockPi required libs:
+-#NPU_LIBS=['rknn_api','log','stdc++','dl']
+-NPU_LIBS=[]
++NPU_LIBS=['rknn_api','log','stdc++','dl']
++#NPU_LIBS=[]
++
+ NPU_LINKFLAGS=['-Wl,-rpath,./']
+ if len(target_device):
+     current_device_libpath = os.path.abspath(os.path.join(base_npu_libpath, target_device))
+diff --git a/Libs/RockPi.tar.xz b/_Libs/RockPi.tar.xz
+similarity index 100%
+rename from Libs/RockPi.tar.xz
+rename to _Libs/RockPi.tar.xz
+diff --git a/Libs/libc++_shared.so b/_Libs/libc++_shared.so
+similarity index 100%
+rename from Libs/libc++_shared.so
+rename to _Libs/libc++_shared.so
+diff --git a/Libs/liblog.so b/_Libs/liblog.so
+similarity index 100%
+rename from Libs/liblog.so
+rename to _Libs/liblog.so
+diff --git a/_Libs/librknn_api.so b/_Libs/librknn_api.so
+new file mode 100644
+index 000000000..ab05fc95c
+Binary files /dev/null and b/_Libs/librknn_api.so differ
+diff --git a/_Libs/librockx.so b/_Libs/librockx.so
+new file mode 100644
+index 000000000..c5a1a840d
+Binary files /dev/null and b/_Libs/librockx.so differ
+diff --git a/Libs/libstdc++.so b/_Libs/libstdc++.so
+similarity index 100%
+rename from Libs/libstdc++.so
+rename to _Libs/libstdc++.so
+diff --git a/arm_compute/runtime/NPU/NPU.h b/arm_compute/runtime/NPU/NPU.h
+index 4ef4982e0..4fddc023e 100644
+--- a/arm_compute/runtime/NPU/NPU.h
++++ b/arm_compute/runtime/NPU/NPU.h
+@@ -38,7 +38,7 @@ enum class NPUTypes{
+ 	Khadas,
+ 	temp,
+ };
+-const NPUTypes selectedNPU = NPUTypes::temp;
++const NPUTypes selectedNPU = NPUTypes::RockPi;
+ 
+ template <NPUTypes NPUType>
+ struct SelectDataStructure {
+diff --git a/examples/Pipeline/graph_googlenet_pipeline.cpp b/examples/Pipeline/graph_googlenet_pipeline.cpp
+index f2efc1111..835ff910a 100644
+--- a/examples/Pipeline/graph_googlenet_pipeline.cpp
++++ b/examples/Pipeline/graph_googlenet_pipeline.cpp
+@@ -144,7 +144,6 @@ public:
+ 
+         // Finalize graph
+         GraphConfig config;
+-
+         config.num_threads = common_params.threads;
+         config.use_tuner   = common_params.enable_tuner;
+         config.tuner_mode  = common_params.tuner_mode;
+diff --git a/run_command.sh b/run_command.sh
+index f23b21db1..56abd619c 100755
+--- a/run_command.sh
++++ b/run_command.sh
+@@ -1,2 +1,2 @@
+ #!/bin/bash
+-adb shell "cd /data/local/ARM-CO-UP/test_graph/; export LD_LIBRARY_PATH=/data/local/ARM-CO-UP/; ./graph_inception_v4_pipeline --data=/data/local/ARM-CO-UP/assets --image=/data/local/ARM-CO-UP/assets/images/jpg_images_299/ --labels=/data/local/ARM-CO-UP/assets/labels/labels.txt --little_cores=2 --threads2=2 --big_cores=4 --threads=4 --npu_host=B --threads2=2 --threads=4 --order=GGGGGGGGGGGGGGGGGGGGGGG --kernel_c=4800 --power_profile_mode=whole --gpu_host=B --n=30 "
++adb shell "cd /data/local/ARM-CO-UP/test_graph/; ./graph_resnet50_earlyexit --little_cores=4 --threads2=4 --big_cores=2 --threads=2 --order=BBLBLBL --n=60"
+diff --git a/src/runtime/Scheduler.cpp b/src/runtime/Scheduler.cpp
+index da377b481..5668d6bd4 100644
+--- a/src/runtime/Scheduler.cpp
++++ b/src/runtime/Scheduler.cpp
+@@ -47,7 +47,7 @@ Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::CPP;
+ Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::ST;
+ #endif /* ARM_COMPUTE_*_SCHEDULER */
+ 
+-const int Little_cores=2;
++const int Little_cores=4;
+ 
+ std::shared_ptr<IScheduler> Scheduler::_custom_scheduler = nullptr;
+ 
+diff --git a/utils/DVFS/DVFS.h b/utils/DVFS/DVFS.h
+index 466012d5c..898137509 100644
+--- a/utils/DVFS/DVFS.h
++++ b/utils/DVFS/DVFS.h
+@@ -6,11 +6,11 @@
+ 
+ #define kernelspace 0
+ #define userspace 1
+-#define mode userspace
++#define mode kernelspace
+ 
+ #define rockpi 0
+ #define khadas 1
+-#define board khadas
++#define board rockpi
+ 
+ #if board == khadas
+     //const std::string CPU_PATH = "/sys/devices/system/cpu/cpufreq/";
+@@ -298,7 +298,7 @@ public:
+ 	}
+ 	void init(){
+ #if board == rockpi
+-		//init_rockpi();
++		init_rockpi();
+ #endif
+ #if board ==khadas
+ 		init_hikey();
+diff --git a/utils/DVFS/governor_pandoon_RockPi.ko b/utils/DVFS/governor_pandoon_RockPi.ko
+new file mode 100644
+index 000000000..b0d3c3285
+Binary files /dev/null and b/utils/DVFS/governor_pandoon_RockPi.ko differ
+diff --git a/utils/Power/Power.h b/utils/Power/Power.h
+index 5cad87784..4ec42f333 100644
+--- a/utils/Power/Power.h
++++ b/utils/Power/Power.h
+@@ -14,9 +14,9 @@
+ #define HIGH 1
+ 
+ //Khadas
+-#define POUT 432
++//#define POUT 432
+ //RockPi
+-//#define POUT 157  /* P1-07 */
++#define POUT 157  /* P1-07 */
+ 
+ static int
+ GPIOExport(int pin)
