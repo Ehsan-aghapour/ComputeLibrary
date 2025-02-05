@@ -33,7 +33,8 @@ while :; do
   fi
 
   # Parse the lines we care about
-  current_rss_kb=$(echo "$mem_info" | grep VmRSS | awk '{print $2}')
+  #current_rss_kb=$(echo "$mem_info" | grep VmRSS | awk '{print $2}')
+  current_rss_kb=$(echo "$mem_info" | grep VmPeak | awk '{print $2}')
   hwm_rss_kb=$(echo "$mem_info" | grep VmHWM | awk '{print $2}')
   
   # Update local peak if we want to track it ourselves
