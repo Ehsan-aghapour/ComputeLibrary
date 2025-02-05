@@ -32,6 +32,26 @@
 #include "arm_compute/graph/nodes/ReceiverNode.h"
 
 
+#define ATRACE_TAG ATRACE_TAG_ALWAYS
+#include <android/trace.h>
+/////ATRACE_BEGIN("CNN Iteration");
+/////ATRACE_INT("graph id", graph.id());
+////ATrace_beginSection(("CNN Iteration Graph "+std::to_string(graph.id())).c_str());
+////ATRACE_END();
+////ATrace_endSection();
+
+void write_to_trace_marker(const std::string& message) {
+    std::ofstream trace_marker("/sys/kernel/debug/tracing/trace_marker");
+    if (trace_marker.is_open()) {
+        trace_marker << message << std::endl;
+        trace_marker.close();
+    }
+}
+
+#define TRACE_BEGIN(name) write_to_trace_marker("B|" + std::to_string(getpid()) + "|" + name + "\n")
+#define TRACE_END() write_to_trace_marker("E\n")
+
+
 
 
 namespace arm_compute
@@ -375,6 +395,8 @@ void GraphManagerPipeline::reset_timing(int graph_id){
 	output_time[graph_id]=0;
 	transmition_time[graph_id]=0;
 	latency_time=0;
+	//latency_time_desired_point=0;
+	latency_of_each_point[graph_id]=0;
 	detail::reset_transmit_timings(it->second);
 	detail::reset_NPU_timings(it->second);
 }
@@ -984,6 +1006,7 @@ void GraphManagerPipeline::warmup_and_execute_graph_serial(Graph &graph, int nn)
     int	Starting_frame=warmup_n;
     for(int Frame=0; Frame<nn+warmup_n;Frame++)
     {
+
     	//WarmUp Finished, Reset Timings
     	if(Frame==Starting_frame){
     		//std::cerr<<"Reset timings\n\n";
@@ -1010,7 +1033,7 @@ void GraphManagerPipeline::warmup_and_execute_graph_serial(Graph &graph, int nn)
         double t_input=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
         input_time[graph.id()] +=t_input;
 
-        //std::cerr<<"graph "<<graph.id()<<" before recs\n";
+        ///std::cerr<<"graph "<<graph.id()<<" before recs\n";
         //Receivers
         tstart=std::chrono::high_resolution_clock::now();
 		detail::call_all_receivers(it->second);
@@ -1018,14 +1041,43 @@ void GraphManagerPipeline::warmup_and_execute_graph_serial(Graph &graph, int nn)
 		double t_receive=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 		receive_time[graph.id()] +=t_receive;
 
-		//std::cerr<<"graph "<<graph.id()<<" before tasks\n";
+		///std::cerr<<"graph "<<graph.id()<<" before tasks\n";
         // Run graph Tasks
+
+		/*std::cerr<<"graph "<<graph.id()<<std::endl;
+		cpu_set_t _set;
+		CPU_ZERO(&_set);
+
+		// Get the CPU affinity of the current process (PID 0)
+
+		if (sched_getaffinity(0, sizeof(cpu_set_t), &_set) == -1) {
+			perror("sched_getaffinity");
+		}
+
+		// Print which cores are available
+		for (int i = 0; i < CPU_SETSIZE; i++) {
+			if (CPU_ISSET(i, &_set)) {
+				printf("Core %d is available\n", i);
+			}
+		}*/
+
+
+		// ************Start custom trace section(use TRACE_BEGIN and TRACE_END)
+		//*************use this in adb shell: atrace -o /data/local/tmp/atrace.html -t 20 sched freq idle am
+		//write_to_trace_marker("Simple Test Trace - Start");
+		//TRACE_BEGIN(("CNN inferece Graph "+std::to_string(graph.id())+" Frame "+std::to_string(Frame)).c_str());
+
 		tstart=std::chrono::high_resolution_clock::now();
 		detail::call_all_tasks_pipeline(it->second,nn);
 		tfinish=std::chrono::high_resolution_clock::now();
 		double t_run=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish-tstart).count();
-		//std::cerr<<Frame<<"->"<<t_run<<std::endl;
+		//std::cerr<<"graph "<<graph.id()<<" Frame "<<Frame<<"->"<<1000*t_run<<std::endl;
 		task_time[graph.id()] += t_run;
+
+
+		// Start custom trace section
+		//write_to_trace_marker("Simple Test Trace - End");
+		//TRACE_END();
 
 		///std::cerr<<"graph "<<graph.id()<<" before sends\n";
 		//Senders
@@ -1035,7 +1087,7 @@ void GraphManagerPipeline::warmup_and_execute_graph_serial(Graph &graph, int nn)
 		auto t_send=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
 		send_time[graph.id()] +=t_send;
 
-		//std::cerr<<"graph "<<graph.id()<<" before outs\n";
+		///std::cerr<<"graph "<<graph.id()<<" before outs\n";
 		//Outputs
 		tstart=std::chrono::high_resolution_clock::now();
         detail::call_all_output_node_accessors(it->second);
@@ -1043,11 +1095,20 @@ void GraphManagerPipeline::warmup_and_execute_graph_serial(Graph &graph, int nn)
         double t_out=std::chrono::duration_cast<std::chrono::duration<double>>(tfinish - tstart).count();
         output_time[graph.id()] +=t_out;
 
-        //std::cerr<<"graph "<<graph.id()<<" before finishs\n";
+        /*if(graph.id()==5){
+        	t_completion=std::chrono::high_resolution_clock::now();
+			auto l=std::chrono::duration_cast<std::chrono::duration<double>>(t_completion - t_arriving).count();
+			latency_time_desired_point+=l;
+        }*/
+        t_completion=std::chrono::high_resolution_clock::now();
+        auto l=std::chrono::duration_cast<std::chrono::duration<double>>(t_completion - t_arriving).count();
+        latency_of_each_point[graph.id()]+=l;
+
+        ///std::cerr<<"graph "<<graph.id()<<" before finishs\n";
         //Last graph finished
 		if(graph.id()==num_graphs-1){
-			t_completion=std::chrono::high_resolution_clock::now();
-			auto l=std::chrono::duration_cast<std::chrono::duration<double>>(t_completion - t_arriving).count();
+			//t_completion=std::chrono::high_resolution_clock::now();
+
 			latency_time+=l;
 			//std::cerr<<"\nFrame: "<<Frame<<" Latency: "<<1000*l<<"\n\n";
 			std::unique_lock<std::mutex> lck(_mtx);
@@ -1103,6 +1164,7 @@ void GraphManagerPipeline::print_times(int n)
 
 
 	 std::cerr<<"\n\nAVG Latency: "<<1000*latency_time/n<<"\n\n";
+	 //std::cerr<<"\n\nAVG Desired Point Latency: "<<1000*latency_time_desired_point/n<<"\n\n";
 }
 
 void GraphManagerPipeline::print_times(int graph_id, int n)
@@ -1115,6 +1177,7 @@ void GraphManagerPipeline::print_times(int graph_id, int n)
 			"   send: "<<(send_time[graph_id]*1000)/n<<
 			"   Out: "<<(output_time[graph_id]*1000)/n<<
 			"   Process: "<< ( ( input_time[graph_id] + task_time[graph_id] + send_time[graph_id] + output_time[graph_id] ) * 1000 ) / n <<
+			"   time to this point: "<<latency_of_each_point[graph_id]*1000/n<<
 			"\n\n";
 	std::cout<<stream.str();
 }

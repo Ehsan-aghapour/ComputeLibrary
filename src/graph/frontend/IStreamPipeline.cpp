@@ -186,6 +186,7 @@ bool IStreamPipeline::is_next_layer(std::string name){
 			header=true;
 		}
 		bool starting=check_starting(graph_name,name);
+		//std::cerr<<"model name: "<<toLowerCase(graph_name)<<" layer name: "<<name<<std::endl;
 		//std::cerr<<"check is next layer "<<starting<<std::endl;
 		//addNameToFile("Layers.log", name);
 		if(starting){

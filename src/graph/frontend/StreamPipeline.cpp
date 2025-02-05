@@ -78,12 +78,22 @@ cpu_set_t* StreamPipeline::set_cores(cpu_set_t *set,char cluster){
 		for(int i=0;i<common_params.little_cores;i++){
 			//std::cerr<<"set core "<<i<<std::endl;
 			CPU_SET(i,set);
+			break;
 		}
 	}
 	if(cluster=='B'){
 		for(int i=common_params.little_cores;i<common_params.total_cores;i++){
 			//std::cerr<<"set core "<<i<<std::endl;
 			CPU_SET(i,set);
+			break;
+		}
+	}
+	if(cluster=='G'){
+		//CPU_SET(3,set);
+		for(int i=common_params.total_cores-1;i>=common_params.little_cores;i--){
+			//std::cerr<<"set core "<<i<<std::endl;
+			CPU_SET(i,set);
+			break;
 		}
 	}
 	return set;
@@ -109,6 +119,7 @@ public:
 
 
 void StreamPipeline::finalize(Target target, const GraphConfig &_config, std::set<int> *b, int blocking)
+//void StreamPipeline::finalize(Target target, const GraphConfig &config, arm_compute::utils::CommonGraphParams *common_params=nullptr){
 {
 	std::vector<int> indicesToRemove;
 	for(auto k=0;k<_gs.size();k++){
@@ -236,6 +247,8 @@ void StreamPipeline::finalize_parallel(int i,std::set<int> *b, int blocking)
 	char cluster='B';
 	if(PE[i]=='L')
 		cluster='L';
+	if(PE[i]=='G')
+			cluster='G';
 	std::stringstream stream;
 	//stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
 	std::cerr<<stream.str();
@@ -318,6 +331,8 @@ void StreamPipeline::run_parallel(int i, int n)
 	char cluster='B';
 	if(PE[i]=='L')
 		cluster='L';
+	if(PE[i]=='G')
+		cluster='G';
 	std::stringstream stream;
 	//stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
 	std::cerr<<stream.str();
@@ -341,6 +356,8 @@ void StreamPipeline::run_w_parallel(int i, int n)
 	char cluster='B';
 	if(PE[i]=='L')
 		cluster='L';
+	if(PE[i]=='G')
+			cluster='G';
 	std::stringstream stream;
 	//stream<<"Graph "<<i<<" setting affinity to "<<cluster<<std::endl;
 	//std::cerr<<stream.str();

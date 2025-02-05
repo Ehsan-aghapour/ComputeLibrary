@@ -51,14 +51,14 @@ Status NEEarlyExitLayer::validate(const ITensorInfo *input)
 
 void NEEarlyExitLayer::run()
 {
-	std::cerr<<"Now it is running early exit layer enter to continue...\n";
+	//std::cerr<<"Now it is running early exit layer enter to continue...\n";
 
 
 	const auto   output_prt    = reinterpret_cast<float *>(_input->buffer() + _input->info()->offset_first_element_in_bytes());
 	auto num_elements=_input->info()->total_size()/_input->info()->element_size();
-	std::cerr<<"Tensor shape is: "<<_input->info()->tensor_shape()<<std::endl;
-	std::cerr<<"total size is: "<<_input->info()->total_size()<<std::endl;
-	std::cerr<<"number of elements are: "<<num_elements<<std::endl;
+	//std::cerr<<"Tensor shape is: "<<_input->info()->tensor_shape()<<std::endl;
+	//std::cerr<<"total size is: "<<_input->info()->total_size()<<std::endl;
+	//std::cerr<<"number of elements are: "<<num_elements<<std::endl;
 	int cnt=0;
 	int cnt2=0;
 	//if 1000 100
