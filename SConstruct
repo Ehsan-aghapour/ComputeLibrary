@@ -119,7 +119,7 @@ base_npu_libpath = 'NPU/Libs/'
 #target_device='RockPi'
 target_device=[]
 #RockPi required libs:
-#NPU_LIBS=['log','stdc++','dl', 'rknn_api']
+#NPU_LIBS=['rknn_api','log','stdc++','dl']
 NPU_LIBS=[]
 NPU_LINKFLAGS=['-Wl,-rpath,./']
 if len(target_device):
@@ -165,6 +165,8 @@ else:
 
     # Append the global linker flags to the environment
     env.Append(LINKFLAGS=NPU_LINKFLAGS)
+
+env.Append(LIBS=['log','android'])
 
 
 Export('env')
