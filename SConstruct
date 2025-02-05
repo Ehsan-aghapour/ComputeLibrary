@@ -118,7 +118,10 @@ env.Append(LIBS=NPU_LIBS,LIBPATH='build/',LINKFLAGS=NPU_LINKFLAGS)
 base_npu_libpath = 'NPU/Libs/'
 #target_device='RockPi'
 target_device=[]
+#RockPi required libs:
 NPU_LIBS=['rknn_api','log','stdc++','dl']
+#NPU_LIBS=[]
+
 NPU_LINKFLAGS=['-Wl,-rpath,./']
 if len(target_device):
     current_device_libpath = os.path.abspath(os.path.join(base_npu_libpath, target_device))

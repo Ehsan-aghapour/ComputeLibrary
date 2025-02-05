@@ -28,6 +28,7 @@ p="/data/local/ARM-CO-UP"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ComputeLibrary_64_Yolov3"
 laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP"
+#laptop_dir="/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP32bit"
 
 _img="$p/assets/images"
 _dt="$p/assets"
@@ -44,11 +45,17 @@ posix="_Khadas"
 posix="_RockPi"
 governor_path="$SCRIPT_DIR/utils/DVFS/${governor}${posix}.ko"
 
+
+## For RockPi
 little_cores=4
 big_cores=2
-
-
 ab
+
+
+# For Khadas
+#little_cores=2
+#big_cores=4
+#ablan
 
 adb push ${laptop_dir}/Layers.conf "$p/test_graph/"
 echo -e "\n*********************************************\nLayers config pushed\n**********************************************\n\n\n\n\n"
@@ -312,6 +319,7 @@ echo -e ${grpah}
 #graph=graph_mobilenet
 if [ "${options[compile]}" == "1" ]; then
     cd "${laptop_dir}"
+	#./b.sh 23
     ./b64.sh 23
 	echo -e "\n*********************************************\nEnd of Building process\n**********************************************\n\n\n\n\n"
     cd "${current_dir}"
@@ -328,10 +336,12 @@ echo -e "\n*********************************************\nbinary graph file push
 
 echo -e "#!/bin/bash" > ${SCRIPT_DIR}/run_command.sh
 
+####for memory profiling I added & at the end of run command to run next script(mem.sh) in parallel
+#dt=""
 if [ "$dt" == "" ]; then
-    echo -e "adb shell \"cd $p/test_graph/; ./${graph} --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
+    echo -e "adb shell \"cd $p/test_graph/; export LD_LIBRARY_PATH=/data/local/ARM-CO-UP/; ./${graph} --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]} \"" >> ${SCRIPT_DIR}/run_command.sh
 else
-	echo -e "adb shell \"cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]}\"" >> ${SCRIPT_DIR}/run_command.sh
+	echo -e "adb shell \"cd $p/test_graph/; export LD_LIBRARY_PATH=/data/local/ARM-CO-UP/; ./${graph} --data=$dt --image=$img --labels=$lbl --little_cores=${little_cores} --threads2=${little_cores} --big_cores=${big_cores} --threads=${big_cores} ""${remaining_options[@]} \"" >> ${SCRIPT_DIR}/run_command.sh
 fi
 
 echo -e "\n*********************************************\nrun command in run_command.sh ready to run\n**********************************************\n\n\n\n\n"
@@ -339,7 +349,6 @@ echo -e "\n*********************************************\nrun command in run_com
 #echo -e "adb shell cd $p/test_graph/; ./${graph} --data=$dt --image=$img --labels=$lbl ""${remaining_options[@]}" >> ${SCRIPT_DIR}/run_command.sh
 cat ${SCRIPT_DIR}/run_command.sh
 chmod +x ${SCRIPT_DIR}/run_command.sh
-./run_command.sh &
-#adb shell $p/test_graph/${graph} --data=$dt --image=$img --labels=$lbl "${remaining_options[@]}"
+#${SCRIPT_DIR}/run_command.sh
 #while true; do adb shell cat /proc/$(adb shell ps -A | grep graph_googlenet_pipeline | awk '{print $2}')/status | grep VmRSS; sleep 1; done
-
+#while true; do adb shell cat /proc/$(adb shell ps -A | grep graph_googlenet_pipeline | awk '{print $2}')/status | grep -E 'VmRSS|VmHWM|VmPeak'; sleep 1; done

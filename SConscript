@@ -236,6 +236,8 @@ if env['opencl']:
     ##Ehsan
     graph_files += Glob('src/graph/backends/NPU/*.cpp')
     runtime_files += Glob('src/runtime/NPU/*/*.cpp')
+    runtime_files += Glob('src/runtime/NPU/template/*.cpp')
+    
 
     
 
