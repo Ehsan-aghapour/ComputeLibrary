@@ -63,7 +63,6 @@ public:
 
 	void init(int _id, char _PE, int start, int end, char _host_PE)
 	{
-		
 		assert(_id == id);
 		start_indx = start;
 		end_indx = end;
@@ -85,7 +84,10 @@ public:
 
 		// Consume common parameters
 		common_params = consume_common_graph_parameters(common_opts);
-		
+		/*config.big_cores=common_params.big_cores;
+		config.little_cores=common_params.little_cores;
+		config.total_cores=common_params.total_cores;*/
+
 		// Return when help menu is requested
 		if(common_params.help)
 		{

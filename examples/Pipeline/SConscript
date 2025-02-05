@@ -105,6 +105,7 @@ for file in Glob("./graph_*.cpp"):
         prog = pipeline_examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=pipeline_examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
+    print(f'\nPipeline example is {example} and prog is {prog}')
     alias = pipeline_examples_env.Alias(example, prog)
     Default(alias)
 

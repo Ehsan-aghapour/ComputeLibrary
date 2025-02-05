@@ -95,16 +95,16 @@ done
 #for key in "${!options[@]}"; do
 #  echo -e "Option: $key, Value: ${options[$key]}"
 #done
-# if false; then
-# 	adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
-# 	adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
-# 	adb shell 'echo -e 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
-# 	adb shell 'echo -e 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
+if false; then
+	adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
+	adb shell 'echo -e userspace > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor'
+	adb shell 'echo -e 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed'
+	adb shell 'echo -e 1800000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_setspeed'
 
-# 	adb shell 'echo -e userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
-# 	#adb shell 'cat /sys/class/devfreq/ff9a0000.gpu/governor'
-# 	adb shell 'echo -e 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
-# fi
+	adb shell 'echo -e userspace > /sys/class/devfreq/ff9a0000.gpu/governor'
+	#adb shell 'cat /sys/class/devfreq/ff9a0000.gpu/governor'
+	adb shell 'echo -e 800000000 > /sys/class/devfreq/ff9a0000.gpu/userspace/set_freq'
+fi
 
 
 

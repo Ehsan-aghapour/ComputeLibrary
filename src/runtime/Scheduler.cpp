@@ -121,7 +121,6 @@ IScheduler &Scheduler::get()
             //std::cerr<<"init done\n";
         }
         //std::cerr<<"Running CPU is: "<<sched_getcpu()<<std::endl;
-        //std::cerr<<"scheduler.cpp core is: "<<sched_getcpu()<<std::endl;
         if(sched_getcpu()>(Little_cores-1)){
             //std::cerr<<"Setting scheduler to CPP2  for big cluster ...\n";
 			if(_scheduler_type==Scheduler::Type::CPP){
