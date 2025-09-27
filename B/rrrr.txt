@@ -1,0 +1,377 @@
+scons: Reading SConscript files ...
+
+scons: warning: Two different environments were specified for target /home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP/build/utils/Utils.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/ehsan/UvA/ARMCL/Rock-Pi/ARM-COUP/examples/Pipeline/SConscript", line 43, in <module>
+
+Pipeline example is graph_alexnet_pipeline and prog is ['graph_alexnet_pipeline']
+
+Pipeline example is graph_googlenet_pipeline and prog is ['graph_googlenet_pipeline']
+
+Pipeline example is graph_inception_resnet_v2_pipeline and prog is ['graph_inception_resnet_v2_pipeline']
+
+Pipeline example is graph_inception_v3_pipeline and prog is ['graph_inception_v3_pipeline']
+
+Pipeline example is graph_inception_v4_pipeline and prog is ['graph_inception_v4_pipeline']
+
+Pipeline example is graph_mobilenet_pipeline and prog is ['graph_mobilenet_pipeline']
+
+Pipeline example is graph_mobilenet_v2_pipeline and prog is ['graph_mobilenet_v2_pipeline']
+
+Pipeline example is graph_resnet50_pipeline and prog is ['graph_resnet50_pipeline']
+
+Pipeline example is graph_squeezenet_pipeline and prog is ['graph_squeezenet_pipeline']
+
+Pipeline example is graph_yolov3_n_pipe_npu and prog is ['graph_yolov3_n_pipe_npu']
+
+Pipeline example is graph_yolov3_pipeline and prog is ['graph_yolov3_pipeline']
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: `arm_compute' is up to date.
+scons: `support' is up to date.
+scons: building associated VariantDir targets: build/utils
+scons: `utils' is up to date.
+scons: building associated VariantDir targets: include/half
+scons: `include/half' is up to date.
+scons: building associated VariantDir targets: include/CL
+scons: `include/CL' is up to date.
+scons: `include/linux' is up to date.
+scons: building associated VariantDir targets: include/libnpy
+scons: `include/libnpy' is up to date.
+scons: building associated VariantDir targets: include/stb
+scons: `include/stb' is up to date.
+scons: rebuilding `build/src/core/arm_compute_version.embed' because AlwaysBuild() is specified
+create_version_file(["build/src/core/arm_compute_version.embed"], [])
+scons: `build/src/core/CL/cl_kernels/absdiff.clembed' is up to date.
+scons: `build/libarm_compute_graph-static.a' is up to date.
+scons: `build/tests/framework/libarm_compute_test_framework.a' is up to date.
+scons: rebuilding `build/tests/benchmark_graph_yolov3.o' because:
+           `examples/graph_yolov3.cpp' is no longer a dependency
+           `examples/graph_yolov3.cpp' is a new dependency
+           `arm_compute/graph/GraphManagerPipeline.h' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_yolov3.o -c -Wall -DARCH_ARM -Wextra -pedantic -Wdisabled-optimization -Wformat=2 -Winit-self -Wstrict-overflow=2 -Wswitch-default -std=c++14 -Woverloaded-virtual -Wformat-security -Wctor-dtor-privacy -Wsign-promo -Weffc++ -Wno-overlength-strings -Wno-vla-extension -march=armv8-a -DENABLE_FP16_KERNELS -DENABLE_FP32_KERNELS -DENABLE_QASYMM8_KERNELS -DENABLE_QASYMM8_SIGNED_KERNELS -DENABLE_QSYMM16_KERNELS -DENABLE_INTEGER_KERNELS -DENABLE_NHWC_KERNELS -DENABLE_NCHW_KERNELS -O3 -ffp-contract=off -fopenmp -D_GLIBCXX_USE_NANOSLEEP -DARM_COMPUTE_CPP_SCHEDULER=1 -DANDROID -DEMBEDDED_KERNELS -DARM_COMPUTE_CL -Iinclude -I. examples/graph_yolov3.cpp
+scons: `build/libarm_compute_core-static.a' is up to date.
+scons: `build/libarm_compute_core.so' is up to date.
+scons: building `build/libarm_compute.so' because it doesn't exist
+scons: `build/libarm_compute-static.a' is up to date.
+scons: `graph_googlenet' is up to date.
+scons: `build/tests/benchmark_neon_permute' is up to date.
+scons: `build/tests/benchmark_graph_resnet_v2_50' is up to date.
+scons: `build/tests/benchmark_cl_sgemm' is up to date.
+scons: `build/tests/gemm_tuner/benchmark_cl_gemm_native' is up to date.
+scons: `gemm_tuner/cl_gemmlowp_reshaped' is up to date.
+aarch64-linux-android-clang++ -o build/libarm_compute.so -Wl,-rpath,./ -pie -static-libstdc++ -ldl -Wl,--no-undefined -shared build/src/runtime/Allocator.os build/src/runtime/BlobLifetimeManager.os build/src/runtime/BlobMemoryPool.os build/src/runtime/CPUUtils.os build/src/runtime/DeviceProperties.os build/src/runtime/Distribution1D.os build/src/runtime/HOG.os build/src/runtime/ILutAllocator.os build/src/runtime/IScheduler.os build/src/runtime/ISimpleLifetimeManager.os build/src/runtime/ITensorAllocator.os build/src/runtime/IWeightsManager.os build/src/runtime/Lut.os build/src/runtime/LutAllocator.os build/src/runtime/MEMUtils.os build/src/runtime/Memory.os build/src/runtime/MemoryManagerOnDemand.os build/src/runtime/MultiHOG.os build/src/runtime/MultiImage.os build/src/runtime/OffsetLifetimeManager.os build/src/runtime/OffsetMemoryPool.os build/src/runtime/OperatorTensor.os build/src/runtime/PoolManager.os build/src/runtime/Pyramid.os build/src/runtime/RuntimeContext.os build/src/runtime/Scheduler.os build/src/runtime/SchedulerFactory.os build/src/runtime/SchedulerUtils.os build/src/runtime/SubTensor.os build/src/runtime/Tensor.os build/src/runtime/TensorAllocator.os build/src/runtime/Utils.os build/src/runtime/CPP/ICPPSimpleFunction.os build/src/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.os build/src/runtime/CPP/functions/CPPDetectionOutputLayer.os build/src/runtime/CPP/functions/CPPDetectionPostProcessLayer.os build/src/runtime/CPP/functions/CPPNonMaximumSuppression.os build/src/runtime/CPP/functions/CPPPermute.os build/src/runtime/CPP/functions/CPPTopKV.os build/src/runtime/CPP/functions/CPPUpsample.os build/src/runtime/CPP/SingleThreadScheduler.os build/src/runtime/CPP/CPPScheduler.os build/src/runtime/CL/CLBufferAllocator.os build/src/runtime/CL/CLDistribution1D.os build/src/runtime/CL/CLGEMMHeuristicsHandle.os build/src/runtime/CL/CLHOG.os build/src/runtime/CL/CLHelpers.os build/src/runtime/CL/CLLut.os build/src/runtime/CL/CLLutAllocator.os build/src/runtime/CL/CLMemory.os build/src/runtime/CL/CLMemoryRegion.os build/src/runtime/CL/CLMultiHOG.os build/src/runtime/CL/CLMultiImage.os build/src/runtime/CL/CLOperator.os build/src/runtime/CL/CLPyramid.os build/src/runtime/CL/CLRuntimeContext.os build/src/runtime/CL/CLScheduler.os build/src/runtime/CL/CLSubTensor.os build/src/runtime/CL/CLTensor.os build/src/runtime/CL/CLTensorAllocator.os build/src/runtime/CL/CLTuner.os build/src/runtime/CL/ICLSimpleFunction.os build/src/runtime/CL/Utils.os build/src/runtime/CL/functions/CLAbsoluteDifference.os build/src/runtime/CL/functions/CLAccumulate.os build/src/runtime/CL/functions/CLActivationLayer.os build/src/runtime/CL/functions/CLArgMinMaxLayer.os build/src/runtime/CL/functions/CLBatchNormalizationLayer.os build/src/runtime/CL/functions/CLBatchToSpaceLayer.os build/src/runtime/CL/functions/CLBitwiseAnd.os build/src/runtime/CL/functions/CLBitwiseNot.os build/src/runtime/CL/functions/CLBitwiseOr.os build/src/runtime/CL/functions/CLBitwiseXor.os build/src/runtime/CL/functions/CLBoundingBoxTransform.os build/src/runtime/CL/functions/CLBox3x3.os build/src/runtime/CL/functions/CLCannyEdge.os build/src/runtime/CL/functions/CLCast.os build/src/runtime/CL/functions/CLChannelCombine.os build/src/runtime/CL/functions/CLChannelExtract.os build/src/runtime/CL/functions/CLChannelShuffleLayer.os build/src/runtime/CL/functions/CLColorConvert.os build/src/runtime/CL/functions/CLComparison.os build/src/runtime/CL/functions/CLConcatenateLayer.os build/src/runtime/CL/functions/CLConvertFullyConnectedWeights.os build/src/runtime/CL/functions/CLConvolution.os build/src/runtime/CL/functions/CLConvolutionLayer.os build/src/runtime/CL/functions/CLCopy.os build/src/runtime/CL/functions/CLCrop.os build/src/runtime/CL/functions/CLCropResize.os build/src/runtime/CL/functions/CLDeconvolutionLayer.os build/src/runtime/CL/functions/CLDeconvolutionLayerUpsample.os build/src/runtime/CL/functions/CLDepthConvertLayer.os build/src/runtime/CL/functions/CLDepthToSpaceLayer.os build/src/runtime/CL/functions/CLDepthwiseConvolutionLayer.os build/src/runtime/CL/functions/CLDequantizationLayer.os build/src/runtime/CL/functions/CLDerivative.os build/src/runtime/CL/functions/CLDilate.os build/src/runtime/CL/functions/CLDirectConvolutionLayer.os build/src/runtime/CL/functions/CLDirectDeconvolutionLayer.os build/src/runtime/CL/functions/CLElementWiseUnaryLayer.os build/src/runtime/CL/functions/CLElementwiseOperations.os build/src/runtime/CL/functions/CLEqualizeHistogram.os build/src/runtime/CL/functions/CLErode.os build/src/runtime/CL/functions/CLFFT1D.os build/src/runtime/CL/functions/CLFFT2D.os build/src/runtime/CL/functions/CLFFTConvolutionLayer.os build/src/runtime/CL/functions/CLFastCorners.os build/src/runtime/CL/functions/CLFill.os build/src/runtime/CL/functions/CLFillBorder.os build/src/runtime/CL/functions/CLFlattenLayer.os build/src/runtime/CL/functions/CLFloor.os build/src/runtime/CL/functions/CLFullyConnectedLayer.os build/src/runtime/CL/functions/CLFuseBatchNormalization.os build/src/runtime/CL/functions/CLGEMM.os build/src/runtime/CL/functions/CLGEMMConvolutionLayer.os build/src/runtime/CL/functions/CLGEMMDeconvolutionLayer.os build/src/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.os build/src/runtime/CL/functions/CLGEMMLowpOutputStage.os build/src/runtime/CL/functions/CLGather.os build/src/runtime/CL/functions/CLGaussian3x3.os build/src/runtime/CL/functions/CLGaussian5x5.os build/src/runtime/CL/functions/CLGaussianPyramid.os build/src/runtime/CL/functions/CLGenerateProposalsLayer.os build/src/runtime/CL/functions/CLHOGDescriptor.os build/src/runtime/CL/functions/CLHOGDetector.os build/src/runtime/CL/functions/CLHOGGradient.os build/src/runtime/CL/functions/CLHOGMultiDetection.os build/src/runtime/CL/functions/CLHarrisCorners.os build/src/runtime/CL/functions/CLHistogram.os build/src/runtime/CL/functions/CLInstanceNormalizationLayer.os build/src/runtime/CL/functions/CLIntegralImage.os build/src/runtime/CL/functions/CLL2NormalizeLayer.os build/src/runtime/CL/functions/CLLSTMLayer.os build/src/runtime/CL/functions/CLLSTMLayerQuantized.os build/src/runtime/CL/functions/CLLaplacianPyramid.os build/src/runtime/CL/functions/CLLaplacianReconstruct.os build/src/runtime/CL/functions/CLLogicalAnd.os build/src/runtime/CL/functions/CLLogicalNot.os build/src/runtime/CL/functions/CLLogicalOr.os build/src/runtime/CL/functions/CLMagnitude.os build/src/runtime/CL/functions/CLMaxUnpoolingLayer.os build/src/runtime/CL/functions/CLMeanStdDev.os build/src/runtime/CL/functions/CLMeanStdDevNormalizationLayer.os build/src/runtime/CL/functions/CLMedian3x3.os build/src/runtime/CL/functions/CLMinMaxLocation.os build/src/runtime/CL/functions/CLNonLinearFilter.os build/src/runtime/CL/functions/CLNonMaximaSuppression3x3.os build/src/runtime/CL/functions/CLNormalizationLayer.os build/src/runtime/CL/functions/CLNormalizePlanarYUVLayer.os build/src/runtime/CL/functions/CLOpticalFlow.os build/src/runtime/CL/functions/CLPReluLayer.os build/src/runtime/CL/functions/CLPadLayer.os build/src/runtime/CL/functions/CLPermute.os build/src/runtime/CL/functions/CLPhase.os build/src/runtime/CL/functions/CLPixelWiseMultiplication.os build/src/runtime/CL/functions/CLPoolingLayer.os build/src/runtime/CL/functions/CLPriorBoxLayer.os build/src/runtime/CL/functions/CLQLSTMLayer.os build/src/runtime/CL/functions/CLQuantizationLayer.os build/src/runtime/CL/functions/CLRNNLayer.os build/src/runtime/CL/functions/CLROIAlignLayer.os build/src/runtime/CL/functions/CLROIPoolingLayer.os build/src/runtime/CL/functions/CLRange.os build/src/runtime/CL/functions/CLReduceMean.os build/src/runtime/CL/functions/CLReductionOperation.os build/src/runtime/CL/functions/CLRemap.os build/src/runtime/CL/functions/CLReorgLayer.os build/src/runtime/CL/functions/CLReshapeLayer.os build/src/runtime/CL/functions/CLReverse.os build/src/runtime/CL/functions/CLScale.os build/src/runtime/CL/functions/CLScharr3x3.os build/src/runtime/CL/functions/CLSelect.os build/src/runtime/CL/functions/CLSlice.os build/src/runtime/CL/functions/CLSobel3x3.os build/src/runtime/CL/functions/CLSobel5x5.os build/src/runtime/CL/functions/CLSobel7x7.os build/src/runtime/CL/functions/CLSoftmaxLayer.os build/src/runtime/CL/functions/CLSpaceToBatchLayer.os build/src/runtime/CL/functions/CLSpaceToDepthLayer.os build/src/runtime/CL/functions/CLSplit.os build/src/runtime/CL/functions/CLStackLayer.os build/src/runtime/CL/functions/CLStridedSlice.os build/src/runtime/CL/functions/CLTableLookup.os build/src/runtime/CL/functions/CLThreshold.os build/src/runtime/CL/functions/CLTile.os build/src/runtime/CL/functions/CLTranspose.os build/src/runtime/CL/functions/CLUnstack.os build/src/runtime/CL/functions/CLWarpAffine.os build/src/runtime/CL/functions/CLWarpPerspective.os build/src/runtime/CL/functions/CLWinogradConvolutionLayer.os build/src/runtime/CL/functions/CLWinogradInputTransform.os build/src/runtime/CL/gemm/CLGEMMDefaultTypeBifrost.os build/src/runtime/CL/gemm/CLGEMMDefaultTypeMidgard.os build/src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.os build/src/runtime/CL/tuners/BifrostTuner.os build/src/runtime/CL/tuners/CLTuningParametersList.os build/src/runtime/CL/tuners/MidgardTuner.os build/src/runtime/gpu/cl/operators/ClActivation.os build/src/runtime/gpu/cl/operators/ClAdd.os build/src/runtime/gpu/cl/operators/ClConcatenate.os build/src/runtime/gpu/cl/operators/ClCopy.os build/src/runtime/gpu/cl/operators/ClCrop.os build/src/runtime/gpu/cl/operators/ClElementwiseOperations.os build/src/runtime/gpu/cl/operators/ClElementwiseUnary.os build/src/runtime/gpu/cl/operators/ClFill.os build/src/runtime/gpu/cl/operators/ClFloor.os build/src/runtime/gpu/cl/operators/ClLogicalNot.os build/src/runtime/gpu/cl/operators/ClPermute.os build/src/runtime/gpu/cl/operators/ClPooling.os build/src/runtime/gpu/cl/operators/ClReshape.os build/src/runtime/gpu/cl/operators/ClSub.os build/src/runtime/CL/mlgo/HeuristicTree.os build/src/runtime/CL/mlgo/MLGOHeuristics.os build/src/runtime/CL/mlgo/MLGOParser.os build/src/runtime/CL/mlgo/Utils.os build/src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.os build/src/runtime/NPU/RockPi/NPURockPi.os build/src/runtime/NPU/template/NPUTemplate.os build/src/runtime/NPU/template/NPUTemplate.os build/src/runtime/NEON/INEOperator.os build/src/runtime/NEON/INESimpleFunction.os build/src/runtime/NEON/INESimpleFunctionNoBorder.os build/src/runtime/NEON/functions/NEAbsoluteDifference.os build/src/runtime/NEON/functions/NEAccumulate.os build/src/runtime/NEON/functions/NEActivationLayer.os build/src/runtime/NEON/functions/NEArgMinMaxLayer.os build/src/runtime/NEON/functions/NEArithmeticAddition.os build/src/runtime/NEON/functions/NEArithmeticSubtraction.os build/src/runtime/NEON/functions/NEBatchNormalizationLayer.os build/src/runtime/NEON/functions/NEBatchToSpaceLayer.os build/src/runtime/NEON/functions/NEBitwiseAnd.os build/src/runtime/NEON/functions/NEBitwiseNot.os build/src/runtime/NEON/functions/NEBitwiseOr.os build/src/runtime/NEON/functions/NEBitwiseXor.os build/src/runtime/NEON/functions/NEBoundingBoxTransform.os build/src/runtime/NEON/functions/NEBox3x3.os build/src/runtime/NEON/functions/NECannyEdge.os build/src/runtime/NEON/functions/NECast.os build/src/runtime/NEON/functions/NEChannelCombine.os build/src/runtime/NEON/functions/NEChannelExtract.os build/src/runtime/NEON/functions/NEChannelShuffleLayer.os build/src/runtime/NEON/functions/NEColorConvert.os build/src/runtime/NEON/functions/NEConcatenateLayer.os build/src/runtime/NEON/functions/NEConvertFullyConnectedWeights.os build/src/runtime/NEON/functions/NEConvolution.os build/src/runtime/NEON/functions/NEConvolutionLayer.os build/src/runtime/NEON/functions/NECopy.os build/src/runtime/NEON/functions/NECropResize.os build/src/runtime/NEON/functions/NEDeconvolutionLayer.os build/src/runtime/NEON/functions/NEDepthConvertLayer.os build/src/runtime/NEON/functions/NEDepthToSpaceLayer.os build/src/runtime/NEON/functions/NEDepthwiseConvolutionLayer.os build/src/runtime/NEON/functions/NEDequantizationLayer.os build/src/runtime/NEON/functions/NEDerivative.os build/src/runtime/NEON/functions/NEDetectionPostProcessLayer.os build/src/runtime/NEON/functions/NEDilate.os build/src/runtime/NEON/functions/NEDirectConvolutionLayer.os build/src/runtime/NEON/functions/NEEarlyExitLayer.os build/src/runtime/NEON/functions/NEElementwiseOperations.os build/src/runtime/NEON/functions/NEElementwiseUnaryLayer.os build/src/runtime/NEON/functions/NEEqualizeHistogram.os build/src/runtime/NEON/functions/NEErode.os build/src/runtime/NEON/functions/NEFFT1D.os build/src/runtime/NEON/functions/NEFFT2D.os build/src/runtime/NEON/functions/NEFFTConvolutionLayer.os build/src/runtime/NEON/functions/NEFastCorners.os build/src/runtime/NEON/functions/NEFill.os build/src/runtime/NEON/functions/NEFillBorder.os build/src/runtime/NEON/functions/NEFlattenLayer.os build/src/runtime/NEON/functions/NEFloor.os build/src/runtime/NEON/functions/NEFullyConnectedLayer.os build/src/runtime/NEON/functions/NEFuseBatchNormalization.os build/src/runtime/NEON/functions/NEGEMM.os build/src/runtime/NEON/functions/NEGEMMAssemblyDispatch.os build/src/runtime/NEON/functions/NEGEMMConv2d.os build/src/runtime/NEON/functions/NEGEMMConvolutionLayer.os build/src/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.os build/src/runtime/NEON/functions/NEGEMMLowpOutputStage.os build/src/runtime/NEON/functions/NEGather.os build/src/runtime/NEON/functions/NEGaussian3x3.os build/src/runtime/NEON/functions/NEGaussian5x5.os build/src/runtime/NEON/functions/NEGaussianPyramid.os build/src/runtime/NEON/functions/NEGenerateProposalsLayer.os build/src/runtime/NEON/functions/NEHOGDescriptor.os build/src/runtime/NEON/functions/NEHOGDetector.os build/src/runtime/NEON/functions/NEHOGGradient.os build/src/runtime/NEON/functions/NEHOGMultiDetection.os build/src/runtime/NEON/functions/NEHarrisCorners.os build/src/runtime/NEON/functions/NEHistogram.os build/src/runtime/NEON/functions/NEInstanceNormalizationLayer.os build/src/runtime/NEON/functions/NEIntegralImage.os build/src/runtime/NEON/functions/NEL2NormalizeLayer.os build/src/runtime/NEON/functions/NELSTMLayer.os build/src/runtime/NEON/functions/NELSTMLayerQuantized.os build/src/runtime/NEON/functions/NELaplacianPyramid.os build/src/runtime/NEON/functions/NELaplacianReconstruct.os build/src/runtime/NEON/functions/NELogical.os build/src/runtime/NEON/functions/NEMagnitude.os build/src/runtime/NEON/functions/NEMaxUnpoolingLayer.os build/src/runtime/NEON/functions/NEMeanStdDev.os build/src/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.os build/src/runtime/NEON/functions/NEMedian3x3.os build/src/runtime/NEON/functions/NEMinMaxLocation.os build/src/runtime/NEON/functions/NENonLinearFilter.os build/src/runtime/NEON/functions/NENonMaximaSuppression3x3.os build/src/runtime/NEON/functions/NENormalizationLayer.os build/src/runtime/NEON/functions/NEOpticalFlow.os build/src/runtime/NEON/functions/NEPReluLayer.os build/src/runtime/NEON/functions/NEPadLayer.os build/src/runtime/NEON/functions/NEPermute.os build/src/runtime/NEON/functions/NEPhase.os build/src/runtime/NEON/functions/NEPixelWiseMultiplication.os build/src/runtime/NEON/functions/NEPoolingLayer.os build/src/runtime/NEON/functions/NEPriorBoxLayer.os build/src/runtime/NEON/functions/NEQLSTMLayer.os build/src/runtime/NEON/functions/NEQuantizationLayer.os build/src/runtime/NEON/functions/NERNNLayer.os build/src/runtime/NEON/functions/NEROIAlignLayer.os build/src/runtime/NEON/functions/NEROIPoolingLayer.os build/src/runtime/NEON/functions/NERange.os build/src/runtime/NEON/functions/NEReduceMean.os build/src/runtime/NEON/functions/NEReductionOperation.os build/src/runtime/NEON/functions/NERemap.os build/src/runtime/NEON/functions/NEReorgLayer.os build/src/runtime/NEON/functions/NEReshapeLayer.os build/src/runtime/NEON/functions/NEReverse.os build/src/runtime/NEON/functions/NEScale.os build/src/runtime/NEON/functions/NEScharr3x3.os build/src/runtime/NEON/functions/NESelect.os build/src/runtime/NEON/functions/NESlice.os build/src/runtime/NEON/functions/NESobel3x3.os build/src/runtime/NEON/functions/NESobel5x5.os build/src/runtime/NEON/functions/NESobel7x7.os build/src/runtime/NEON/functions/NESoftmaxLayer.os build/src/runtime/NEON/functions/NESpaceToBatchLayer.os build/src/runtime/NEON/functions/NESpaceToDepthLayer.os build/src/runtime/NEON/functions/NESplit.os build/src/runtime/NEON/functions/NEStackLayer.os build/src/runtime/NEON/functions/NEStridedSlice.os build/src/runtime/NEON/functions/NETableLookup.os build/src/runtime/NEON/functions/NEThreshold.os build/src/runtime/NEON/functions/NETile.os build/src/runtime/NEON/functions/NETranspose.os build/src/runtime/NEON/functions/NEUnstack.os build/src/runtime/NEON/functions/NEWarpAffine.os build/src/runtime/NEON/functions/NEWarpPerspective.os build/src/runtime/NEON/functions/NEWinogradConvolutionLayer.os build/src/runtime/NEON/functions/assembly/NEDepthwiseConvolutionAssemblyDispatch.os build/src/runtime/cpu/operators/CpuActivation.os build/src/runtime/cpu/operators/CpuAdd.os build/src/runtime/cpu/operators/CpuConcatenate.os build/src/runtime/cpu/operators/CpuCopy.os build/src/runtime/cpu/operators/CpuElementwise.os build/src/runtime/cpu/operators/CpuElementwiseUnary.os build/src/runtime/cpu/operators/CpuFill.os build/src/runtime/cpu/operators/CpuFloor.os build/src/runtime/cpu/operators/CpuPermute.os build/src/runtime/cpu/operators/CpuPooling.os build/src/runtime/cpu/operators/CpuPoolingAssemblyDispatch.os build/src/runtime/cpu/operators/CpuReshape.os build/src/runtime/cpu/operators/CpuSoftmax.os build/src/runtime/cpu/operators/CpuSub.os -Lbuild -L. -LNPU/Libs/RockPi -Lbuild/build -Lbuild -lrknn_api -llog -lstdc++ -ldl -llog -landroid -ldl -larm_compute_core
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:28:
+In file included from ./arm_compute/graph/Edge.h:28:
+./arm_compute/graph/Tensor.h:42:7: warning: 'arm_compute::graph::Tensor' has virtual functions but non-virtual destructor [-Wnon-virtual-dtor]
+class Tensor
+      ^
+clang++: warning: argument unused during compilation: '-pie' [-Wunused-command-line-argument]
+scons: `graph_yolov3_n_pipe_npu' is up to date.
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::run()':
+NPUTemplate.cpp:(.text+0x43c): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::run()'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x43c): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::prepare()':
+NPUTemplate.cpp:(.text+0x424): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::prepare()'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x424): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::validate(arm_compute::ITensorInfo const*, arm_compute::ITensorInfo const*)':
+NPUTemplate.cpp:(.text+0x408): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::validate(arm_compute::ITensorInfo const*, arm_compute::ITensorInfo const*)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x408): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::configure(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >, std::__ndk1::vector<arm_compute::ITensor*, std::__ndk1::allocator<arm_compute::ITensor*> >, std::__ndk1::vector<arm_compute::ITensor*, std::__ndk1::allocator<arm_compute::ITensor*> >)':
+NPUTemplate.cpp:(.text+0x404): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::configure(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >, std::__ndk1::vector<arm_compute::ITensor*, std::__ndk1::allocator<arm_compute::ITensor*> >, std::__ndk1::vector<arm_compute::ITensor*, std::__ndk1::allocator<arm_compute::ITensor*> >)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x404): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::configure(arm_compute::ITensor*, arm_compute::ITensor*)':
+NPUTemplate.cpp:(.text+0x400): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::configure(arm_compute::ITensor*, arm_compute::ITensor*)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x400): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(arm_compute::NPU<(arm_compute::NPUTypes)2>&&)':
+NPUTemplate.cpp:(.text+0xfc): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(arm_compute::NPU<(arm_compute::NPUTypes)2>&&)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0xfc): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(int)':
+NPUTemplate.cpp:(.text+0x0): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(int)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x0): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(arm_compute::NPU<(arm_compute::NPUTypes)2>&&)':
+NPUTemplate.cpp:(.text+0xfc): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(arm_compute::NPU<(arm_compute::NPUTypes)2>&&)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0xfc): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(int)':
+NPUTemplate.cpp:(.text+0x0): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::NPU(int)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x0): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::~NPU()':
+NPUTemplate.cpp:(.text+0x390): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::~NPU()'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x390): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::~NPU()':
+NPUTemplate.cpp:(.text+0x31c): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::~NPU()'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x31c): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::~NPU()':
+NPUTemplate.cpp:(.text+0x31c): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::~NPU()'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x31c): first defined here
+build/src/runtime/NPU/template/NPUTemplate.os: In function `arm_compute::NPU<(arm_compute::NPUTypes)2>::operator=(arm_compute::NPU<(arm_compute::NPUTypes)2>&&)':
+NPUTemplate.cpp:(.text+0x1b0): multiple definition of `arm_compute::NPU<(arm_compute::NPUTypes)2>::operator=(arm_compute::NPU<(arm_compute::NPUTypes)2>&&)'
+build/src/runtime/NPU/template/NPUTemplate.os:NPUTemplate.cpp:(.text+0x1b0): first defined here
+scons: `graph_resnet50' is up to date.
+scons: `neoncl_scale_median_gaussian' is up to date.
+scons: `build/tests/benchmark_neon_opticalflow' is up to date.
+scons: rebuilding `build/tests/benchmark_graph_squeezenet' because:
+           `NPU/Libs/Shared/libstdc++.so' is no longer a dependency
+           `NPU/Libs/Shared/libc++_shared.so' is no longer a dependency
+           `NPU/Libs/Shared/liblog.so' is no longer a dependency
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute-static.a' changed
+           `build/libarm_compute_core-static.a' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_squeezenet -Wl,-rpath,./ -pie -static-libstdc++ -ldl -fopenmp -Wl,--whole-archive build/libarm_compute_graph-static.a -Wl,--no-whole-archive build/tests/benchmark_graph_squeezenet.o build/tests/GraphUtils.o build/tests/CommonGraphOptions.o build/tests/benchmark_examples/RunExample.o -Lbuild -L. -LNPU/Libs/RockPi -lrknn_api -llog -lstdc++ -ldl -llog -landroid build/tests/framework/libarm_compute_test_framework.a build/libarm_compute_graph-static.a build/libarm_compute-static.a build/libarm_compute_core-static.a -llog
+scons: `build/tests/benchmark_graph_inception_resnet_v2' is up to date.
+scons: rebuilding `build/tests/benchmark_graph_squeezenet_v1_1' because:
+           `NPU/Libs/Shared/libstdc++.so' is no longer a dependency
+           `NPU/Libs/Shared/libc++_shared.so' is no longer a dependency
+           `NPU/Libs/Shared/liblog.so' is no longer a dependency
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute-static.a' changed
+           `build/libarm_compute_core-static.a' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_squeezenet_v1_1 -Wl,-rpath,./ -pie -static-libstdc++ -ldl -fopenmp -Wl,--whole-archive build/libarm_compute_graph-static.a -Wl,--no-whole-archive build/tests/benchmark_graph_squeezenet_v1_1.o build/tests/GraphUtils.o build/tests/CommonGraphOptions.o build/tests/benchmark_examples/RunExample.o -Lbuild -L. -LNPU/Libs/RockPi -lrknn_api -llog -lstdc++ -ldl -llog -landroid build/tests/framework/libarm_compute_test_framework.a build/libarm_compute_graph-static.a build/libarm_compute-static.a build/libarm_compute_core-static.a -llog
+scons: `graph_squeezenet' is up to date.
+scons: `neon_scale' is up to date.
+scons: `build/tests/gemm_tuner/benchmark_cl_gemm_reshaped' is up to date.
+scons: rebuilding `build/tests/benchmark_graph_vgg19' because:
+           `NPU/Libs/Shared/libstdc++.so' is no longer a dependency
+           `NPU/Libs/Shared/libc++_shared.so' is no longer a dependency
+           `NPU/Libs/Shared/liblog.so' is no longer a dependency
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute-static.a' changed
+           `build/libarm_compute_core-static.a' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_vgg19 -Wl,-rpath,./ -pie -static-libstdc++ -ldl -fopenmp -Wl,--whole-archive build/libarm_compute_graph-static.a -Wl,--no-whole-archive build/tests/benchmark_graph_vgg19.o build/tests/GraphUtils.o build/tests/CommonGraphOptions.o build/tests/benchmark_examples/RunExample.o -Lbuild -L. -LNPU/Libs/RockPi -lrknn_api -llog -lstdc++ -ldl -llog -landroid build/tests/framework/libarm_compute_test_framework.a build/libarm_compute_graph-static.a build/libarm_compute-static.a build/libarm_compute_core-static.a -llog
+scons: rebuilding `build/tests/benchmark_graph_ssd_mobilenet' because:
+           `NPU/Libs/Shared/libstdc++.so' is no longer a dependency
+           `NPU/Libs/Shared/libc++_shared.so' is no longer a dependency
+           `NPU/Libs/Shared/liblog.so' is no longer a dependency
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute-static.a' changed
+           `build/libarm_compute_core-static.a' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_ssd_mobilenet -Wl,-rpath,./ -pie -static-libstdc++ -ldl -fopenmp -Wl,--whole-archive build/libarm_compute_graph-static.a -Wl,--no-whole-archive build/tests/benchmark_graph_ssd_mobilenet.o build/tests/GraphUtils.o build/tests/CommonGraphOptions.o build/tests/benchmark_examples/RunExample.o -Lbuild -L. -LNPU/Libs/RockPi -lrknn_api -llog -lstdc++ -ldl -llog -landroid build/tests/framework/libarm_compute_test_framework.a build/libarm_compute_graph-static.a build/libarm_compute-static.a build/libarm_compute_core-static.a -llog
+scons: `build/tests/benchmark_neon_convolution' is up to date.
+scons: `graph_resnet12' is up to date.
+scons: `neon_opticalflow' is up to date.
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../lib/gcc/aarch64-linux-android/4.9.x/../../../../aarch64-linux-android/bin/ld: warning: libstdc++.so, needed by NPU/Libs/RockPi/librknn_api.so, not found (try using -rpath or -rpath-link)
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:51:
+In file included from ./arm_compute/graph/frontend/IStreamOperators.h:27:
+./arm_compute/graph/frontend/IStream.h:99:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static StreamHints _hints     = {};              /**< Execution and algorithmic hints */
+    ^
+./arm_compute/graph/frontend/IStream.h:89:95: warning: control reaches end of non-void function [-Wreturn-type]
+    virtual NodeID next_layer(std::vector<std::pair<NodeID,int>>, NodeID&, int&, std::string){};
+                                                                                              ^
+./arm_compute/graph/frontend/IStream.h:94:47: warning: control reaches end of non-void function [-Wreturn-type]
+        virtual std::pair<NodeID,int> get_position(){};
+                                                     ^
+scons: `graph_vgg19' is up to date.
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../lib/gcc/aarch64-linux-android/4.9.x/../../../../aarch64-linux-android/bin/ld: warning: libstdc++.so, needed by NPU/Libs/RockPi/librknn_api.so, not found (try using -rpath or -rpath-link)
+scons: `graph_squeezenet_pipeline' is up to date.
+scons: `build/tests/benchmark_neon_scale' is up to date.
+scons: `build/tests/benchmark_graph_resnext50' is up to date.
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../lib/gcc/aarch64-linux-android/4.9.x/../../../../aarch64-linux-android/bin/ld: warning: libstdc++.so, needed by NPU/Libs/RockPi/librknn_api.so, not found (try using -rpath or -rpath-link)
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:52:
+In file included from ./arm_compute/graph/frontend/Layers.h:29:
+In file included from ./arm_compute/graph/frontend/ILayer.h:28:
+In file included from ./arm_compute/graph/frontend/SubStream.h:28:
+./arm_compute/graph/frontend/IStreamPipeline.h:244:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static std::string                                           graph_name;
+    ^
+./arm_compute/graph/frontend/IStreamPipeline.h:248:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static int                   current_layer={0};
+    ^
+./arm_compute/graph/frontend/IStreamPipeline.h:250:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static int                   _target_graph={0};
+    ^
+./arm_compute/graph/frontend/IStreamPipeline.h:252:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static NodeMap                               node_map;
+    ^
+./arm_compute/graph/frontend/IStreamPipeline.h:253:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static std::vector<int>      start_layer;
+    ^
+./arm_compute/graph/frontend/IStreamPipeline.h:254:5: warning: inline variables are a C++17 extension [-Wc++17-extensions]
+    inline static std::vector<int>      end_layer;
+    ^
+./arm_compute/graph/frontend/IStreamPipeline.h:147:18: warning: 'add_layer' overrides a member function but is not marked 'override' [-Winconsistent-missing-override]
+    virtual void add_layer(ILayer &layer) = 0;
+                 ^
+./arm_compute/graph/frontend/IStream.h:50:18: note: overridden virtual function is here
+    virtual void add_layer(ILayer &layer) = 0;
+                 ^
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:52:
+In file included from ./arm_compute/graph/frontend/Layers.h:29:
+In file included from ./arm_compute/graph/frontend/ILayer.h:28:
+In file included from ./arm_compute/graph/frontend/SubStream.h:28:
+./arm_compute/graph/frontend/IStreamPipeline.h:152:20: warning: 'graph' overrides a member function but is not marked 'override' [-Winconsistent-missing-override]
+    virtual Graph &graph() = 0;
+                   ^
+./arm_compute/graph/frontend/IStream.h:55:20: note: overridden virtual function is here
+    virtual Graph &graph() = 0;
+                   ^
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:52:
+In file included from ./arm_compute/graph/frontend/Layers.h:29:
+In file included from ./arm_compute/graph/frontend/ILayer.h:28:
+In file included from ./arm_compute/graph/frontend/SubStream.h:28:
+./arm_compute/graph/frontend/IStreamPipeline.h:157:26: warning: 'graph' overrides a member function but is not marked 'override' [-Winconsistent-missing-override]
+    virtual const Graph &graph() const = 0;
+                         ^
+./arm_compute/graph/frontend/IStream.h:60:26: note: overridden virtual function is here
+    virtual const Graph &graph() const = 0;
+                         ^
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:52:
+In file included from ./arm_compute/graph/frontend/Layers.h:29:
+In file included from ./arm_compute/graph/frontend/ILayer.h:28:
+In file included from ./arm_compute/graph/frontend/SubStream.h:28:
+./arm_compute/graph/frontend/IStreamPipeline.h:224:27: warning: 'get_position' overrides a member function but is not marked 'override' [-Winconsistent-missing-override]
+    std::pair<NodeID,int> get_position(){
+                          ^
+./arm_compute/graph/frontend/IStream.h:94:32: note: overridden virtual function is here
+        virtual std::pair<NodeID,int> get_position(){};
+                                      ^
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:52:
+In file included from ./arm_compute/graph/frontend/Layers.h:29:
+In file included from ./arm_compute/graph/frontend/ILayer.h:28:
+In file included from ./arm_compute/graph/frontend/SubStream.h:28:
+./arm_compute/graph/frontend/IStreamPipeline.h:232:20: warning: comparison of integers of different signs: 'int' and 'std::__ndk1::vector<int, std::__ndk1::allocator<int> >::size_type' (aka 'unsigned long') [-Wsign-compare]
+        for(int i=0; i<start_layer.size(); i++){
+                     ~^~~~~~~~~~~~~~~~~~~
+scons: `graph_mobilenet_v2' is up to date.
+scons: `build/tests/benchmark_cl_cache' is up to date.
+scons: `build/tests/benchmark_graph_inception_v3' is up to date.
+scons: `build/tests/benchmark_graph_inception_resnet_v1' is up to date.
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+scons: `graph_resnet50_pipeline' is up to date.
+scons: `build/tests/benchmark_graph_edsr' is up to date.
+scons: `build/tests/benchmark_graph_mobilenet' is up to date.
+scons: `build/tests/benchmark_neon_sgemm' is up to date.
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../lib/gcc/aarch64-linux-android/4.9.x/../../../../aarch64-linux-android/bin/ld: warning: libstdc++.so, needed by NPU/Libs/RockPi/librknn_api.so, not found (try using -rpath or -rpath-link)
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:53:
+In file included from ./arm_compute/graph/frontend/Stream.h:34:
+./arm_compute/graph/GraphManagerPipeline.h:68:2: warning: explicitly defaulted move constructor is implicitly deleted [-Wdefaulted-function-deleted]
+        GraphManagerPipeline(GraphManagerPipeline &&) = default;
+        ^
+./arm_compute/graph/GraphManagerPipeline.h:189:21: note: move constructor of 'GraphManagerPipeline' is implicitly deleted because field '_mtx' has a deleted move constructor
+        std::mutex                                                              _mtx = {};
+                                                                                ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/__mutex_base:48:5: note: 'mutex' has been explicitly marked deleted here
+    mutex(const mutex&) = delete;
+    ^
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:53:
+In file included from ./arm_compute/graph/frontend/Stream.h:34:
+./arm_compute/graph/GraphManagerPipeline.h:72:24: warning: explicitly defaulted move assignment operator is implicitly deleted [-Wdefaulted-function-deleted]
+        GraphManagerPipeline &operator=(GraphManagerPipeline &&) = default;
+                              ^
+./arm_compute/graph/GraphManagerPipeline.h:189:21: note: move assignment operator of 'GraphManagerPipeline' is implicitly deleted because field '_mtx' has a deleted move assignment operator
+        std::mutex                                                              _mtx = {};
+                                                                                ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/__mutex_base:49:12: note: 'operator=' has been explicitly marked deleted here
+    mutex& operator=(const mutex&) = delete;
+           ^
+scons: `graph_squeezenet_v1_1' is up to date.
+scons: `build/tests/benchmark_graph_googlenet' is up to date.
+scons: `graph_resnext50' is up to date.
+scons: `neon_permute' is up to date.
+scons: `neon_cartoon_effect' is up to date.
+scons: `graph_srcnn955' is up to date.
+scons: `graph_vgg16' is up to date.
+scons: `build/tests/benchmark_graph_inception_v4' is up to date.
+scons: `graph_googlenet_pipeline' is up to date.
+scons: `build/tests/validate_graph_depthwiseconvolution' is up to date.
+scons: `build/tests/arm_compute_benchmark' is up to date.
+scons: `graph_alexnet' is up to date.
+scons: rebuilding `build/tests/benchmark_graph_vgg16' because:
+           `NPU/Libs/Shared/libstdc++.so' is no longer a dependency
+           `NPU/Libs/Shared/libc++_shared.so' is no longer a dependency
+           `NPU/Libs/Shared/liblog.so' is no longer a dependency
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute-static.a' changed
+           `build/libarm_compute_core-static.a' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_vgg16 -Wl,-rpath,./ -pie -static-libstdc++ -ldl -fopenmp -Wl,--whole-archive build/libarm_compute_graph-static.a -Wl,--no-whole-archive build/tests/benchmark_graph_vgg16.o build/tests/GraphUtils.o build/tests/CommonGraphOptions.o build/tests/benchmark_examples/RunExample.o -Lbuild -L. -LNPU/Libs/RockPi -lrknn_api -llog -lstdc++ -ldl -llog -landroid build/tests/framework/libarm_compute_test_framework.a build/libarm_compute_graph-static.a build/libarm_compute-static.a build/libarm_compute_core-static.a -llog
+scons: `build/tests/benchmark_neon_cartoon_effect' is up to date.
+scons: `graph_inception_resnet_v2_pipeline' is up to date.
+scons: rebuilding `build/tests/benchmark_graph_vgg_vdsr' because:
+           `NPU/Libs/Shared/libstdc++.so' is no longer a dependency
+           `NPU/Libs/Shared/libc++_shared.so' is no longer a dependency
+           `NPU/Libs/Shared/liblog.so' is no longer a dependency
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute_graph-static.a' changed
+           `build/libarm_compute-static.a' changed
+           `build/libarm_compute_core-static.a' changed
+aarch64-linux-android-clang++ -o build/tests/benchmark_graph_vgg_vdsr -Wl,-rpath,./ -pie -static-libstdc++ -ldl -fopenmp -Wl,--whole-archive build/libarm_compute_graph-static.a -Wl,--no-whole-archive build/tests/benchmark_graph_vgg_vdsr.o build/tests/GraphUtils.o build/tests/CommonGraphOptions.o build/tests/benchmark_examples/RunExample.o -Lbuild -L. -LNPU/Libs/RockPi -lrknn_api -llog -lstdc++ -ldl -llog -landroid build/tests/framework/libarm_compute_test_framework.a build/libarm_compute_graph-static.a build/libarm_compute-static.a build/libarm_compute_core-static.a -llog
+scons: *** [build/libarm_compute.so] Error 1
+In file included from examples/graph_yolov3.cpp:28:
+./utils/Utils.h:778:58: warning: unused parameter 'sz' [-Wunused-parameter]
+void fill_tensor_array(TensorType &tensor, T* array, int sz)
+                                                         ^
+./utils/Utils.h:801:59: warning: unused parameter 'sz' [-Wunused-parameter]
+void fill_tensor_array2(TensorType &tensor, T* array, int sz)
+                                                          ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../lib/gcc/aarch64-linux-android/4.9.x/../../../../aarch64-linux-android/bin/ld: warning: libstdc++.so, needed by NPU/Libs/RockPi/librknn_api.so, not found (try using -rpath or -rpath-link)
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../lib/gcc/aarch64-linux-android/4.9.x/../../../../aarch64-linux-android/bin/ld: warning: libstdc++.so, needed by NPU/Libs/RockPi/librknn_api.so, not found (try using -rpath or -rpath-link)
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:28:
+In file included from ./arm_compute/graph/Edge.h:27:
+In file included from ./arm_compute/graph/INode.h:27:
+In file included from ./arm_compute/core/Error.h:27:
+In file included from /home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/array:111:
+In file included from /home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/algorithm:643:
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/memory:2338:5: warning: delete called on non-final 'arm_compute::graph::Tensor' that has virtual functions but non-virtual destructor [-Wdelete-non-abstract-non-virtual-dtor]
+    delete __ptr;
+    ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/memory:2593:7: note: in instantiation of member function 'std::__ndk1::default_delete<arm_compute::graph::Tensor>::operator()' requested here
+      __ptr_.second()(__tmp);
+      ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/memory:2547:19: note: in instantiation of member function 'std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> >::reset' requested here
+  ~unique_ptr() { reset(); }
+                  ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/memory:1880:64: note: in instantiation of member function 'std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> >::~unique_ptr' requested here
+    _LIBCPP_INLINE_VISIBILITY void destroy(pointer __p) {__p->~_Tp();}
+                                                               ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/memory:1742:18: note: in instantiation of member function 'std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > >::destroy' requested here
+            {__a.destroy(__p);}
+                 ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/memory:1595:14: note: in instantiation of function template specialization 'std::__ndk1::allocator_traits<std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > > >::__destroy<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > >' requested here
+            {__destroy(__has_destroy<allocator_type, _Tp*>(), __a, __p);}
+             ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/vector:426:25: note: in instantiation of function template specialization 'std::__ndk1::allocator_traits<std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > > >::destroy<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > >' requested here
+        __alloc_traits::destroy(__alloc(), _VSTD::__to_raw_pointer(--__soon_to_be_end));
+                        ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/vector:369:29: note: in instantiation of member function 'std::__ndk1::__vector_base<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> >, std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > > >::__destruct_at_end' requested here
+    void clear() _NOEXCEPT {__destruct_at_end(__begin_);}
+                            ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/vector:463:9: note: in instantiation of member function 'std::__ndk1::__vector_base<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> >, std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > > >::clear' requested here
+        clear();
+        ^
+/home/ehsan/UvA/ARMCL/android-ndk-r21e-linux-x86_64/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/c++/v1/vector:495:5: note: in instantiation of member function 'std::__ndk1::__vector_base<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> >, std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > > >::~__vector_base' requested here
+    vector() _NOEXCEPT_(is_nothrow_default_constructible<allocator_type>::value)
+    ^
+./arm_compute/graph/Graph.h:229:51: note: in instantiation of member function 'std::__ndk1::vector<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> >, std::__ndk1::allocator<std::__ndk1::unique_ptr<arm_compute::graph::Tensor, std::__ndk1::default_delete<arm_compute::graph::Tensor> > > >::vector' requested here
+    std::vector<std::unique_ptr<Tensor>> _tensors = {};         /**< Graph tensors */
+                                                  ^
+In file included from examples/graph_yolov3.cpp:24:
+In file included from ./arm_compute/graph.h:29:
+./arm_compute/graph/GraphPipeline.h:56:10: warning: private field 'start_layer' is not used [-Wunused-private-field]
+    int         start_layer;
+                ^
+./arm_compute/graph/GraphPipeline.h:57:10: warning: private field 'end_layer' is not used [-Wunused-private-field]
+    int         end_layer;
+                ^
+./arm_compute/graph/GraphPipeline.h:58:10: warning: private field 'PE' is not used [-Wunused-private-field]
+    char        PE;
+                ^
+./arm_compute/graph/GraphPipeline.h:59:10: warning: private field 'Host_PE' is not used [-Wunused-private-field]
+    char        Host_PE;
+                ^
+24 warnings generated.
+scons: building terminated because of errors.

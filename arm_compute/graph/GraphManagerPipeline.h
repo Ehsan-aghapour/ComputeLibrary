@@ -91,6 +91,8 @@ public:
     void execute_graph(Graph &graph, int nn=0);
     //if there is no buffer in between stages
     void warmup_and_execute_graph_no_buffer(Graph &graph, int nn);
+    void warmup_and_execute_graph_pipeline_0(Graph &graph, int nn);
+    void warmup_and_execute_graph_pipeline_01(Graph &graph, int nn);
     //If you want to buffer output of a stage if next stage is busy:
     void warmup_and_execute_graph_pipeline(Graph &graph, int nn);
     void warmup_and_execute_graph_serial(Graph &graph, int nn);
