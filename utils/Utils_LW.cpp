@@ -127,7 +127,16 @@ std::vector<std::string> get_end_task_names(std::string graph_name="alex"){
 				"predictions/Softmax" };
 	}
 	if(graph_name=="squeeze"){
-		_end_task_names={ "pool1", "fire2/concat", "fire3/concat", "pool4", "fire5/concat", "fire6/concat", "fire7/concat", "pool8", "fire9/concat", "prob" };
+		_end_task_names={ "pool1",
+				"fire2/concat",
+				"fire3/concat",
+				"pool4",
+				"fire5/concat",
+				"fire6/concat",
+				"fire7/concat",
+				"pool8",
+				"fire9/concat",
+				"prob" };
 	}
 	if(graph_name=="test"){
 		_end_task_names={ "pool1", "pool2"};

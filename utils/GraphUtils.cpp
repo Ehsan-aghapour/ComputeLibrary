@@ -1037,6 +1037,7 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
 
     std::ifstream ifs;
 
+
     try
     {
         ifs.exceptions(std::ifstream::badbit);
@@ -1044,6 +1045,7 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
 
         for(std::string line; !std::getline(ifs, line).fail();)
         {
+        	std::cerr<<line<<std::endl;
             _labels.emplace_back(line);
         }
     }
