@@ -279,7 +279,31 @@ Also, it is possible to perform super-layer level DVFS when running the model.
 
 
 
+## Versions
 
+- **CO-UP v1.0** — _Stable, published baseline_.  
+  **Tag:** `coup-v1.0` (commit `de24fb7f3`).  
+  Use this if you need the exact version referenced in our papers.
+
+- **CO-UP v2.0** — _Feature update: Early-Exit + broader platform support (incl. 32-bit) + pipeline execution (v1 just switching execution which has used in partial quantization work).  
+  **Branch:** `CO-UP-v2`, **Tag:** `coup-v2.0` (commit `e0d10f832`).  
+  Changes since v1:
+  - Early-exit inference integrated
+  - 32-bit platform/toolchain support
+  - More generic/platform-agnostic code paths and build flags
+  - Compatibility updates for Khadas/HiKey-class boards
+
+### Checking out specific versions
+
+```bash
+# Published baseline (as cited in papers)
+git checkout coup-v1.0
+
+# Latest v2 development branch
+git checkout CO-UP-v2
+
+# Tagged v2 release
+git checkout coup-v2.0
 
  
 
